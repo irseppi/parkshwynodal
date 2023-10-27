@@ -1,0 +1,19 @@
+name: denalinodal
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - obspy=1.3.0
+  - jupyterlab=3.4.4
+  - numpy=1.23.2 
+  - matplotlib=3.5
+  - cartopy=0.20
+  - scipy=1.8.1
+  - tqdm=4.64.0
+  - ipywidgets=8.0.1
+  - jupyterlab_widgets=3.0.1
+  - pygmt=0.9.0
+  - geopandas=0.13.2
+  - fiona=1.8.22
+  - pySEP=1.0.11
+  - imageio.v2 =
