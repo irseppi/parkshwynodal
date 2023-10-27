@@ -42,7 +42,7 @@ def calc_time(t, l, vo):
 flight_files=[]
 filenames = []
 
-# Load the seismometer location data
+# load the seismometer location data
 seismo_data = pd.read_csv('nodes_stations.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
