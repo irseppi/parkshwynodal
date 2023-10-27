@@ -1,9 +1,87 @@
 import sys
 import fileinput
+from datetime import datetime
+import os
+def modify_file(input_file_name, output_file_name):
+    # Function to modify the content of the file
+    def modify_content(content):
+        return content.upper()
 
-step = 3
- 
-with open("nodal_part.site") as handle:
-	for lineno, line in enumerate(handle):
+    # Read the input file
+    with open(input_file_name, 'r') as file:
+        content = file.read()
+
+    # Modify the content
+    modified_content = modify_content(content)
+
+    # Write the modified content to the output file
+    with open(output_file_name, 'w') as file:
+        file.write(modified_content)
+
+modify_file('input.txt', 'output.txt')
+def station_subset(filename,steps,outputname):
+	# Read the input file
+	with open(filename) as handle:
+		for lineno, line in enumerate(handle):
 		if lineno % step == 0:
 			print(line)
+	return 
+
+
+# replace all occurrences of ''' with '"'
+for i, line in enumerate(fileinput.input('master_stations(_all).site', inplace=1)):
+	sys.stdout.write(line.replace ('-    -     0.0000       0.0000  1687896210.00000', '-    -         0.0000    0.0000  1687896210.00000')) 
+
+
+for i, line in enumerate(fileinput.input('master_stations(_all).site', inplace=1)):
+	val = line.split()
+	new_val = round(float(val[4]), 4) # 3 digit precision
+	sys.stdout.write(line.replace(str(val[4]), str(new_val)))
+
+
+
+for i, line in enumerate(fileinput.input('master_stations(_all).site', inplace=1)):
+	val = line.split()
+	new_val = round(float(val[5])/1000,4)
+	sys.stdout.write(line.replace(str(val[5]), str(new_val)))
+
+
+
+# replace all occurrences of ''' with '"'
+for i, line in enumerate(fileinput.input('filename.site', inplace=1)):
+    sys.stdout.write(line.replace(' '', ' "')) 
+ 
+
+
+os.getcwd()
+collection = '533595343'
+for i, filename in enumerate(os.listdir(collection)):
+	for p, fil in enumerate(os.listdir('533595343/'+filename)):
+		
+		os.rename('533595343/' + filename + '/' + fil, '533595343/' + filename +'_'+ fil)
+
+input_file = 'color_codes.txt'
+output_file = 'colors.txt'
+
+with open(input_file, 'r') as f_in, open(output_file, 'w') as f_out:
+    for line in f_in:
+       line=line.split(' 	')
+       print(line[0])
+       f_out.write(line[0]) 
+
+for i, line in enumerate(fileinput.input('colors.txt', inplace=1)):
+    sys.stdout.write(line.replace('#', '\n#')) 
+
+
+
+input_file = 'dates1.txt'
+output_file = 'dates2.txt'
+
+with open(input_file, 'r') as f_in, open(output_file, 'w') as f_out:
+    for line in f_in:
+        dt = datetime.strptime(line.strip(), '%Y-%m-%dT%H:%M:%S.%f')
+        rounded_dt = dt.replace(second=round(dt.second))
+        f_out.write(rounded_dt.strftime('%Y-%m-%d %H:%M:%S') + '\n') 
+
+for i, line in enumerate(fileinput.input('dates1.txt', inplace=1)):
+        sys.stdout.write(line.replace(line[-, '')) 
