@@ -3,7 +3,7 @@ from collections import Counter
 import matplotlib.pyplot as plt
 
 # Read the timestamps from the text file
-with open('dates2.txt', 'r') as f:
+with open('/REPOSITORIES/parkshwynodal/input/dates.txt', 'r') as f:
     timestamps = f.read().splitlines()
 
 # Convert the timestamps to datetime objects
@@ -24,7 +24,7 @@ plt.show()
 	
 
 # Read the timestamps from the text file
-with open('dates2.txt', 'r') as f:
+with open('/REPOSITORIES/parkshwynodal/input/dates.txt', 'r') as f:
     timestamps = f.read().splitlines()
 
 # Convert the timestamps to datetime objects
