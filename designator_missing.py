@@ -99,9 +99,8 @@ for i, flight_file in enumerate(flight_files):
 		text = open('/scratch/irseppi/nodal_data/flightradar24/'+ date +'_flights.csv', "r")
 		for line in text.readlines():
 			val = line.split(',')
-			print(val[0],flight_num)
 			if val[0] == flight_num and val[1] == 0:
-				print(val[0],flight_num)
+				print(val[0])
 				f.write(val[0]+'\n')
 	else:
 		continue
