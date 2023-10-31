@@ -10,99 +10,59 @@ import datetime
 import pytz
 import obspy
 
-def distance(lat1, lon1, lat2, lon2):
-	dist = gps2dist_azimuth(lat1, lon1, lat2, lon2)
-	dist_km = dist[0]/1000
-	return dist_km
+flight_names=[]
+dates = []
 
-def dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes):
-	f = False
-	for s in range(len(flight_latitudes)):
-		for l in range(len(seismo_latitudes)):
-			dist = distance(seismo_latitudes[l], seismo_longitudes[l], flight_latitudes[s], flight_longitudes[s])
-			if dist <= 2:
-				f = True
-				break
-			else:
-				continue
-	return f
+month = '02'
+for day in range(11,29):
+	day = str(day)
+	# assign directory
+	directory = '/scratch/irseppi/nodal_data/Plane_info/Plane_map/2019-' + month + '-' + day
 
-flight_files=[]
-filenames = []
+	# iterate over files in directory
+	for filename in os.listdir(directory):
+		flight_name = filename[13:22]
+		date = filename[4:12]
 
-# Load the seismometer location data
-seismo_data = pd.read_csv('input/nodes_stations.txt', sep="|")
-seismo_latitudes = seismo_data['Latitude']
-seismo_longitudes = seismo_data['Longitude']
-seismo_stations = seismo_data['Latitude']
-sta = seismo_data['Station']
+		flight_names.append(flight_name)
+		dates.append(date)
 
-for month in (2,4):
-	if month == 2:
-		month = '02'
-		for day in range(11,29):
-			day = str(day)
-			# assign directory
-			directory = '/scratch/irseppi/nodal_data/flightradar24/2019'+month+day+'_positions'
+month = '03'
+for day in range(1, 10):
+	day = '0' + str(day)
+	# assign directory
+	directory = '/scratch/irseppi/nodal_data/Plane_info/Plane_map/2019-' + month + '-' + day
 
-			# iterate over files in directory
-			for filename in os.listdir(directory):
-				filenames.append(filename)
-				f = os.path.join(directory, filename)
-				
-				# checking if it is a file
-				if os.path.isfile(f):
-					flight_files.append(f)
-	elif month == 3:
-		month = '03'
-		for day in range(1, 27):
-			if day < 10:
-				day = '0' + str(day)
-				# assign directory
-				directory = '/scratch/irseppi/nodal_data/flightradar24/2019'+month+day+'_positions'
-			
-				# iterate over files in directory
-				for filename in os.listdir(directory):
-					filenames.append(filename)
-					f = os.path.join(directory, filename)
-					
-					# checking if it is a file
-					if os.path.isfile(f):
-						flight_files.append(f)
-			else:
-				day = str(day)
-				# assign directory
-				directory = '/scratch/irseppi/nodal_data/flightradar24/2019'+month+day+'_positions'
-				
-				# iterate over files in directory
-				for filename in os.listdir(directory):
-					filenames.append(filename)
-					f = os.path.join(directory, filename)
-					
-					# checking if it is a file
-					if os.path.isfile(f):
-						flight_files.append(f)
+	# iterate over files in directory
+	for filename in os.listdir(directory):
+		flight_name = filename[13:22]
+		date = filename[4:12]
+
+		flight_names.append(flight_name)
+		dates.append(date)
+
+for day in range(10, 27):
+	day = str(day)
+	# assign directory
+	directory = '/scratch/irseppi/nodal_data/Plane_info/Plane_map/2019-' + month + '-' + day
+	
+	# iterate over files in directory
+	for filename in os.listdir(directory):
+		flight_name = filename[12:22]
+		date = filename[4:12]
+
+		flight_names.append(flight_name)
+		dates.append(date)
 				
 f = open('designator_missing.txt','w')
 
-for i, flight_file in enumerate(flight_files):
-	flight_data = pd.read_csv(flight_file, sep=",")
-	flight_latitudes = flight_data['latitude']
-	flight_longitudes = flight_data['longitude']
+for i in range(len(flight_names)):
+	text = open('/scratch/irseppi/nodal_data/flightradar24/'+ dates[i] +'_flights.csv', "r")
+	for line in text.readlines():
+		val = line.split(',')
+		if val[0] == flight_names[i] and val[1] == '0':
+			val.append(dates[i])
+			f.write(val[10]+','+val[0]+','+val[1]+','+val[2]+','+val[3]+','+val[4]+','+val[5]+','+val[6]+','+val[7]+','+val[8]+'\n')
 
-	fname = filenames[i]	
-	flight_num = fname[9:18]
-	date = fname[0:8]
-	con = dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes)
-	if con == True:	
-
-		text = open('/scratch/irseppi/nodal_data/flightradar24/'+ date +'_flights.csv', "r")
-		for line in text.readlines():
-			val = line.split(',')
-			if val[0] == flight_num and val[1] == 0:
-				print(val[0])
-				f.write(val[0]+'\n')
-	else:
-		continue
 f.close()				
 
