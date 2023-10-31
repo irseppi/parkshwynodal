@@ -85,7 +85,4 @@ with open(input_file, 'r') as f_in, open(output_file, 'w') as f_out:
 
 for i, line in enumerate(fileinput.input('dates1.txt', inplace=1)):
         sys.stdout.write(line.replace(line[-, '')) 
-<<<<<<< HEAD
 
-=======
->>>>>>> 496d048d965a3c11d0f500414e2f5569e473d36a

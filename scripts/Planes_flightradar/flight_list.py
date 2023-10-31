@@ -48,7 +48,7 @@ for day in range(10, 27):
 	
 	# iterate over files in directory
 	for filename in os.listdir(directory):
-		flight_name = filename[12:22]
+		flight_name = filename[13:22]
 		date = filename[4:12]
 
 		flight_names.append(flight_name)
