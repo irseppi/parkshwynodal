@@ -22,98 +22,28 @@ def make_base_dir(base_dir):
 				current_path.mkdir()
 month = []
 day = []
-for month in range(2,4):
-	if month == 2:
-		for day in range(11,29):
-			day.append(str(day))
-			month.append('02')
-			
-	elif month == 3:
-		for day in range(1, 27):
-			if day < 10:
-				day.append('0' + str(day))
-				month.append('03')
-			else:
-				day.append(str(day))
-				month.append('03')
-plane_pic = []
-plane_map = []
-plane_spec = []
-b_map = []
-data = []
-for month in range(2,4):
-	if month == 2:
-		month = '02'
-		for day in range(11,29):
-			day = str(day)
-			# assign directory
-			directory = '/scratch/irseppi/nodal_data/flightradar24/2019'+month+day+'_positions'
-			
-			# iterate over files in directory
-			for filename in os.listdir(directory):
-				
-				f = os.path.join(directory, filename)
-				
-				# checking if it is a file
-				if os.path.isfile(f):
-					data.append(filename)
-			DIR = '/scratch/irseppi/nodal_data/Plane_info/Plane_spec/2019-'+month+'-'+day
-			# iterate over files in directory
-			for filename in os.listdir(DIR):
-				
-				f = os.path.join(directory, filename)
-				for fil in os.listdir(f):
-					# checking if it is a file
-					if os.path.isfile(f):
-						plane_spec.append(filename)git clone https://GITHUBUSERNAME@github.com/irseppi/denali_nodal_set.git
 
-			D = '/scratch/irseppi/nodal_data/Plane_info/Plane_map/2019-'+month+'-'+day
-			# iterate over files in directory
-			for filename in os.listdir(D):
-				f = os.path.join(directory, filename)
-	
-				# checking if it is a file
-				if os.path.isfile(f):
-					plane_map.append(filename)
-	elif month == 3:
-		month = '03'
-		for day in range(1, 27):
-			if day < 10:
-				day = '0' + str(day)
-				# assign directory
-				directory = '/scratch/irseppi/nodal_data/flightradar24/2019'+month+day+'_positions'
-				DIR = '/scratch/irseppi/nodal_data/Plane_info/'
+for day in range(11,29):
+	day.append(str(day))
+	month.append('02')
 
-				# iterate over files in directory
-				for filename in os.listdir(directory):
-					
-					f = os.path.join(directory, filename)
-					
-					# checking if it is a file
-					if os.path.isfile(f):
-						filenames.append(filename)
-			else:
-				day = str(day)
-				# assign directory
-				directory = '/scratch/irseppi/nodal_data/flightradar24/2019'+month+day+'_positions'
-				DIR = '/scratch/irseppi/nodal_data/Plane_info/'
-				# iterate over files in directory
-				for filename in os.listdir(directory):
-					filenames.append(filename)
-					f = os.path.join(directory, filename)
-					
-					# checking if it is a file
-					if os.path.isfile(f):
-						filenames.append(filename)
+for day in range(1, 10):
+	day.append('0' + str(day))
+	month.append('03')
+
+for day in range(10, 27):
+	day.append(str(day))
+	month.append('03')
 								
 for i in range(len(day)):
-	DIR = '/scratch/irseppi/nodal_data/Plane_info/'
-	directory = '/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+'_positions'
+	spec_dir = '/scratch/irseppi/nodal_data/plane_info/plane_spec/2019-'+month[i]+'-'+day[i]
+	map_dir = '/scratch/irseppi/nodal_data/plane_info/plane_map/2019-'+month[i]+'-'+day[i]
+	data = '/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+'_positions'
 	for m, f in enumerate(DIR):
 		# Open images
-		spectrogram = Image.open(DIR + '/Plane_spec/2019-'+month[i]+'-'+day[i]+'/'+spectrogram.jpg')
-		plane = Image.open('plane.jpg')
-		map_img = Image.open('map.jpg')
+		spectrogram = Image.open('/scratch/irseppi/nodal_data/plane_info/plane_spec/2019-'+month[i]+'-'+day[i]+'/'+flight+'/'+station+'/'+timestamp+'_'+flight+'.png')
+		plane = Image.open('/scratch/irseppi/nodal_data/plane_info/plane_images/'+plane+'.jpg')
+		map_img = Image.open('/scratch/irseppi/nodal_data/plane_info/plane_map/2019-'+month[i]+'-'+day[i]+'/map_2019'+month[i]+day[i]+'_'+flight+'.png')
 		blown_map = Image.open('blown_map.jpg')
 
 		# Resize images
