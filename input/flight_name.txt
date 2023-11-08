@@ -1,3 +1,4 @@
+date,flight_id,aircraft_id,reg,equip,callsign,flight,schd_from,schd_to,real_to,reserved
 20190211,527816958,0,,,AER918,KO918,FAI,,
 20190211,527818091,10685390,N296AK,B739,ASA179,AS179,ANC,FAI,FAI
 20190211,527823506,0,,,,,,,
