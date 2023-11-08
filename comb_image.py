@@ -37,7 +37,7 @@ for d in range(10, 27):
 								
 for i in range(len(day)):
 	spec_dir = '/scratch/irseppi/nodal_data/plane_info/plane_spec/2019-'+month[i]+'-'+day[i]+'/'
-	data = '/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+'_flights.csv'
+	data = '/REPOSITORIES/parkshwynodal/input/flight_name.txt' #'/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+'_flights.csv'
 	flight_data = pd.read_csv(data, sep=",")
 	flight_id = flight_data['flight_id']
 	equipment = flight_data['equip']
