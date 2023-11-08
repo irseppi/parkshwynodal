@@ -29,7 +29,8 @@ seismo_data = pd.read_csv('input/nodes_stations.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 sta = seismo_data['Station']
-			
+
+#Loop through each station in text file that we already know comes within 2km of the nodes			
 for line in sta_f.readlines():
 	val = line.split(',')
 	date = val[0]
@@ -44,7 +45,6 @@ for line in sta_f.readlines():
 	speed = flight_data['speed']
 	alt = flight_data['altitude']
 
-	# Create a scatter plot for the seismometer locations
 	for line  in range(len(sta)):
 		if int(sta[line]) == int(station):
 			
@@ -57,18 +57,21 @@ for line in sta_f.readlines():
 				dist = distance(seismo_latitudes[line], seismo_longitudes[line], flight_latitudes[l], flight_longitudes[l])
 				if dist <= 2:
 					fig = plt.figure() #figsize=(24,30))
+
 					# Create a scatter plot for the seismometer locations
 					for sd in range(len(seismo_data)):
-						plt.scatter(seismo_longitudes[sd], seismo_latitudes[sd], c='red')		
+						plt.scatter(seismo_longitudes[sd], seismo_latitudes[sd], c='red')
+					# Create a scatter plot for the timestamp locations		
 					for fd in range(len(flight_data)):
 						plt.scatter(flight_longitudes[fd], flight_latitudes[fd], c='b')
-					#Label stations
+
+					#Label station
 					plt.text(seismo_longitudes[line], seismo_latitudes[line], sta[line], fontsize=10)
 					plt.scatter(seismo_longitudes[line], seismo_latitudes[line], c='pink')
 					
 					ht = datetime.datetime.utcfromtimestamp(time[l])
 
-					#Label time stamps with time
+					#Label timestamp 
 					plt.text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=10)
 					plt.scatter(flight_longitudes[l], flight_latitudes[l], c='orange')
 					
@@ -86,6 +89,7 @@ for line in sta_f.readlines():
 					plt.xlabel('Longitude')
 					plt.ylabel('Latitude')
 
+					#Save
 					plt.title('Date: ' + date + ' | Flight: ' + flight + ' | Station: ' + station + ' | Speed: '+str(speed[l])+'knts | Altitude: '+str(alt[l])+'ft')
 					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_zoom/' + date + '/'+flight+'/'
 					make_base_dir(BASE_DIR)
