@@ -1,14 +1,4 @@
-import pandas as pd
-import matplotlib.pyplot as plt
-import glob
-import matplotlib
 import os
-import numpy as np
-from obspy.geodetics import gps2dist_azimuth
-from obspy.core import UTCDateTime
-import datetime
-import pytz
-import obspy
 
 flight_names=[]
 dates = []
