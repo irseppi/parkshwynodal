@@ -37,17 +37,16 @@ for d in range(10, 27):
 								
 for i in range(len(day)):
 	spec_dir = '/scratch/irseppi/nodal_data/plane_info/plane_spec/2019-'+month[i]+'-'+day[i]+'/'
-	data = '/REPOSITORIES/parkshwynodal/input/flight_name.txt' #'/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+'_flights.csv'
+	data = 'input/flight_name.txt' #'/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+'_flights.csv'
 	flight_data = pd.read_csv(data, sep=",")
 	flight_id = flight_data['flight_id']
 	equipment = flight_data['equip']
+
 	for flight in os.listdir(spec_dir):
 		f = os.path.join(spec_dir, flight)
 		for l in range(len(flight_id)):
 			if str(flight_id[l]) == str(flight):
 				p = equipment[l]
-				print(p)
-		
 
 		for station in os.listdir(f):
 			sta = os.path.join(f, station)
@@ -57,7 +56,7 @@ for i in range(len(day)):
 				# Open images
 				spectrogram = Image.open(im)
 				map_img = Image.open('/scratch/irseppi/nodal_data/plane_info/plane_map/2019-'+month[i]+'-'+day[i]+'/map_2019'+month[i]+day[i]+'_'+flight+'.png')
-				blown_map = Image.open('/scratch/irseppi/nodal_data/plane_info/blown_map.png')
+				blown_map = Image.open('/scratch/irseppi/nodal_data/plane_info/map_zoom/2019'+month[i]+day[i]+'/'+flight+'/'+flight+'_'+station+'_' + str(time[l]) + '.png')
 				#spec_amp = 
 				#if p == 'nan':
 				#plane_img = Image.open('plane.png')

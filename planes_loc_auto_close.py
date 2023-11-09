@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.projections import geo
 import os
 import numpy as np
 from obspy.geodetics import gps2dist_azimuth
@@ -21,6 +22,7 @@ def distance(lat1, lon1, lat2, lon2):
 	dist_km = dist[0]/1000
 	return dist_km
 
+ 
 sta_f = open('input/flight_name_sta.txt','r')
 
 
@@ -35,8 +37,8 @@ for line in sta_f.readlines():
 	val = line.split(',')
 	date = val[0]
 	flight = val[1]
-	station = val[2]
-
+	station = val[2][0:4]
+	print(station)
 	flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + date + '_positions/' + date + '_' + flight + '.csv'
 	flight_data = pd.read_csv(flight_file, sep=",")
 	flight_latitudes = flight_data['latitude']
@@ -57,7 +59,8 @@ for line in sta_f.readlines():
 				dist = distance(seismo_latitudes[line], seismo_longitudes[line], flight_latitudes[l], flight_longitudes[l])
 				if dist <= 2:
 					fig = plt.figure() #figsize=(24,30))
-
+					f = (np.arccos((1/111.32)*np.pi/180)/110.32)*180/np.pi
+					plt.gca().set_aspect(f)
 					# Create a scatter plot for the seismometer locations
 					for sd in range(len(seismo_data)):
 						plt.scatter(seismo_longitudes[sd], seismo_latitudes[sd], c='red')
@@ -82,18 +85,18 @@ for line in sta_f.readlines():
 					yy = sum(y)/len(y)
 					xx = sum(x)/len(x)
 					plt.text(xx,yy, str(round(dist, 2))+'km', fontsize=10)
-
+					
 					# Set labels and title
 					plt.xlim(min_lon, max_lon)
 					plt.ylim(min_lat, max_lat)
 					plt.xlabel('Longitude')
 					plt.ylabel('Latitude')
-
+					
 					#Save
-					plt.title('Date: ' + date + ' | Flight: ' + flight + ' | Station: ' + station + ' | Speed: '+str(speed[l])+'knts | Altitude: '+str(alt[l])+'ft')
-					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_zoom/' + date + '/'+flight+'/'
+					plt.title('Date: ' + date + ' | Flight: ' + flight + ' | Station: ' + station + '\n | Speed: '+str(speed[l]*0.514444)+'m/s | Altitude: '+str(alt[l]*0.3048)+'m')
+					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_zoom/' + date + '/'+flight+'/'+station+'/'
 					make_base_dir(BASE_DIR)
-					plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_zoom/'+ date + '/'+flight+'/'+flight+'_'+station+'_' + str(time[l]) + '.png')
+					plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_zoom/'+ date + '/'+flight+'/'+station+'/zmap_'+flight+'_' + str(time[l]) + '.png')
 					plt.close()
 					
 				else:
