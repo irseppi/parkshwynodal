@@ -49,12 +49,9 @@ for line in sta_f.readlines():
 
 	for line  in range(len(sta)):
 		if int(sta[line]) == int(station):
-			
 			for l in range(len(flight_latitudes)):
 				dist = distance(seismo_latitudes[line], seismo_longitudes[line], flight_latitudes[l], flight_longitudes[l])
-			
 				if dist <= 2:
-				
 					y =[flight_latitudes[l],  seismo_latitudes[line]]
 					x = [flight_longitudes[l], seismo_longitudes[line]]
 					yy = sum(y)/len(y)
@@ -66,8 +63,7 @@ for line in sta_f.readlines():
 					max_lon = xx + 0.05
 					min_lat = yy - 0.03
 					max_lat = yy + 0.03
-
-					#fig = plt.figure() 
+ 
 					fig, ax = plt.subplots()
 					plt.gca().set_aspect(f)
 					
