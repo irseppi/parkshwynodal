@@ -68,7 +68,7 @@ for i in range(len(day)):
 				spectrogram = Image.open(im)
 				map_img = Image.open('/scratch/irseppi/nodal_data/plane_info/plane_map/2019-'+month[i]+'-'+day[i]+'/map_2019'+month[i]+day[i]+'_'+flight+'.png')
 				zoom_map = Image.open('/scratch/irseppi/nodal_data/plane_info/map_zoom/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/zmap_'+flight+'_' + str(time) + '.png')
-				spec_img = Image.open('hold.png')
+				spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/spec/2019-'+month[i]+'-'+day[i]+'/'+flight+'/'+station+'/'+flight+'_' + str(time) + '.png')
 				
 				# Resize images
 				google_slide_width = 1280  # Width of a Google Slide in pixels
@@ -83,10 +83,9 @@ for i in range(len(day)):
 					#search text files for plane
 				
 				
-				spec = spec_img.resize((int(google_slide_width * 0.25), int(google_slide_height * 0.25)))
-				#zoom_map = zoom_map.crop((2, 0, 2, 0))  
-				zoom = zoom_map.resize((int(google_slide_width * 0.25), int(google_slide_height * 0.3)))
-				maps = map_img.resize((int(google_slide_width * 0.13), int(google_slide_height * 0.3)))
+				spec = spec_img.resize((int(google_slide_width * 0.28), int(google_slide_height * 0.28)))  
+				zoom = zoom_map.resize((int(google_slide_width * 0.258), int(google_slide_height * 0.31)))
+				maps = map_img.resize((int(google_slide_width * 0.1346), int(google_slide_height * 0.31)))
 				spectrogram = spectrogram.resize((int(google_slide_width * 0.75), int(google_slide_height)))
 
 				# Create blank canvas
@@ -95,9 +94,9 @@ for i in range(len(day)):
 				# Paste images onto canvas
 				
 				canvas.paste(plane, (google_slide_width - plane.width, 0))
-				canvas.paste(spec, (google_slide_width - map_img.width, plane.height))
+				canvas.paste(spec, (google_slide_width - spec.width+ int(spec.width/12), plane.height))
 				canvas.paste(zoom, (google_slide_width - zoom.width + int(zoom.width/5.5), google_slide_height - zoom.height))
-				canvas.paste(spectrogram, (0, 0))
+				canvas.paste(spectrogram, (-40, 0))
 				canvas.paste(maps, (google_slide_width - int(maps.width*2.1), google_slide_height - maps.height))
 				
 
@@ -116,9 +115,9 @@ for i in range(len(day)):
 						text1 = 'Date: 2019-' + month[i] + '-' + day[i] + '\nFlight: ' + flight + '\nStation: ' + station + '\nSpeed: '+str(round(speed[l]*0.514444,2))+'m/s\nAltitude: '+str(round(alt[l]*0.3048,2))+'m' 
 					else:
 						continue
-				draw.text((google_slide_width - 140, 440), text1,fill='black', font=font,)
+				draw.text((google_slide_width - 140, 400), text1,fill='black', font=font,)
 				
-				draw.text((google_slide_width - 300, 440), text2, fill='black', font=font)
+				draw.text((google_slide_width - 300, 400), text2, fill='black', font=font)
 
 				BASE_DIR = "/scratch/irseppi/nodal_data/plane_info/full_image/2019-"+str(month[i])+"-"+str(day[i])+'/'+flight+'/'
 				make_base_dir(BASE_DIR)
