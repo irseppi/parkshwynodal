@@ -83,7 +83,7 @@ for i in range(len(day)):
 					#search text files for plane
 				
 				
-				spec = spec_img.resize((int(google_slide_width * 0.28), int(google_slide_height * 0.28)))  
+				spec = spec_img.resize((int(google_slide_width * 0.31), int(google_slide_height * 0.31)))  
 				zoom = zoom_map.resize((int(google_slide_width * 0.258), int(google_slide_height * 0.31)))
 				maps = map_img.resize((int(google_slide_width * 0.1346), int(google_slide_height * 0.31)))
 				spectrogram = spectrogram.resize((int(google_slide_width * 0.75), int(google_slide_height)))
@@ -94,15 +94,15 @@ for i in range(len(day)):
 				# Paste images onto canvas
 				
 				canvas.paste(plane, (google_slide_width - plane.width, 0))
-				canvas.paste(spec, (google_slide_width - spec.width+ int(spec.width/12), plane.height))
-				canvas.paste(zoom, (google_slide_width - zoom.width + int(zoom.width/5.5), google_slide_height - zoom.height))
+				canvas.paste(spec, (google_slide_width - spec.width+ int(spec.width/12), google_slide_height - spec.height))
+				canvas.paste(zoom, (google_slide_width - zoom.width + int(zoom.width/5.5), plane.height))
 				canvas.paste(spectrogram, (-40, 0))
-				canvas.paste(maps, (google_slide_width - int(maps.width*2.1), google_slide_height - maps.height))
+				canvas.paste(maps, (google_slide_width - int(maps.width*2.1), plane.height))
 				
 
 				# Draw text from files
 				draw = ImageDraw.Draw(canvas)
-				font = ImageFont.truetype('input/TimesSansDisplay-PR9E.ttf', 16) #load_default()  
+				font = ImageFont.truetype('input/Arialn.ttf', 18) #load_default()  
 				#PIL.ImageFont.ImageFont.getsize
 				flight_file = '/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+ '_positions/2019'+month[i]+day[i]+ '_' + flight + '.csv'
 				flight_data = pd.read_csv(flight_file, sep=",")
@@ -115,9 +115,9 @@ for i in range(len(day)):
 						text1 = 'Date: 2019-' + month[i] + '-' + day[i] + '\nFlight: ' + flight + '\nStation: ' + station + '\nSpeed: '+str(round(speed[l]*0.514444,2))+'m/s\nAltitude: '+str(round(alt[l]*0.3048,2))+'m' 
 					else:
 						continue
-				draw.text((google_slide_width - 140, 400), text1,fill='black', font=font,)
+				draw.text((google_slide_width - 160, 400), text1,fill='black', font=font,)
 				
-				draw.text((google_slide_width - 300, 400), text2, fill='black', font=font)
+				draw.text((google_slide_width - 340, 400), text2, fill='black', font=font)
 
 				BASE_DIR = "/scratch/irseppi/nodal_data/plane_info/full_image/2019-"+str(month[i])+"-"+str(day[i])+'/'+flight+'/'
 				make_base_dir(BASE_DIR)
