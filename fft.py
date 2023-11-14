@@ -96,36 +96,35 @@ for i in range(len(day)):
 				
 				tr = obspy.read(n)
 			
-				tim = 120 
+				tim = 0.5
 				tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - tim, tr[2].stats.starttime + (mins * 60) + secs + tim)
 		
 				sampling_frequency = tr[2].stats.sampling_rate
 				title    = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'
-		
+				'''
 				X =  fft(tr[2]) 
 				N = len(X)  #Number of sample points
 				n = np.arange(N) #array of number of points 0 to N
 				T = N/sampling_frequency #Spacing of Samples
 				freq = n/T 
-				fft_amp = np.abs(X)
+				fft_amp = np.log10(np.abs(X))
 
 				plt.figure(figsize = (9, 6))
 
-				plt.stem(freq, np.abs(X), 'b', \
+				plt.stem(freq, np.log10(np.abs(X)), 'b', \
 					 markerfmt=" ", basefmt="-b")
 				plt.xlabel('Freq (Hz)')
 				plt.ylabel('FFT Amplitude |X(freq)|')
 				plt.xlim(1, 250)
 				xmask = np.logical_and(freq > 0.2, freq < 250)
 				plt.ylim(0,np.max(fft_amp[xmask]*1.1))
-				plt.title(title)
+				#plt.title(title)
 
 				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/spec/2019-'+month[i]+'-'+day[i]+'/'+flight+'/'+station+'/'
 				make_base_dir(BASE_DIR)
 				plt.savefig('/scratch/irseppi/nodal_data/plane_info/spec/2019-'+month[i]+'-'+day[i]+'/'+flight+'/'+station+'/'+flight+'_' + str(time) + '.png')
 				plt.close()
-
-				ID = f'{waveform_id[0]}.{waveform_id[1]}.{waveform_id[2]}.{waveform_id[3]}'
+				'''
 				# computing and creating a list of the amplitude spectra of the seismograms for the selected station location
 				tr[2].detrend('constant')
 				tr[2].detrend('linear')
@@ -134,13 +133,13 @@ for i in range(len(day)):
 				fft_amp, fft_freq = wf_fft(tr[2].data)
 
 				plt.figure()
-				plt.plot(fft_freq,fft_amp)
+				plt.plot(fft_freq,np.log10(fft_amp))
 				plt.xlim(0.2,250)
 
 				xmask = np.logical_and(fft_freq > .2, fft_freq < 250)
-				plt.ylim(0,np.max(fft_amp[xmask]*1.1))
-				plt.title(ID)
+				plt.ylim(0,np.max(np.log10(fft_amp[xmask])*1.1))
+				#plt.title(title)
 				plt.xlabel(f'Frequency (Hz)')
 				plt.ylabel(f'Amplitude (m/s)')
-				plt.savefig('/scratch/irseppi/nodal_data/plane_info/spec/2019-'+month[i]+'-'+day[i]+'/'+flight+'/'+station+'/classex_'+flight+'_' + str(time) + '.png')
+				plt.savefig('/scratch/irseppi/nodal_data/plane_info/spec/2019-'+month[i]+'-'+day[i]+'/'+flight+'/'+station+'/'+flight+'_' + str(time) + '.png')
 				plt.close()
