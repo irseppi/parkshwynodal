@@ -96,12 +96,12 @@ for i in range(len(day)):
 				
 				tr = obspy.read(n)
 			
-				tim = 0.5
+				tim = 0.1
 				tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - tim, tr[2].stats.starttime + (mins * 60) + secs + tim)
 		
 				sampling_frequency = tr[2].stats.sampling_rate
 				title    = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'
-				'''
+				
 				X =  fft(tr[2]) 
 				N = len(X)  #Number of sample points
 				n = np.arange(N) #array of number of points 0 to N
@@ -124,7 +124,7 @@ for i in range(len(day)):
 				make_base_dir(BASE_DIR)
 				plt.savefig('/scratch/irseppi/nodal_data/plane_info/spec/2019-'+month[i]+'-'+day[i]+'/'+flight+'/'+station+'/'+flight+'_' + str(time) + '.png')
 				plt.close()
-				'''
+				
 				# computing and creating a list of the amplitude spectra of the seismograms for the selected station location
 				tr[2].detrend('constant')
 				tr[2].detrend('linear')

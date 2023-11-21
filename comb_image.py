@@ -23,7 +23,7 @@ def make_base_dir(base_dir):
 month = []
 day = []
 
-for d in range(11,29):
+for d in range(27,29):
 	day.append(str(d))
 	month.append('02')
 
@@ -34,6 +34,8 @@ for d in range(1, 10):
 for d in range(10, 27):
 	day.append(str(d))
 	month.append('03')
+
+#text = open('all_station_crossing_db.txt', 'r')
 								
 for i in range(len(day)):
 	spec_dir = '/scratch/irseppi/nodal_data/plane_info/plane_spec/2019-'+month[i]+'-'+day[i]+'/'
@@ -50,7 +52,7 @@ for i in range(len(day)):
 	schd_from = flight_data['schd_from']
 	schd_to = flight_data['schd_to']
 	real_to = flight_data['real_to']
-	reserved = flight_data['reserved']
+
 
 	for flight in os.listdir(spec_dir):
 		f = os.path.join(spec_dir, flight)
@@ -68,8 +70,10 @@ for i in range(len(day)):
 				spectrogram = Image.open(im)
 				map_img = Image.open('/scratch/irseppi/nodal_data/plane_info/plane_map/2019-'+month[i]+'-'+day[i]+'/map_2019'+month[i]+day[i]+'_'+flight+'.png')
 				zoom_map = Image.open('/scratch/irseppi/nodal_data/plane_info/map_zoom/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/zmap_'+flight+'_' + str(time) + '.png')
-				spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/spec/2019-'+month[i]+'-'+day[i]+'/'+flight+'/'+station+'/'+flight+'_' + str(time) + '.png')
-				
+				try:
+					spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/spec/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+station+'_' + str(time) + '.png')
+				except:
+					spec_img = Image.open('hold.png')
 				# Resize images
 				google_slide_width = 1280  # Width of a Google Slide in pixels
 				google_slide_height = 720  # Height of a Google Slide in pixels
@@ -77,12 +81,12 @@ for i in range(len(day)):
 				path = '/scratch/irseppi/nodal_data/plane_info/plane_images/'+str(p)+'.jpg'
 				if os.path.isfile(path):
 					plane_img = Image.open('/scratch/irseppi/nodal_data/plane_info/plane_images/'+str(p)+'.jpg')
-					plane = plane_img.resize((int(google_slide_width * 0.25), int(google_slide_height * 0.25)))
+					
 				else:
 					plane = Image.open('hold.png')
 					#search text files for plane
 				
-				
+				plane = plane_img.resize((int(google_slide_width * 0.25), int(google_slide_height * 0.25)))
 				spec = spec_img.resize((int(google_slide_width * 0.31), int(google_slide_height * 0.31)))  
 				zoom = zoom_map.resize((int(google_slide_width * 0.258), int(google_slide_height * 0.31)))
 				maps = map_img.resize((int(google_slide_width * 0.1346), int(google_slide_height * 0.31)))
@@ -119,9 +123,9 @@ for i in range(len(day)):
 				
 				draw.text((google_slide_width - 340, 400), text2, fill='black', font=font)
 
-				BASE_DIR = "/scratch/irseppi/nodal_data/plane_info/full_image/2019-"+str(month[i])+"-"+str(day[i])+'/'+flight+'/'
+				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/full_image/'
 				make_base_dir(BASE_DIR)
-				name= BASE_DIR + time+'_'+station+'.png'
+				name= BASE_DIR + '2019'+str(month[i])+str(day[i])+'_'+flight+'_'+time+'_'+station+'.png'
 
 				# Save combined image
 				canvas.save(name)
