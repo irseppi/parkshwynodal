@@ -251,4 +251,5 @@ for i in range(len(day)):
 
 						# Save combined image
 						canvas.save(name)
+	
 						
