@@ -2,6 +2,8 @@ import sys
 import fileinput
 from datetime import datetime
 import os
+import pandas as pd
+
 def modify_file(input_file_name, output_file_name):
     # Function to modify the content of the file
     def modify_content(content):
@@ -86,3 +88,24 @@ with open(input_file, 'r') as f_in, open(output_file, 'w') as f_out:
 for i, line in enumerate(fileinput.input('dates1.txt', inplace=1)):
         sys.stdout.write(line.replace(line[-, '')) 
 
+f = open('coun.txt', 'w')
+text = open('all_station_crossing_db.txt', 'r')
+flight_data = pd.read_csv('20231010_Aircraft _UA_Fairbanks.csv', sep=",")
+eq = flight_data['TypeDesignator']
+des = flight_data['Description']
+count = 0
+for line in text.readlines():
+	val = line.split(',')
+	equip = val[6]
+	for l in range(len(eq)):
+		if str(eq[l]) == str(equip[0:4]) and str(des[l]) == 'Helicopter':
+			count = count + 1
+			f.write(eq[l]+'\n')
+f.write(count)
+f.close()
+text = open('all_station_crossing_db.txt', 'r')
+
+for line in text.readlines():
+	val = line.split(',')
+	equip = val[6]
+	print(equip)
