@@ -36,7 +36,7 @@ for line in text.readlines():
 	station = str(val[5])
 	tim = 120
 	flight_num = str(val[1])
-	if ht.month == 2 and ht.day >= 11 or ht.month == 3:
+	if ht.month == 2 and ht.day >= 12 or ht.month == 3:
 		day_of_year = str((ht - datetime.datetime(2019, 1, 1)).days + 1)
 	
 		if val[5].isdigit() == False:
@@ -89,56 +89,60 @@ for line in text.readlines():
 			except:
 				continue
 	
-	# Time array
-	t = np.arange(len(data)) / fs
-	g = fs*240
-	# Compute spectrogram
-	frequencies, times, Sxx = spectrogram(data, fs) #, window=windows.boxcar(fs,sym=True))
+		try:
+			# Time array
+			t = np.arange(len(data)) / fs
+			g = fs*240
+			# Compute spectrogram
+			frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9) #, window=windows.boxcar(fs,sym=True))
 
-	
-	fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
+			fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
 
-	ax1.plot(t, data, 'k', linewidth=0.5)
-	ax1.set_title(title)
-	ax1.axvline(x=tim, c = 'r', ls = '--')
-	ax1.margins(x=0)
-	vmin = np.min(10 * np.log10(Sxx))
-	vmax = np.max(10 * np.log10(Sxx))
-	# Plot spectrogram
-	cax = ax2.pcolormesh(times, frequencies, 10 * np.log10(Sxx), shading='gouraud', cmap='hsv', vmin=vmin, vmax=vmax)
-	ax2.set_xlabel('Time [s]')
+			ax1.plot(t, data, 'k', linewidth=0.5)
+			ax1.set_title(title)
+			ax1.axvline(x=tim, c = 'r', ls = '--')
+			ax1.margins(x=0)
+			vmin = np.min(10 * np.log10(Sxx))
+			vmax = np.max(10 * np.log10(Sxx))
+			# Plot spectrogram
+			cax = ax2.pcolormesh(times, frequencies, 10 * np.log10(Sxx), shading='gouraud', cmap='hsv', vmin=vmin, vmax=vmax)
+			ax2.set_xlabel('Time [s]')
 
-	# Find the center of the trace
-	center_index = len(data) // 2
-	center_time = t[center_index]
+			# Find the center of the trace
+			center_index = len(data) // 2
+			center_time = t[center_index]
 
-	ax2.axvline(x=center_time, c = 'r', ls = '--')
-	ax2.set_ylabel('Frequency (Hz)')
-	ax2.margins(x=0)
-	ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
-	
-	plt.colorbar(mappable=cax, cax=ax3)
-	ax3.set_ylabel('Relative Amplitude (dB)')
-	plt.show()
-	BASE_DIR = "/scratch/irseppi/nodal_data/plane_info/plane_spec2/2019-0"+str(month1)+"-"+str(day1)+"/"+flight_num+ '/'+station
-	make_base_dir(BASE_DIR)
-	fig.savefig('/scratch/irseppi/nodal_data/plane_info/plane_spec2/2019-0'+str(month1)+'-'+str(day1)+'/'+flight_num + '/'+station+'/'+str(time)+'_'+flight_num+'.png')
+			ax2.axvline(x=center_time, c = 'r', ls = '--')
+			ax2.set_ylabel('Frequency (Hz)')
+			ax2.margins(x=0)
+			ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
+			
+			plt.colorbar(mappable=cax, cax=ax3)
+			ax3.set_ylabel('Relative Amplitude (dB)')
+			#plt.show()
+			BASE_DIR = "/scratch/irseppi/nodal_data/plane_info/plane_spec2/2019-0"+str(month1)+"-"+str(day1)+"/"+flight_num+ '/'+station
+			make_base_dir(BASE_DIR)
+			fig.savefig('/scratch/irseppi/nodal_data/plane_info/plane_spec2/2019-0'+str(month1)+'-'+str(day1)+'/'+flight_num + '/'+station+'/'+str(time)+'_'+flight_num+'.png')
+			plt.close()
 
-	# Compute and plot amplitude spectrum for the center of the trace
-	window = np.hanning(fs)  # one second window
-	center_data = data[int(center_index):int(center_index+fs)] * window
-	freqs = np.fft.rfftfreq(fs, 1/fs)
-	fft = np.fft.rfft(center_data)
-	plt.plot(freqs, 10*np.log10(np.abs(fft)))
-	plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
-	plt.xlabel('Frequency [Hz]')
-	plt.ylabel('Amplitude [m/s]')
-	plt.xlim(2,int(fs/2))
-	xmask = np.logical_and(freqs > .2, freqs < int(fs/2))
-	plt.ylim(0,np.max(10*np.log10(fft[xmask])*1.1))
-	plt.show()
+			plt.figure()
+			# Compute and plot amplitude spectrum for the center of the trace
+			window = np.hanning(fs)  # one second window
+			center_data = data[int(center_index):int(center_index+fs)] * window
+			freqs = np.fft.rfftfreq(fs, 1/fs)
+			fft = 10*np.log10(np.fft.rfft(center_data))
+			plt.plot(freqs, np.abs(fft))
+			plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
+			plt.xlabel('Frequency [Hz]')
+			plt.ylabel('Amplitude [m/s]')
+			plt.xlim(2,int(fs/2))
+			xmask = np.logical_and(freqs > .2, freqs < int(fs/2))
+			plt.ylim(0,np.max(fft[xmask])*1.1)
+			#plt.show()
 
-	BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/spec2/'+str(val[0])+'/'+str(val[1])+'/'+str(val[5])+'/'
-	make_base_dir(BASE_DIR)
-	plt.savefig('/scratch/irseppi/nodal_data/plane_info/spec2/'+str(val[0])+'/'+str(val[1])+'/'+str(val[5])+'/'+str(val[5])+'_' + str(val[2]) + '.png')
-	plt.close()
+			BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/spec2/'+str(val[0])+'/'+str(val[1])+'/'+str(val[5])+'/'
+			make_base_dir(BASE_DIR)
+			plt.savefig('/scratch/irseppi/nodal_data/plane_info/spec2/'+str(val[0])+'/'+str(val[1])+'/'+str(val[5])+'/'+str(val[5])+'_' + str(val[2]) + '.png')
+			plt.close()
+		except:
+			continue

@@ -1,22 +1,22 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib
 import os
-import numpy as np
-from obspy.geodetics import gps2dist_azimuth
-from obspy.core import UTCDateTime
+
 import datetime
 import pytz
-import obspy
+
 import math
 import matplotlib.dates as mdates
-from pathlib import Path
+
 # Import all dependencies
 import numpy as np
+import datetime
 from matplotlib import dates, pyplot as plt
 from obspy import UTCDateTime
 from obspy.clients.fdsn import Client
 from scipy.signal import spectrogram
+import obspy
+from pathlib import Path
 
 def make_base_dir(base_dir):
 	base_dir = Path(base_dir)
@@ -27,11 +27,10 @@ def make_base_dir(base_dir):
 			if not current_path.exists():
 				current_path.mkdir()
 
-text = open('all_station_crossing_db.txt', 'r')
 
-text = open('all_station_crossing_db.txt', 'r')
+text = open('input/all_station_crossing_db.txt', 'r')
 window_duration = 10  # spectrogram window duration [s]
-freq_lims = (0.5,10)  # frequency limits for output spectrogram. If `None`, the limits will be adaptive
+freq_lims = (0.5,250)  # frequency limits for output spectrogram. If `None`, the limits will be adaptive
 v_percent_lims = (20,97.5)  # colorbar limits
 for line in text.readlines():
 	val = line.split(',')
@@ -40,7 +39,9 @@ for line in text.readlines():
 		day_of_year = str((ht - datetime.datetime(2019, 1, 1)).days + 1)
 		if val[5].isdigit() == False:
 			try:
-				n = "/aec/wf/2019/0"+day_of_year+"/"+str(val[5])+".*Z.20190"+day_of_year+"000000+"
+				
+				n = "/aec/wf/2019/0"+day_of_year+"/"+str(val[5])+".HHZ.20190"+day_of_year+"000000+"
+				print(n)
 				tr = obspy.read(n)
 
 				h = ht.hour
@@ -79,10 +80,13 @@ for line in text.readlines():
 					       vmax=np.percentile(spec_db_plot, v_percent_lims[1]),
 					       origin='lower', aspect='auto', interpolation='None')
 				# Plot every 20th column of spectrogram to see how it changes with time
-				for i in range(0, np.shape(spec_db_plot)[1], 20):
-				    ax[1].axvline(trace_time_matplotlib[i], linestyle='--')
-				    ax[2].plot(np.arange(freq_lims[0]+0.05, freq_lims[1]-0.05, 0.1), spec_db_plot[:, i])
-				fig.show()
+				#ax[1].axvline(val[2], linestyle='--')
+				#ax[2].plot(np.arange(freq_lims[0]+0.05, freq_lims[1]-0.05, 0.1), spec_db_plot[:, i])
+				for i in range(0, np.shape(spec_db_plot)[1], 3):
+					ax[1].axvline(trace_time_matplotlib[i], linestyle='--')
+					ax[2].plot(np.arange(freq_lims[0]+0.05, freq_lims[1]-0.05, 0.1), spec_db_plot[:, i])
+
+				#fig.show()
 				
 				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/allspec/'+ str(val[0]) + '/'+str(val[1])+'/'+str(val[5])+'/'
 				make_base_dir(BASE_DIR)
