@@ -18,11 +18,6 @@ def make_base_dir(base_dir):
 			current_path = current_path/parent
 			if not current_path.exists():
 				current_path.mkdir()
-		
-def distance(lat1, lon1, lat2, lon2):
-	dist = gps2dist_azimuth(lat1, lon1, lat2, lon2)
-	dist_km = dist[0]/1000
-	return dist_km
 
 sta_f = open('input/all_station_crossing_db.txt','r')
 
