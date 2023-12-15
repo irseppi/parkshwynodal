@@ -131,7 +131,7 @@ for i in range(len(day)):
 
 				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/full_image2/'
 				make_base_dir(BASE_DIR)
-				name= BASE_DIR + '2019'+str(month[i])+str(day[i])+'_'+flight+'_'+time+'_'+station+'_'+pla+'.png'
+				name= BASE_DIR + '2019'+str(month[i])+str(day[i])+'_'+flight+'_'+time+'_'+station+'_'+pla+'_'+descrip+'_'+engine+coun'.png'
 
 				# Save combined image
 				canvas.save(name)
