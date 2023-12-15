@@ -56,6 +56,8 @@ for line in sta_f.readlines():
 					plt.yticks(fontsize = 13)
 					plt.xticks(fontsize = 13)
 
+
+					#Added a box to highligh zoomed in location
 					y =[flight_latitudes[l],  seismo_latitudes[t]]
 					x = [flight_longitudes[l], seismo_longitudes[t]]
 					yy = sum(y)/len(y)
