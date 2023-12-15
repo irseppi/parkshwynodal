@@ -77,18 +77,15 @@ for i in range(len(day)):
 				spectrogram = Image.open(im)
 				map_img = Image.open('/scratch/irseppi/nodal_data/plane_info/pmap2/2019'+month[i]+day[i]+'/'+flight+'/map_'+station+'_'+flight+'.png')
 				zoom_map = Image.open('/scratch/irseppi/nodal_data/plane_info/pmap_zoom2/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/zmap_'+flight+'_' + str(time) + '.png')
-				try:
-					spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/spec2/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+station+'_' + str(time) + '.png')
-				except:
-					spec_img = Image.open('hold.png')
+				spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/spec2/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+station+'_' + str(time) + '.png')
 
 				# Resize images
 				google_slide_width = 1280  # Width of a Google Slide in pixels
 				google_slide_height = 720  # Height of a Google Slide in pixels
 				
-				path = '/scratch/irseppi/nodal_data/plane_info/plane_images/'+str(p)+'.jpg'
+				path = '/scratch/irseppi/nodal_data/plane_info/plane_images/'+str(pla)+'.jpg'
 				if os.path.isfile(path):
-					plane_img = Image.open('/scratch/irseppi/nodal_data/plane_info/plane_images/'+str(p)+'.jpg')
+					plane_img = Image.open(path)
 					
 				else:
 					plane = Image.open('hold.png')
@@ -141,17 +138,15 @@ for i in range(len(day)):
 
 '''
 try:
-	map_img = Image.open(p)
+	map_img = 
 except:
 	map_image = Image.open('hold.png')
-t ='/scratch/irseppi/nodal_data/plane_info/pmap_zoom/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+'zmap_'+image
 
 try:
-	zoom_map = Image.open(t)
+	zoom_map = 
 	
-	g = '/scratch/irseppi/nodal_data/plane_info/spec/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+station+'_' + str(time) + '.png'
 except:
-	zoom_map = Image.open('hold.png')
+	zoom_map =
 try:
 	spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/spec/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+station+'_' + str(time) + '.png')
 except:
