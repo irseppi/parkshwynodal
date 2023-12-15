@@ -27,7 +27,7 @@ sta_f = open('input/all_station_crossing_db.txt','r')
 
 
 # Load the seismometer location data
-seismo_data = pd.read_csv('perm_stations.txt', sep="|")
+seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 sta = seismo_data['Station']
@@ -92,14 +92,13 @@ for line in sta_f.readlines():
 					plt.ylim(min_lat, max_lat)
 					ax.tick_params(axis='both', which='major', labelsize=9)
 					#Save
-					#plt.title('Date: ' + date + ' | Flight: ' + flight + ' | Station: ' + station + '\n | Speed: '+str(round(speed[l]*0.514444,2))+'m/s | Altitude: '+str(round(alt[l]*0.3048,2))+'m')
-					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/pmap_zoom/' + date + '/'+flight+'/'+station+'/'
+					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/pmap_zoom2/' + date + '/'+flight+'/'+station+'/'
 					make_base_dir(BASE_DIR)
-					plt.savefig('/scratch/irseppi/nodal_data/plane_info/pmap_zoom/'+ date + '/'+flight+'/'+station+'/zmap_'+flight+'_' + str(time[l]) + '.png')
+					plt.savefig('/scratch/irseppi/nodal_data/plane_info/pmap_zoom2/'+ date + '/'+flight+'/'+station+'/zmap_'+flight+'_' + str(time[l]) + '.png')
 					plt.close()
 						
-					else:
-						continue
+				else:
+					continue
 				
 			else:
 				continue
