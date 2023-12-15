@@ -23,7 +23,7 @@ def distance(lat1, lon1, lat2, lon2):
 	return dist_km
 
  
-sta_f = open('all_station_crossing_db.txt','r')
+sta_f = open('input/all_station_crossing_db.txt','r')
 
 
 # Load the seismometer location data
@@ -38,66 +38,65 @@ for line in sta_f.readlines():
 	date = val[0]
 	flight = val[1]
 	station = val[5]
-	
-	if val[5].isdigit() == False:
-		print(station)
-		flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + date + '_positions/' + date + '_' + flight + '.csv'
-		flight_data = pd.read_csv(flight_file, sep=",")
-		flight_latitudes = flight_data['latitude']
-		flight_longitudes = flight_data['longitude']
-		time = flight_data['snapshot_id']
-		speed = flight_data['speed']
-		alt = flight_data['altitude']
 
-		for line  in range(len(sta)):
-			if sta[line] == station:
-				for l in range(len(flight_latitudes)):
-					dist = distance(seismo_latitudes[line], seismo_longitudes[line], flight_latitudes[l], flight_longitudes[l])
-					if dist <= 2:
-						y =[flight_latitudes[l],  seismo_latitudes[line]]
-						x = [flight_longitudes[l], seismo_longitudes[line]]
-						yy = sum(y)/len(y)
-						xx = sum(x)/len(x)
 
-						#f = (np.arccos((62/111.32)*np.pi/180)/110.32)
-						f = 1.0/np.cos(62*np.pi/180)
-						min_lon = xx - 0.05
-						max_lon = xx + 0.05
-						min_lat = yy - 0.03
-						max_lat = yy + 0.03
-	 
-						fig, ax = plt.subplots()
-						plt.gca().set_aspect(f)
-						
-						plt.scatter(seismo_longitudes, seismo_latitudes, c='red')
-						
-						plt.scatter(flight_longitudes, flight_latitudes, c='c')
+	flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + date + '_positions/' + date + '_' + flight + '.csv'
+	flight_data = pd.read_csv(flight_file, sep=",")
+	flight_latitudes = flight_data['latitude']
+	flight_longitudes = flight_data['longitude']
+	time = flight_data['snapshot_id']
+	speed = flight_data['speed']
+	alt = flight_data['altitude']
 
-						#Label station
-						plt.text(seismo_longitudes[line], seismo_latitudes[line], sta[line], fontsize=9, fontweight='bold')
-						plt.scatter(seismo_longitudes[line], seismo_latitudes[line], c='pink')
-						
-						ht = datetime.datetime.utcfromtimestamp(time[l])
+	for line  in range(len(sta)):
+		if sta[line] == station:
+			for l in range(len(flight_latitudes)):
+				dist = distance(seismo_latitudes[line], seismo_longitudes[line], flight_latitudes[l], flight_longitudes[l])
+				if dist <= 2:
+					y =[flight_latitudes[l],  seismo_latitudes[line]]
+					x = [flight_longitudes[l], seismo_longitudes[line]]
+					yy = sum(y)/len(y)
+					xx = sum(x)/len(x)
 
-						#Label timestamp 
-						plt.text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=9, fontweight='bold')
-						plt.scatter(flight_longitudes[l], flight_latitudes[l], c='orange')
-						
-						
-						plt.plot(x,y, '--', c='orange')
-						
-						plt.text(xx,yy, str(round(dist, 2))+'km', fontsize=8, fontweight='bold')
-						
-						# Set labels and title
-						plt.xlim(min_lon, max_lon)
-						plt.ylim(min_lat, max_lat)
-						ax.tick_params(axis='both', which='major', labelsize=9)
-						#Save
-						#plt.title('Date: ' + date + ' | Flight: ' + flight + ' | Station: ' + station + '\n | Speed: '+str(round(speed[l]*0.514444,2))+'m/s | Altitude: '+str(round(alt[l]*0.3048,2))+'m')
-						BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/pmap_zoom/' + date + '/'+flight+'/'+station+'/'
-						make_base_dir(BASE_DIR)
-						plt.savefig('/scratch/irseppi/nodal_data/plane_info/pmap_zoom/'+ date + '/'+flight+'/'+station+'/zmap_'+flight+'_' + str(time[l]) + '.png')
-						plt.close()
+					#f = (np.arccos((62/111.32)*np.pi/180)/110.32)
+					f = 1.0/np.cos(62*np.pi/180)
+					min_lon = xx - 0.05
+					max_lon = xx + 0.05
+					min_lat = yy - 0.03
+					max_lat = yy + 0.03
+ 
+					fig, ax = plt.subplots()
+					plt.gca().set_aspect(f)
+					
+					plt.scatter(seismo_longitudes, seismo_latitudes, c='red')
+					
+					plt.scatter(flight_longitudes, flight_latitudes, c='c')
+
+					#Label station
+					plt.text(seismo_longitudes[line], seismo_latitudes[line], sta[line], fontsize=9, fontweight='bold')
+					plt.scatter(seismo_longitudes[line], seismo_latitudes[line], c='pink')
+					
+					ht = datetime.datetime.utcfromtimestamp(time[l])
+
+					#Label timestamp 
+					plt.text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=9, fontweight='bold')
+					plt.scatter(flight_longitudes[l], flight_latitudes[l], c='orange')
+					
+					
+					plt.plot(x,y, '--', c='orange')
+					
+					plt.text(xx,yy, str(round(dist, 2))+'km', fontsize=8, fontweight='bold')
+					
+					# Set labels and title
+					plt.xlim(min_lon, max_lon)
+					plt.ylim(min_lat, max_lat)
+					ax.tick_params(axis='both', which='major', labelsize=9)
+					#Save
+					#plt.title('Date: ' + date + ' | Flight: ' + flight + ' | Station: ' + station + '\n | Speed: '+str(round(speed[l]*0.514444,2))+'m/s | Altitude: '+str(round(alt[l]*0.3048,2))+'m')
+					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/pmap_zoom/' + date + '/'+flight+'/'+station+'/'
+					make_base_dir(BASE_DIR)
+					plt.savefig('/scratch/irseppi/nodal_data/plane_info/pmap_zoom/'+ date + '/'+flight+'/'+station+'/zmap_'+flight+'_' + str(time[l]) + '.png')
+					plt.close()
 						
 					else:
 						continue
