@@ -23,7 +23,7 @@ def make_base_dir(base_dir):
 month = []
 day = []
 
-for d in range(27,29):
+for d in range(11,29):
 	day.append(str(d))
 	month.append('02')
 
@@ -37,14 +37,7 @@ for d in range(10, 27):
 
 text = open('input/all_station_crossing_db.txt', 'r')
 
-data = 'input/flight_name.txt' 
 airplane = 'input/20231010_Aircraft _UA_Fairbanks.csv'
-
-flight_data = pd.read_csv(data, sep=",")
-flight_id = flight_data['flight_id']
-equipment = flight_data['equip']
-callsign = flight_data['callsign'] 
-fly = flight_data['flight']
 
 plane_data = pd.read_csv(airplane, sep=",")
 man = plane_data['MANUFACTURER']
@@ -57,25 +50,37 @@ turb_cat = plane_data['Wake Turbulence Category']
 							
 for i in range(len(day)):
 	spec_dir = '/scratch/irseppi/nodal_data/plane_info/plane_spec2/2019-'+month[i]+'-'+day[i]+'/'
+	flight_data = pd.read_csv('/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+'_flights.csv', sep=",")
+	flight_id = flight_data['flight_id']
+	equipment = flight_data['equip']
+	callsign = flight_data['callsign'] 
+	fly = flight_data['flight']
 
 	for flight in os.listdir(spec_dir):
 		f = os.path.join(spec_dir, flight)
 		for l in range(len(flight_id)):
 			if str(flight_id[l]) == str(flight):
 				pla = equipment[l]
-				if pla == float('nan'):
-					text2 = 'Callsign: ' + str(callsign[l]) 
-				else:
-					text2 = str(man) + ', '+ str(model) + ' (' + str(descrip) + ')'
+				for h in range(len(des)):
+					if pla == des[h]:
+						text2 = str(man[h]) + ', '+ str(model[h]) + ' (' + str(descrip[h]) + ')'
+						break
+					else:
+						text2 = 'Callsign: ' + str(callsign[l])
+					print(text2) 
+				
+			else:
+				continue
 		for station in os.listdir(f):
 			sta = os.path.join(f, station)
 			for image in os.listdir(sta):
 				time = image[0:10]
 				im = os.path.join(sta, image)
-
+				
+				#try:
 				# Open images
 				spectrogram = Image.open(im)
-				map_img = Image.open('/scratch/irseppi/nodal_data/plane_info/pmap2/2019'+month[i]+day[i]+'/'+flight+'/map_'+station+'_'+flight+'.png')
+				map_img = Image.open('/scratch/irseppi/nodal_data/plane_info/pmap2/2019'+month[i]+day[i]+'/'+flight+'/map_'+station+'_'+time+'.png')
 				zoom_map = Image.open('/scratch/irseppi/nodal_data/plane_info/pmap_zoom2/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/zmap_'+flight+'_' + str(time) + '.png')
 				spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/spec2/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+station+'_' + str(time) + '.png')
 
@@ -88,29 +93,37 @@ for i in range(len(day)):
 					plane_img = Image.open(path)
 					
 				else:
-					plane = Image.open('hold.png')
+					plane_img = Image.open('hold.png')
 					#search text files for plane
-				
-				plane = plane_img.resize((int(google_slide_width * 0.25), int(google_slide_height * 0.25)))
-				spec = spec_img.resize((int(google_slide_width * 0.31), int(google_slide_height * 0.31)))  
-				zoom = zoom_map.resize((int(google_slide_width * 0.258), int(google_slide_height * 0.31)))
-				maps = map_img.resize((int(google_slide_width * 0.1346), int(google_slide_height * 0.31)))
-				spectrogram = spectrogram.resize((int(google_slide_width * 0.75), int(google_slide_height * 0.042)))
-				cover = Image.open('hold.png')
-				cov = cover.resize((int(google_slide_width * 0.25), int(google_slide_height * 0.25)))
+				scale = 70/1280
+				plane = plane_img.resize((int(google_slide_width * 0.27), int(google_slide_height * 0.27)))
+				spec = spec_img.resize((int(google_slide_width * 0.31), int(google_slide_height * 0.36)))  
+				zoom = zoom_map.resize((int(google_slide_width * 0.236), int(google_slide_height * 0.32)))
+				maps = map_img.resize((int(google_slide_width *  0.256), int(google_slide_height * 0.32)))
+				spectrogram = spectrogram.resize((int(google_slide_width * 0.75), int(google_slide_height)))
+				#cover = Image.open('hold.png')
+				#cov = cover.resize((int(google_slide_width * 0.25), int(google_slide_height * 0.25)))
 
 				# Create blank canvas
 				canvas = Image.new('RGB', (google_slide_width, google_slide_height), 'white')
 
 				# Paste images onto canvas
 				
-				canvas.paste(plane, (google_slide_width - plane.width, 0))
-				canvas.paste(spec, (google_slide_width - spec.width+ int(spec.width/12), google_slide_height - spec.height))
-				canvas.paste(zoom, (google_slide_width - zoom.width + int(zoom.width/5.5), plane.height))
-				canvas.paste(spectrogram, (-40, 0))
-				canvas.paste(maps, (google_slide_width - int(maps.width*2.1), plane.height))
+				#canvas.paste(plane, (google_slide_width - plane.width, 0))
+				#canvas.paste(maps, (google_slide_width  - 520, plane.height))
+				#canvas.paste(spec, (google_slide_width - spec.width + int(spec.width/12), google_slide_height - spec.height))
+				#canvas.paste(zoom, (google_slide_width  - zoom.width + int(zoom.width/5.5), plane.height))
+				#canvas.paste(spectrogram, (-40, 0))
+				#width, height = zoom.size
+ 				
+				canvas.paste(maps, (google_slide_width - int(maps.width*1.36), plane.height))
 				
-
+				canvas.paste(spec, (google_slide_width - spec.width+ int(spec.width/12), google_slide_height - spec.height))
+				canvas.paste(zoom, (google_slide_width - zoom.width + int(zoom.width/4), plane.height))
+				canvas.paste(plane, (google_slide_width - plane.width, 0))
+				canvas.paste(spectrogram, (-40, 0))
+				#canvas.paste(maps, (google_slide_width - int(maps.width*1.5), plane.height))
+				
 				# Draw text from files
 				draw = ImageDraw.Draw(canvas)
 				font = ImageFont.truetype('input/Arialn.ttf', 18) #load_default()  
@@ -125,16 +138,21 @@ for i in range(len(day)):
 						text1 = 'Speed: '+str(round(speed[l]*0.514444,2))+'m/s\nAltitude: '+str(round(alt[l]*0.3048,2))+'m' 
 					else:
 						continue
-				draw.text((google_slide_width - plane.width, 0), text1, fill='black', font=font)
+				bbox = draw.textbbox((google_slide_width - plane.width, 0), text2, font=font)
+				draw.rectangle(bbox, fill="white")
+				draw.text((google_slide_width - plane.width, 0), text2, fill='black', font=font)
 				
-				draw.text((google_slide_width - 340, 400), text2, fill='black', font=font)
+				draw.text((google_slide_width - 220, 430), text1, fill='black', font=font)
 
 				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/full_image2/'
 				make_base_dir(BASE_DIR)
-				name= BASE_DIR + '2019'+str(month[i])+str(day[i])+'_'+flight+'_'+time+'_'+station+'_'+pla+'_'+descrip+'_'+engine+coun'.png'
+				name= BASE_DIR + '2019'+str(month[i])+str(day[i])+'_'+(flight)+'_'+time+'_'+str(station)+'_'+str(pla)+'_'+str(descrip[h])+'_'+str(engine[h])+str(coun[h])+'.png'
 
 				# Save combined image
 				canvas.save(name)
+				#except:
+					
+				#continue
 
 '''
 try:
