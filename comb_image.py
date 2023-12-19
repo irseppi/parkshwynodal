@@ -64,9 +64,11 @@ for i in range(len(day)):
 				for h in range(len(des)):
 					if pla == des[h]:
 						text2 = str(man[h]) + ', '+ str(model[h]) + ' (' + str(descrip[h]) + ')'
+						text3 = 'Flight Designator: '+str(des[h]) + '\nEngine: '+str(engine[h])+'\nEngine Count: ' +str(coun[h])+'\nWake Turbulence Category: '+str(coun[h])
 						break
 					else:
 						text2 = 'Callsign: ' + str(callsign[l])
+						text3 = 'Flight Designator: Unknown\nEngine: Unknown\nEngine Count: Unknown\nWake Turbulence Category: Unknown'
 					print(text2) 
 				
 			else:
@@ -96,30 +98,20 @@ for i in range(len(day)):
 					plane_img = Image.open('hold.png')
 					#search text files for plane
 				scale = 70/1280
-				plane = plane_img.resize((int(google_slide_width * 0.27), int(google_slide_height * 0.27)))
-				spec = spec_img.resize((int(google_slide_width * 0.31), int(google_slide_height * 0.36)))  
-				zoom = zoom_map.resize((int(google_slide_width * 0.236), int(google_slide_height * 0.32)))
-				maps = map_img.resize((int(google_slide_width *  0.256), int(google_slide_height * 0.32)))
+				plane = plane_img.resize((int(google_slide_width * 0.26), int(google_slide_height * 0.26)))
+				spec = spec_img.resize((int(google_slide_width * 0.31), int(google_slide_height * 0.35)))  
+				zoom = zoom_map.resize((int(google_slide_width * 0.236), int(google_slide_height * 0.31)))
+				maps = map_img.resize((int(google_slide_width *  0.256), int(google_slide_height * 0.31)))
 				spectrogram = spectrogram.resize((int(google_slide_width * 0.75), int(google_slide_height)))
-				#cover = Image.open('hold.png')
-				#cov = cover.resize((int(google_slide_width * 0.25), int(google_slide_height * 0.25)))
 
 				# Create blank canvas
 				canvas = Image.new('RGB', (google_slide_width, google_slide_height), 'white')
 
 				# Paste images onto canvas
-				
-				#canvas.paste(plane, (google_slide_width - plane.width, 0))
-				#canvas.paste(maps, (google_slide_width  - 520, plane.height))
-				#canvas.paste(spec, (google_slide_width - spec.width + int(spec.width/12), google_slide_height - spec.height))
-				#canvas.paste(zoom, (google_slide_width  - zoom.width + int(zoom.width/5.5), plane.height))
-				#canvas.paste(spectrogram, (-40, 0))
-				#width, height = zoom.size
- 				
-				canvas.paste(maps, (google_slide_width - int(maps.width*1.36), plane.height))
+				canvas.paste(maps, (google_slide_width - int(maps.width*1.36), int(plane.height*0.9)))
 				
 				canvas.paste(spec, (google_slide_width - spec.width+ int(spec.width/12), google_slide_height - spec.height))
-				canvas.paste(zoom, (google_slide_width - zoom.width + int(zoom.width/4), plane.height))
+				canvas.paste(zoom, (google_slide_width - zoom.width + int(zoom.width/4), int(plane.height*0.9)))
 				canvas.paste(plane, (google_slide_width - plane.width, 0))
 				canvas.paste(spectrogram, (-40, 0))
 				#canvas.paste(maps, (google_slide_width - int(maps.width*1.5), plane.height))
@@ -135,14 +127,16 @@ for i in range(len(day)):
 				
 				for l in range(len(t)):
 					if int(time) == int(t[l]):
-						text1 = 'Speed: '+str(round(speed[l]*0.514444,2))+'m/s\nAltitude: '+str(round(alt[l]*0.3048,2))+'m' 
+						text1 = 'Speed: '+str(round(speed[l]*0.514444,2))+'m/s\n           : '+str(round(speed[l]*1.15078,2))+'mph\nAltitude: '+str(round(alt[l]*0.3048,2))+'m\n            : '+str(round(alt[l],2)) +'ft'
 					else:
 						continue
 				bbox = draw.textbbox((google_slide_width - plane.width, 0), text2, font=font)
 				draw.rectangle(bbox, fill="white")
 				draw.text((google_slide_width - plane.width, 0), text2, fill='black', font=font)
 				
-				draw.text((google_slide_width - 220, 430), text1, fill='black', font=font)
+				draw.text((google_slide_width - 130, 390), text1,fill='black', font=font)
+				
+				draw.text((google_slide_width - 350, 390), text3, fill='black', font=font)
 
 				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/full_image2/'
 				make_base_dir(BASE_DIR)
