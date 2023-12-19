@@ -36,7 +36,7 @@ for line in text.readlines():
 	station = str(val[5])
 	tim = 120
 	flight_num = str(val[1])
-	if ht.month == 2 and ht.day >= 12 or ht.month == 3:
+	if ht.month == 2 and ht.day >= 11 or ht.month == 3:
 		day_of_year = str((ht - datetime.datetime(2019, 1, 1)).days + 1)
 	
 		if val[5].isdigit() == False:
@@ -95,7 +95,7 @@ for line in text.readlines():
 			g = fs*240
 			# Compute spectrogram
 			frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9) #, window=windows.boxcar(fs,sym=True))
-
+			'''
 			fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
 
 			ax1.plot(t, data, 'k', linewidth=0.5)
@@ -107,11 +107,11 @@ for line in text.readlines():
 			# Plot spectrogram
 			cax = ax2.pcolormesh(times, frequencies, 10 * np.log10(Sxx), shading='gouraud', cmap='hsv', vmin=vmin, vmax=vmax)
 			ax2.set_xlabel('Time [s]')
-
+			'''
 			# Find the center of the trace
 			center_index = len(data) // 2
 			center_time = t[center_index]
-
+			'''
 			ax2.axvline(x=center_time, c = 'r', ls = '--')
 			ax2.set_ylabel('Frequency (Hz)')
 			ax2.margins(x=0)
@@ -124,7 +124,7 @@ for line in text.readlines():
 			make_base_dir(BASE_DIR)
 			fig.savefig('/scratch/irseppi/nodal_data/plane_info/plane_spec2/2019-0'+str(month1)+'-'+str(day1)+'/'+flight_num + '/'+station+'/'+str(time)+'_'+flight_num+'.png')
 			plt.close()
-
+			'''
 			plt.figure()
 			# Compute and plot amplitude spectrum for the center of the trace
 			window = np.hanning(fs)  # one second window
@@ -136,10 +136,12 @@ for line in text.readlines():
 			plt.xlabel('Frequency [Hz]')
 			plt.ylabel('Amplitude [m/s]')
 			plt.xlim(2,int(fs/2))
+			
 			xmask = np.logical_and(freqs > .2, freqs < int(fs/2))
 			plt.ylim(0,np.max(fft[xmask])*1.1)
+			plt.grid()
 			#plt.show()
-
+			print(station, flight_num)
 			BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/spec2/'+str(val[0])+'/'+str(val[1])+'/'+str(val[5])+'/'
 			make_base_dir(BASE_DIR)
 			plt.savefig('/scratch/irseppi/nodal_data/plane_info/spec2/'+str(val[0])+'/'+str(val[1])+'/'+str(val[5])+'/'+str(val[5])+'_' + str(val[2]) + '.png')
