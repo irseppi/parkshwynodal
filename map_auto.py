@@ -46,42 +46,25 @@ for line in sta_f.readlines():
 		if str(time[l]) == str(val[2]):
 			for t  in range(len(sta)):
 				if sta[t] == station:
-	
 					# Plot the main figure
 					fig, ax = plt.subplots()
-					plt.gca().set_aspect(f)
-					ax.plot(X, Y, c='k')
-
-					# Define the position of the zoomed portion
-					sub_axes = plt.axes([1.1, 0.5, 0.4, 0.4])
-
-					# Plot the zoomed portion
-					sub_axes.plot(X_detail, Y_detail, c='k')
-
-					# Plot the main figure
-					fig, ax = plt.subplots()
-					ax.plot(X, Y, c='k')
-
-					# Define the position of the zoomed portion
-					sub_axes = plt.axes([1.1, 0.5, 0.4, 0.4])
-
-					# Plot the zoomed portion
-					sub_axes.plot(X_detail, Y_detail, c='k')
-
-					plt.show()
-
-					fig = plt.figure()#figsize=(24,30))
 					plt.gca().set_aspect(f)
 					
-					plt.scatter(seismo_longitudes, seismo_latitudes, c='red', s = 3, label='seismometers')
-					plt.plot(flight_longitudes, flight_latitudes, '-o', c='c', lw=1, ms = 1, label='flight path')
+					ax.scatter(seismo_longitudes, seismo_latitudes, c='red', s = 3, label='seismometers')
+					ax.plot(flight_longitudes, flight_latitudes, '-o', c='c', lw=1, ms = 1, label='flight path')
 					
 					# Set labels and title
-					plt.xlim(min_lon, max_lon)
-					plt.ylim(min_lat, max_lat)
-					plt.yticks(fontsize = 13)
-					plt.xticks(fontsize = 13)
+					ax.set_xlim(min_lon, max_lon)
+					ax.set_ylim(min_lat, max_lat)
+					ax.set_yticks(fontsize = 13)
+					ax.set_xticks(fontsize = 13)
 
+					# Define the position of the zoomed portion
+					sub_axes = plt.axes([1.1, 0.5, 0.4, 0.4])
+
+					# Plot the zoomed portion
+					sub_axes.scatter(seismo_longitudes, seismo_latitudes, c='red')
+					sub_axes.scatter(flight_longitudes, flight_latitudes, c='c')
 
 					#Added a box to highligh zoomed in location
 					y =[flight_latitudes[l],  seismo_latitudes[t]]
@@ -95,40 +78,28 @@ for line in sta_f.readlines():
 					maxla = yy + 0.03
 
 					plt.gca().add_patch(Rectangle((minl, minla), 0.1, 0.06, ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5))
-					plt.close()
 					print(sta[t], flight)
 
-					y =[flight_latitudes[l],  seismo_latitudes[line]]
-					x = [flight_longitudes[l], seismo_longitudes[line]]
-					yy = sum(y)/len(y)
-					xx = sum(x)/len(x)
- 
-					fig, ax = plt.subplots()
-					plt.gca().set_aspect(f)
-					
-					plt.scatter(seismo_longitudes, seismo_latitudes, c='red')
-					
-					plt.scatter(flight_longitudes, flight_latitudes, c='c')
 
 					#Label station
-					plt.text(seismo_longitudes[line], seismo_latitudes[line], sta[line], fontsize=9, fontweight='bold')
-					plt.scatter(seismo_longitudes[line], seismo_latitudes[line], c='pink')
+					sub_axes.text(seismo_longitudes[t], seismo_latitudes[t], sta[t], fontsize=9, fontweight='bold')
+					sub_axes.scatter(seismo_longitudes[t], seismo_latitudes[t], c='pink')
 					
 					ht = datetime.datetime.utcfromtimestamp(time[l])
 
 					#Label timestamp 
-					plt.text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=9, fontweight='bold')
-					plt.scatter(flight_longitudes[l], flight_latitudes[l], c='orange')
+					sub_axes.text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=9, fontweight='bold')
+					sub_axes.scatter(flight_longitudes[l], flight_latitudes[l], c='orange')
 					
 					
-					plt.plot(x,y, '--', c='orange')
-					
-					plt.text(xx,yy, str(round(dist, 2))+'km', fontsize=8, fontweight='bold')
+					sub_axes.plot(x,y, '--', c='orange')
+					sub_axes.text(xx,yy, str(round(dist, 2))+'km', fontsize=8, fontweight='bold')
 					
 					# Set labels and title
-					plt.xlim(minl, maxl)
-					plt.ylim(minla, maxla)
-					ax.tick_params(axis='both', which='major', labelsize=9)
+					sub_axes.set_xlim(minl, maxl)
+					sub_axes.set_ylim(minla, maxla)
+					sub_axes.tick_params(axis='both', which='major', labelsize=9)
+					plt.show()
 
 					#Save
 					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/pmap_z2/' + date + '/'+flight+'/'+station+'/'
@@ -141,3 +112,4 @@ for line in sta_f.readlines():
 				
 			else:
 				continue
+
