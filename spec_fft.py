@@ -95,7 +95,7 @@ for line in text.readlines():
 			g = fs*240
 			# Compute spectrogram
 			frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9) #, window=windows.boxcar(fs,sym=True))
-			'''
+			
 			fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
 
 			ax1.plot(t, data, 'k', linewidth=0.5)
@@ -107,11 +107,11 @@ for line in text.readlines():
 			# Plot spectrogram
 			cax = ax2.pcolormesh(times, frequencies, 10 * np.log10(Sxx), shading='gouraud', cmap='hsv', vmin=vmin, vmax=vmax)
 			ax2.set_xlabel('Time [s]')
-			'''
+			
 			# Find the center of the trace
 			center_index = len(data) // 2
 			center_time = t[center_index]
-			'''
+			
 			ax2.axvline(x=center_time, c = 'r', ls = '--')
 			ax2.set_ylabel('Frequency (Hz)')
 			ax2.margins(x=0)
@@ -119,12 +119,14 @@ for line in text.readlines():
 			
 			plt.colorbar(mappable=cax, cax=ax3)
 			ax3.set_ylabel('Relative Amplitude (dB)')
-			#plt.show()
+			plt.show()
+			plt.close()
+			
 			BASE_DIR = "/scratch/irseppi/nodal_data/plane_info/plane_spec2/2019-0"+str(month1)+"-"+str(day1)+"/"+flight_num+ '/'+station
 			make_base_dir(BASE_DIR)
 			fig.savefig('/scratch/irseppi/nodal_data/plane_info/plane_spec2/2019-0'+str(month1)+'-'+str(day1)+'/'+flight_num + '/'+station+'/'+str(time)+'_'+flight_num+'.png')
 			plt.close()
-			'''
+			
 			plt.figure()
 			# Compute and plot amplitude spectrum for the center of the trace
 			window = np.hanning(fs)  # one second window
@@ -146,5 +148,25 @@ for line in text.readlines():
 			make_base_dir(BASE_DIR)
 			plt.savefig('/scratch/irseppi/nodal_data/plane_info/spec2/'+str(val[0])+'/'+str(val[1])+'/'+str(val[5])+'/'+str(val[5])+'_' + str(val[2]) + '.png')
 			plt.close()
+			'''
+			plt.figure()
+			# Compute spectrogram
+			frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9)
+
+			# Find the index of the middle frequency
+			middle_index = len(times) // 2
+
+			# Extract the middle line of the spectrogram
+			middle_line = Sxx[:, middle_index]
+
+			# Plot the middle line of the spectrogram
+			plt.figure(figsize=(10, 6))
+			plt.plot(times, 10 * np.log10(middle_line))
+			plt.xlabel('Time [s]')
+			plt.ylabel('Amplitude [dB]')
+			plt.title('Spectra vs Amplitude for the Middle Line of the Spectrogram')
+			plt.show()
+			plt.close()
+			'''
 		except:
 			continue
