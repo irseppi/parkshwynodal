@@ -86,14 +86,14 @@ for line in sta_f.readlines():
                     axs[1].plot(x,y, '--', c='orange')
                     # Draw the zoomed in map on the second subplot
                     axs[1].scatter(seismo_longitudes, seismo_latitudes, c='red')
-                    axs[1].scatter(flight_longitudes, flight_latitudes, c='c')
+                    axs[1].plot(flight_longitudes, flight_latitudes, c='c',linestyle ='dotted')
                     axs[1].set_xlim(minl, maxl)
                     axs[1].set_ylim(minla, maxla)
                     axs[1].text(seismo_longitudes[t], seismo_latitudes[t], sta[t], fontsize=9, fontweight='bold')
                     axs[1].tick_params(axis='both', which='major', labelsize=13)
                     axs[1].text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=9, fontweight='bold')
-                    axs[1].scatter(flight_longitudes[l], flight_latitudes[l], c='c')
-
+                    axs[1].scatter(flight_longitudes[l], flight_latitudes[l], c='lawngreen')
+                    axs[1].scatter(seismo_longitudes[t], seismo_latitudes[t], c='fuchsia')
 
                     
 
@@ -104,7 +104,7 @@ for line in sta_f.readlines():
                     fig.add_artist(con)
                     con = mpatch.ConnectionPatch(xyA=(minl, maxla), xyB=(maxl, maxla), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
                     fig.add_artist(con)
-
+                  
                     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all/' + date + '/'+flight+'/'+station+'/'
                     make_base_dir(BASE_DIR)
                     plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all/'+ date + '/'+flight+'/'+station+'/zmap_'+flight+'_' + str(time[l]) + '.png')
