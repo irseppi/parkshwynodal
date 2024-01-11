@@ -71,6 +71,7 @@ for line in sta_f.readlines():
 					maxl = xx + 0.05
 					minla = yy - 0.03
 					maxla = yy + 0.03
+
 					zoom_box = Rectangle((minl, minla), 0.1, 0.06, ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
 					plt.gca().add_patch(zoom_box)
 					#plt.gca().add_patch(Rectangle((minl, minla), 0.1, 0.06, ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5))
