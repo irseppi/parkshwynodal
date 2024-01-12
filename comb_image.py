@@ -60,6 +60,7 @@ for i in range(len(day)):
 		f = os.path.join(spec_dir, flight)
 		for l in range(len(flight_id)):
 			if str(flight_id[l]) == str(flight):
+				#search text files for plane
 				pla = equipment[l]
 				for h in range(len(des)):
 					if pla == des[h]:
@@ -79,11 +80,10 @@ for i in range(len(day)):
 				time = image[0:10]
 				im = os.path.join(sta, image)
 				
-				#try:
+				
 				# Open images
 				spectrogram = Image.open(im)
-				map_img = Image.open('/scratch/irseppi/nodal_data/plane_info/pmap2/2019'+month[i]+day[i]+'/'+flight+'/map_'+station+'_'+time+'.png')
-				zoom_map = Image.open('/scratch/irseppi/nodal_data/plane_info/pmap_zoom2/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/zmap_'+flight+'_' + str(time) + '.png')
+				map_img = Image.open('/scratch/irseppi/nodal_data/plane_info/map_all/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/map_'+flight+'_'+time+'.png')
 				spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/spec2/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+station+'_' + str(time) + '.png')
 
 				# Resize images
@@ -96,25 +96,21 @@ for i in range(len(day)):
 					
 				else:
 					plane_img = Image.open('hold.png')
-					#search text files for plane
+					
 				scale = 70/1280
 				plane = plane_img.resize((int(google_slide_width * 0.26), int(google_slide_height * 0.26)))
 				spec = spec_img.resize((int(google_slide_width * 0.31), int(google_slide_height * 0.35)))  
-				zoom = zoom_map.resize((int(google_slide_width * 0.236), int(google_slide_height * 0.31)))
-				maps = map_img.resize((int(google_slide_width *  0.256), int(google_slide_height * 0.31)))
+				maps = map_img.resize((int(google_slide_width *  0.31), int(google_slide_height * 0.27)))
 				spectrogram = spectrogram.resize((int(google_slide_width * 0.75), int(google_slide_height)))
 
 				# Create blank canvas
 				canvas = Image.new('RGB', (google_slide_width, google_slide_height), 'white')
 
 				# Paste images onto canvas
-				canvas.paste(maps, (google_slide_width - int(maps.width*1.36), int(plane.height*0.9)))
-				
 				canvas.paste(spec, (google_slide_width - spec.width+ int(spec.width/12), google_slide_height - spec.height))
-				canvas.paste(zoom, (google_slide_width - zoom.width + int(zoom.width/4), int(plane.height*0.9)))
 				canvas.paste(plane, (google_slide_width - plane.width, 0))
 				canvas.paste(spectrogram, (-40, 0))
-				#canvas.paste(maps, (google_slide_width - int(maps.width*1.5), plane.height))
+				canvas.paste(maps, (google_slide_width - int(maps.width), int(plane.height)+int(plane.height*0.05)))
 				
 				# Draw text from files
 				draw = ImageDraw.Draw(canvas)
@@ -137,35 +133,14 @@ for i in range(len(day)):
 				draw.text((google_slide_width - 130, 390), text1,fill='black', font=font)
 				
 				draw.text((google_slide_width - 350, 390), text3, fill='black', font=font)
-
-				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/full_image2/'
+				
+				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/fig/'
 				make_base_dir(BASE_DIR)
 				name= BASE_DIR + '2019'+str(month[i])+str(day[i])+'_'+(flight)+'_'+time+'_'+str(station)+'_'+str(pla)+'_'+str(descrip[h])+'_'+str(engine[h])+str(coun[h])+'.png'
 
 				# Save combined image
 				canvas.save(name)
-				#except:
-					
-				#continue
 
-'''
-try:
-	map_img = 
-except:
-	map_image = Image.open('hold.png')
-
-try:
-	zoom_map = 
-	
-except:
-	zoom_map =
-try:
-	spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/spec/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+station+'_' + str(time) + '.png')
-except:
-	spec_img = Image.open('hold.png')
-
-spectrogram = spectrogram.resize((int(google_slide_width * 0.75), int(google_slide_height)))
-'''
 						
 						
 
