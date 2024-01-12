@@ -121,6 +121,7 @@ for line in text.readlines():
 			plt.colorbar(mappable=cax, cax=ax3)
 
 			ax3.set_ylabel('Relative Amplitude (dB)')
+
 			BASE_DIR = "/scratch/irseppi/nodal_data/plane_info/plane_spec/2019-0"+str(month1)+"-"+str(day1)+"/"+flight_num+ '/'+station
 			make_base_dir(BASE_DIR)
 			fig.savefig('/scratch/irseppi/nodal_data/plane_info/plane_spec/2019-0'+str(month1)+'-'+str(day1)+'/'+flight_num + '/'+station+'/'+str(time)+'_'+flight_num+'.png')
@@ -144,13 +145,12 @@ for line in text.readlines():
 			plt.xlabel('Freq [Hz]')
 			plt.ylabel('Amplitude [dB]')
 			plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
-			plt.close()
 
 			BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/spec/'+str(val[0])+'/'+str(val[1])+'/'+str(val[5])+'/'
 			make_base_dir(BASE_DIR)
 			plt.savefig('/scratch/irseppi/nodal_data/plane_info/spec/'+str(val[0])+'/'+str(val[1])+'/'+str(val[5])+'/'+str(val[5])+'_' + str(val[2]) + '.png')
 			plt.close()
-
+			print(station, flight_num)
 		except:
 			continue	
 
