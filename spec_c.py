@@ -111,7 +111,7 @@ for n in range(0,5):
 
 	# Extract the middle line of the spectrogram
 	middle_column = Sxx[:, middle_index]
-	peaks, _ = signal.find_peaks(middle_column, prominence=10, distance = 10) #, distance=10)
+	peaks, _ = signal.find_peaks(10 * np.log10(middle_column), prominence=10, distance = 10) #, distance=10)
 	np.diff(peaks)
 	#middle_detrend = spline(middle_column, order=5, dspline=500)  #signal.detrend(middle_column) #, bp=len(lags)//2)
 	#Determining Autocorrelation & Lag values
