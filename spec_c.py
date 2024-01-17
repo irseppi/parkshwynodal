@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import spectrogram
+from scipy import signal
 import obspy
 import math
 import matplotlib.pyplot as plt
@@ -12,6 +13,7 @@ from obspy.core import UTCDateTime
 import datetime
 from numpy.fft import fft, ifft
 from pathlib import Path
+from obspy.signal.detrend import polynomial, spline
 
 def make_base_dir(base_dir):
 	base_dir = Path(base_dir)
@@ -21,13 +23,17 @@ def make_base_dir(base_dir):
 			current_path = current_path/parent
 			if not current_path.exists():
 				current_path.mkdir()
+def dft_highpass(x, dropcomponent):
+    fx = np.fft.rfft(x)
+    fx[:dropcomponent] = 0
+    return np.fft.irfft(fx)
 #20190225_530342801_1551066051_1022
 #20190214_528485724_1550172833_1272
 #20190214_528473229_1550168070_1173
 #20190214_528407493_1550165577_1283
 #20190213_528293430_1550089044_1004
 
-flight_num = [530342801,528485724,528473229,528407493,528293430]
+flight_num = [530342801,528485724,528473220,528407493,528293430]
 time = [1551066051,1550172833,1550168070,1550165577,1550089044]
 sta = [1022,1272,1173,1283,1004]
 day = [25,14,14,14,13]
@@ -53,8 +59,8 @@ for n in range(0,5):
 
 			
 			
-	n = "/scratch/naalexeev/NODAL/2019-02-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-02-"+day2+"T"+h_u+":00:00.000000Z."+station+".mseed"
-	tr = obspy.read(n)
+	p = "/scratch/naalexeev/NODAL/2019-02-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-02-"+day2+"T"+h_u+":00:00.000000Z."+station+".mseed"
+	tr = obspy.read(p)
 
 	tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - tim, tr[2].stats.starttime + (mins * 60) + secs + tim)
 	data = tr[2][0:-1]
@@ -93,20 +99,48 @@ for n in range(0,5):
 
 	plt.colorbar(mappable=cax, cax=ax3)
 	ax3.set_ylabel('Relative Amplitude (dB)')
-	BASE_DIR = "/scratch/irseppi/nodal_data/plane_info/5plane_spec/"
+	BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+ '/'+str(flight_num[n])+'/'+station+'/'
 	make_base_dir(BASE_DIR)
-	fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/201902'+str(day[n])+ '_'+station+'_'+str(time[n])+'_'+flight_num[n]+'.png')
+
+	fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+ '/'+str(flight_num[n])+'/'+station+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
 	plt.close()
+
+
 	# Find the index of the middle frequency
 	middle_index = len(times) // 2
 
 	# Extract the middle line of the spectrogram
 	middle_column = Sxx[:, middle_index]
+	peaks, _ = signal.find_peaks(middle_column, prominence=10, distance = 10) #, distance=10)
+	np.diff(peaks)
+	#middle_detrend = spline(middle_column, order=5, dspline=500)  #signal.detrend(middle_column) #, bp=len(lags)//2)
+	#Determining Autocorrelation & Lag values
+	#autocorr = signal.correlate(middle_column, middle_column, mode="same")
 
+	#Normalize the autocorr values (such that the hightest peak value is at 1)
+	#autocorr = (autocorr-min(autocorr))/(max(autocorr)-min(autocorr))
+
+	#lags = signal.correlation_lags(len(middle_column), len(middle_column), mode = "same")
+
+	#dautocorr = signal.detrend(autocorr, bp=len(lags)//2)
+
+	#b, a = signal.butter(1, 1e-3, 'high')
+	#fautocorr = signal.filtfilt(b, a, autocorr)
+
+	# detrend with DFT HPF
+	#rautocorr = dft_highpass(autocorr, len(autocorr-1) // 1000)
+
+	
+	# detrend w/ breakpoints
+	#dautocorr = signal.detrend(autocorr, bp=len(lags)//2)
 	# Plot the middle line of the spectrogram
-	plt.figure(figsize=(10,6))
+	fig = plt.figure(figsize=(10,6))
 	plt.grid()
-	plt.plot(frequencies, 10 * np.log10(middle_column))
+	#plt.plot(frequencies, 10*np.log10(middle_detrend))
+	plt.plot(frequencies, 10 * np.log10(middle_column), c='c')
+	plt.plot(peaks, 10 * np.log10(middle_column[peaks]), "x")
+	for g in range(len(peaks)):
+		plt.text(peaks[g], 10 * np.log10(middle_column[peaks[g]]), peaks[g])
 	plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
 
 	plt.xlim(2,int(fs/2))
@@ -114,8 +148,9 @@ for n in range(0,5):
 	plt.xlabel('Freq [Hz]')
 	plt.ylabel('Amplitude [dB]')
 	plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
-	BASE_DIR = "/scratch/irseppi/nodal_data/plane_info/5spec/"
+
+	BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5spec/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+station+'/'
 	make_base_dir(BASE_DIR)
-	fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec/201902'+str(day[n])+'_'+station+'-'+str(time[n])+'_'+flight_num[n]+'.png')
+	fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+station+'/'+station+'_'+str(time[n])+'.png')
 	plt.close()
 

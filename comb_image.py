@@ -23,17 +23,18 @@ def make_base_dir(base_dir):
 month = []
 day = []
 
-for d in range(11,29):
+for d in range(13,15):
 	day.append(str(d))
 	month.append('02')
+day.append(str(25))
+month.append('02')
+#for d in range(1, 10):
+#day.append('0' + str(d))
+#month.append('03')
 
-for d in range(1, 10):
-	day.append('0' + str(d))
-	month.append('03')
-
-for d in range(10, 27):
-	day.append(str(d))
-	month.append('03')
+#for d in range(10, 27):
+#day.append(str(d))
+#month.append('03')
 
 text = open('input/all_station_crossing_db.txt', 'r')
 
@@ -49,7 +50,8 @@ coun = plane_data['Engine Count']
 turb_cat = plane_data['Wake Turbulence Category']
 							
 for i in range(len(day)):
-	spec_dir = '/scratch/irseppi/nodal_data/plane_info/plane_spec2/2019-'+month[i]+'-'+day[i]+'/'
+	spec_dir = '/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-'+month[i]+'-'+day[i]
+	
 	flight_data = pd.read_csv('/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+'_flights.csv', sep=",")
 	flight_id = flight_data['flight_id']
 	equipment = flight_data['equip']
@@ -84,7 +86,7 @@ for i in range(len(day)):
 				# Open images
 				spectrogram = Image.open(im)
 				map_img = Image.open('/scratch/irseppi/nodal_data/plane_info/map_all/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/map_'+flight+'_'+time+'.png')
-				spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/spec2/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+station+'_' + str(time) + '.png')
+				spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/5spec/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+station+'_' + str(time) + '.png')
 
 				# Resize images
 				google_slide_width = 1280  # Width of a Google Slide in pixels
@@ -134,14 +136,14 @@ for i in range(len(day)):
 				
 				draw.text((google_slide_width - 350, 390), text3, fill='black', font=font)
 				
-				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/fig/'
+				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5fig/'
 				make_base_dir(BASE_DIR)
 				name= BASE_DIR + '2019'+str(month[i])+str(day[i])+'_'+(flight)+'_'+time+'_'+str(station)+'_'+str(pla)+'_'+str(descrip[h])+'_'+str(engine[h])+str(coun[h])+'.png'
 
 				# Save combined image
 				canvas.save(name)
 
-						
-						
+					
+					
 
-											
+										
