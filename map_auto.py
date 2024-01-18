@@ -49,7 +49,7 @@ for line in sta_f.readlines():
     flight_latitudes = flight_data['latitude']
     flight_longitudes = flight_data['longitude']
     time = flight_data['snapshot_id']
-
+    head = flight_data['heading']
     for l in range(len(time)):
         if str(time[l]) == str(val[2]):
             for t  in range(len(sta)):
@@ -80,6 +80,7 @@ for line in sta_f.readlines():
                     maxl = xx + 0.05
                     minla = yy - 0.03
                     maxla = yy + 0.03
+                    direction = np.deg2rad(head[l])
 
                     rect = Rectangle((minl, minla), 0.1, 0.06, ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
                     axs[0].add_patch(rect)
@@ -89,15 +90,15 @@ for line in sta_f.readlines():
                     axs[1].plot(flight_longitudes, flight_latitudes, c='c',linestyle ='dotted')
                     axs[1].set_xlim(minl, maxl)
                     axs[1].set_ylim(minla, maxla)
-                    axs[1].text(seismo_longitudes[t], seismo_latitudes[t], sta[t], fontsize=9, fontweight='bold')
+                    axs[1].text(seismo_longitudes[t], seismo_latitudes[t], sta[t], fontsize=11, fontweight='bold')
                     axs[1].tick_params(axis='both', which='major', labelsize=13)
-                    axs[1].text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=9, fontweight='bold')
+                    axs[1].text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=11, fontweight='bold')
                     axs[1].scatter(flight_longitudes[l], flight_latitudes[l], c='lawngreen')
                     axs[1].scatter(seismo_longitudes[t], seismo_latitudes[t], c='pink')
-
+                    axs[1].quiver(flight_longitudes[l], flight_latitudes[l], np.cos(direction), np.sin(direction), angles='xy', scale_units='xy', scale=1)
                     
 
-                    axs[1].text(xx,yy, str(round(dist, 2))+'km', fontsize=8, fontweight='bold')
+                    axs[1].text(xx,yy, str(round(dist, 2))+'km', fontsize=10, fontweight='bold')
 
                     # Draw dashed lines connecting the rectangle on the existing map to the zoomed-in map
                     con = mpatch.ConnectionPatch(xyA=(minl, minla), xyB=(maxl, minla), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
