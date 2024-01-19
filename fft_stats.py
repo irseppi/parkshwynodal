@@ -49,8 +49,7 @@ for line in text.readlines():
 				
 				tr[0].trim(tr[0].stats.starttime +(h *60 *60) + (mins * 60) + secs - tim, tr[0].stats.starttime +(h *60 *60) + (mins * 60) + secs + tim)
 				data = tr[0][0:-1]
-				fs = int(tr[0].stats.sampling_rate)
-				title    = f'{tr[0].stats.network}.{tr[0].stats.station}.{tr[0].stats.location}.{tr[0].stats.channel} − starting {tr[0].stats["starttime"]}'						
+				fs = int(tr[0].stats.sampling_rate)					
 				t                  = tr[0].times()
 			except:
 				continue
@@ -84,8 +83,7 @@ for line in text.readlines():
 			
 				tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - tim, tr[2].stats.starttime + (mins * 60) + secs + tim)
 				data = tr[2][0:-1]
-				fs = int(tr[2].stats.sampling_rate)
-				title    = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'						
+				fs = int(tr[2].stats.sampling_rate)				
 				t                  = tr[2].times()
 			except:
 				continue
@@ -99,7 +97,6 @@ for line in text.readlines():
 			# Compute spectrogram
 			frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9) 
 
-			
 			# Find the index of the middle frequency
 			middle_index = len(times) // 2
 
@@ -107,13 +104,13 @@ for line in text.readlines():
 			middle_column = Sxx[:, middle_index]
 			peaks, _ = signal.find_peaks(10 * np.log10(middle_column), prominence=10, distance = 10) 
 			np.diff(peaks)
-
+			print(peaks, len(peaks))
 			if os.path.exists(base_dir):
 				output = open(base_dir,'a')
 			else:
 				output = open(base_dir,'w')
-			
-			output.write(str(station)+','+str(peaks)+','+str(10 * np.log10(middle_column[peaks]))+'\n') #station,freq of peaks,relative amp
+			for g in range(0,len(peaks)):
+				output.write(str(station)+','+str(peaks[g])+','+str(10 * np.log10(middle_column[peaks[g]]))+'\n') #station,freq of peaks,relative amp
 			output.close()
 				
 		except:
