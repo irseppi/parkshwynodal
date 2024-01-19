@@ -107,19 +107,13 @@ for line in text.readlines():
 			middle_column = Sxx[:, middle_index]
 			peaks, _ = signal.find_peaks(10 * np.log10(middle_column), prominence=10, distance = 10) 
 			np.diff(peaks)
-			#info = np.array(peaks, properties)
-			print('len'+str(len(peaks)))
+
 			if os.path.exists(base_dir):
 				output = open(base_dir,'a')
 			else:
 				output = open(base_dir,'w')
-			 #+'\n')
-			#output.write(info)
-			#for g in range(len(peaks)):
-			#print(peaks[g])
-				#output.write(peaks[g]+'\n')
-			#print(str(info[0][g])) #+'\n') #, 10 * np.log10(middle_column[peaks[l]]))
-			#output.write('try\n') #peaks[l], 10 * np.log10(middle_column[peaks[l]])) #station+'\n'+'peak_freq:'+peaks+'\n'+'amp'+10 * np.log10(middle_column[peaks])+'\n')
+			
+			output.write(str(station)+','+str(peaks)+','+str(10 * np.log10(middle_column[peaks]))+'\n') #station,freq of peaks,relative amp
 			output.close()
 				
 		except:
