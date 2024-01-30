@@ -10,14 +10,14 @@ for files in os.listdir(dire):
 		f = os.path.join(dire, files)
 		data = pd.read_csv(f)
 		peaks = data.iloc[:, 1]
-		amp = data.iloc[:, 2]
-		pl = []
-		for a in range(len(amp)):
-			x = (amp[a]-np.min(amp))/(np.max(amp)-np.min(amp))
-			pl.append(x)
+		#amp = data.iloc[:, 2]
+		#pl = []
+		#for a in range(len(amp)):
+		#x = (amp[a]-np.min(amp))/(np.max(amp)-np.min(amp))
+		#pl.append(x)
 		# Plot the data as a bar graph
 		plt.figure()
-		plt.hist(peaks, edgecolor="red", bins=50, weights=pl)
+		plt.hist(peaks, edgecolor="red", bins=50) #, weights=pl)
 		plt.xlim(5,np.max(peaks+1))
 		plt.xticks(np.arange(5, np.max(peaks), step=5))
 		plt.xlabel('Freq [Hz]')

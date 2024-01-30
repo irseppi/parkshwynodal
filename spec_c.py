@@ -106,8 +106,32 @@ for n in range(0,5):
 					g = fs*240
 
 					# Compute spectrogram
-					frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9) 
-
+					frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9, detrend = 'constant') 
+					#nergy = Sxx**2
+					#energy_cumsum = np.cumsum(energy)
+					#MDF = frequencies[np.where(energy_cumsum>np.max(energy_cumsum)/2)][0][0]  
+					m = len(Sxx)
+					print(m)
+					a, b = Sxx.shape
+					ngrid = a*b
+					#Sxx.sort() 
+					
+					#median = np.median(Sxx)
+					MDF = np.zeros((a,b))
+					for row in range(len(Sxx)):
+						if row > 90:
+							median = np.median(Sxx[row]**2)
+						if row > 200: 
+							median = np.abs(np.median(Sxx[row]**4))
+						else:
+							median = np.median(np.sqrt(Sxx[row]))
+						for col in range(len(Sxx[row])):
+							if Sxx[row][col]>0:
+								Sxxn = Sxx[row][col] + median
+							else:
+								Sxxn = Sxx[row][col] - median
+							MDF[row, col] = Sxxn
+					#MDF = Sxx - median 
 					fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
 
 					ax1.plot(t, data, 'k', linewidth=0.5)
@@ -118,7 +142,7 @@ for n in range(0,5):
 					vmax = np.max(10 * np.log10(Sxx))
 
 					# Plot spectrogram
-					cax = ax2.pcolormesh(times, frequencies, 10 * np.log10(Sxx), shading='gouraud', cmap='hsv', vmin=vmin, vmax=vmax)
+					cax = ax2.pcolormesh(times, frequencies, 10 * np.log10(MDF), shading='gouraud', cmap='hsv')#, vmin=vmin, vmax=vmax)
 					ax2.set_xlabel('Time [s]')
 
 					# Find the center of the trace
@@ -143,35 +167,13 @@ for n in range(0,5):
 					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+ '/'+str(flight_num[n])+'/'+station[y]+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
 					plt.close()
 
-
 					# Find the index of the middle frequency
 					middle_index = len(times) // 2
 
 					# Extract the middle line of the spectrogram
-					middle_column = Sxx[:, middle_index]
+					middle_column = MDF[:, middle_index]
 					peaks, _ = signal.find_peaks(10 * np.log10(middle_column), prominence=10, distance = 10) #, distance=10)
 					np.diff(peaks)
-					#middle_detrend = spline(middle_column, order=5, dspline=500)  #signal.detrend(middle_column) #, bp=len(lags)//2)
-					#Determining Autocorrelation & Lag values
-					#autocorr = signal.correlate(middle_column, middle_column, mode="same")
-
-					#Normalize the autocorr values (such that the hightest peak value is at 1)
-					#autocorr = (autocorr-min(autocorr))/(max(autocorr)-min(autocorr))
-
-					#lags = signal.correlation_lags(len(middle_column), len(middle_column), mode = "same")
-
-					#dautocorr = signal.detrend(autocorr, bp=len(lags)//2)
-
-					#b, a = signal.butter(1, 1e-3, 'high')
-					#fautocorr = signal.filtfilt(b, a, autocorr)
-
-					# detrend with DFT HPF
-					#rautocorr = dft_highpass(autocorr, len(autocorr-1) // 1000)
-
-					
-					# detrend w/ breakpoints
-					#dautocorr = signal.detrend(autocorr, bp=len(lags)//2)
-					# Plot the middle line of the spectrogram
 					fig = plt.figure(figsize=(10,6))
 					plt.grid()
 					#plt.plot(frequencies, 10*np.log10(middle_detrend))
@@ -191,4 +193,4 @@ for n in range(0,5):
 					make_base_dir(BASE_DIR)
 					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'+station[y]+'_'+str(time[n])+'.png')
 					plt.close()
-
+					
