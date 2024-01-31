@@ -121,16 +121,16 @@ for n in range(0,5):
 					for row in range(len(Sxx)):
 						if row > 90:
 							median = np.median(Sxx[row]**2)
-						if row > 200: 
-							median = np.abs(np.median(Sxx[row]**4))
+						if row > 245: 
+							median = abs(np.median(Sxx[row]**3)*(10))
 						else:
-							median = np.median(np.sqrt(Sxx[row]))
+							median = np.median(np.sqrt(Sxx[row]))*(-10) #- np.median(Sxx[row]**2)
 						for col in range(len(Sxx[row])):
-							if Sxx[row][col]>0:
-								Sxxn = Sxx[row][col] + median
-							else:
-								Sxxn = Sxx[row][col] - median
-							MDF[row, col] = Sxxn
+							#if Sxx[row][col]>0:
+							Sxxn = np.abs(Sxx[row][col]) + median
+							#else:
+							#Sxxn = Sxx[row][col] - median
+							MDF[row, col] = np.abs(Sxxn)
 					#MDF = Sxx - median 
 					fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
 
@@ -183,7 +183,7 @@ for n in range(0,5):
 						plt.text(peaks[g], 10 * np.log10(middle_column[peaks[g]]), peaks[g])
 					plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
 
-					plt.xlim(2,int(fs/2))
+					plt.xlim(2+(0.02*int(fs/2)),int(fs/2)-(0.02*int(fs/2)))
 
 					plt.xlabel('Freq [Hz]')
 					plt.ylabel('Amplitude [dB]')
