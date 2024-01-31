@@ -64,7 +64,6 @@ for n in range(0,5):
 	mins = ht.minute
 	secs = ht.second
 	h = ht.hour
-	#station = str(sta[n])
 	tim = 120	
 	h_u = str(h+1)
 	if h < 23:			
@@ -89,7 +88,6 @@ for n in range(0,5):
 			alt = flight_data['altitude'][line]
 			for y in range(len(station)):
 				if str(station[y]) == str(sta[n]):
-					print(seismo_latitudes[y], flight_longitudes[line])
 					dist = distance(seismo_latitudes[y], seismo_longitudes[y], flight_latitudes[line], flight_longitudes[line])	
 						
 					p = "/scratch/naalexeev/NODAL/2019-02-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-02-"+day2+"T"+h_u+":00:00.000000Z."+station[y]+".mseed"
@@ -107,42 +105,31 @@ for n in range(0,5):
 
 					# Compute spectrogram
 					frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9, detrend = 'constant') 
-					#nergy = Sxx**2
-					#energy_cumsum = np.cumsum(energy)
-					#MDF = frequencies[np.where(energy_cumsum>np.max(energy_cumsum)/2)][0][0]  
-					m = len(Sxx)
-					print(m)
+			  
 					a, b = Sxx.shape
-					ngrid = a*b
-					#Sxx.sort() 
 					
-					#median = np.median(Sxx)
 					MDF = np.zeros((a,b))
 					for row in range(len(Sxx)):
-						if row > 90:
-							median = np.median(Sxx[row]**2)
-						if row > 245: 
-							median = abs(np.median(Sxx[row]**3)*(10))
-						else:
-							median = np.median(np.sqrt(Sxx[row]))*(-10) #- np.median(Sxx[row]**2)
-						for col in range(len(Sxx[row])):
-							#if Sxx[row][col]>0:
-							Sxxn = np.abs(Sxx[row][col]) + median
-							#else:
-							#Sxxn = Sxx[row][col] - median
-							MDF[row, col] = np.abs(Sxxn)
-					#MDF = Sxx - median 
+						m = len(Sxx[row])
+						p = sorted(Sxx[row])
+						median = p[int(m/2)]
+						for col in range(m):
+							MDF[row][col] = median
 					fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
-
+					
 					ax1.plot(t, data, 'k', linewidth=0.5)
 					ax1.set_title(title)
 					ax1.axvline(x=tim, c = 'r', ls = '--')
 					ax1.margins(x=0)
-					vmin = np.min(10 * np.log10(Sxx))
-					vmax = np.max(10 * np.log10(Sxx))
+					
+					spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
+					middle_index = len(times) // 2
+					middle_column = spec[:, middle_index]
+					vmin = np.min(middle_column)
+					vmax = np.max(middle_column)
 
 					# Plot spectrogram
-					cax = ax2.pcolormesh(times, frequencies, 10 * np.log10(MDF), shading='gouraud', cmap='hsv')#, vmin=vmin, vmax=vmax)
+					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
 					ax2.set_xlabel('Time [s]')
 
 					# Find the center of the trace
@@ -171,20 +158,21 @@ for n in range(0,5):
 					middle_index = len(times) // 2
 
 					# Extract the middle line of the spectrogram
-					middle_column = MDF[:, middle_index]
-					peaks, _ = signal.find_peaks(10 * np.log10(middle_column), prominence=10, distance = 10) #, distance=10)
+					middle_column = spec[:, middle_index]
+					
+					peaks, _ = signal.find_peaks(middle_column, prominence=20) #, distance = 10) 
 					np.diff(peaks)
 					fig = plt.figure(figsize=(10,6))
 					plt.grid()
-					#plt.plot(frequencies, 10*np.log10(middle_detrend))
-					plt.plot(frequencies, 10 * np.log10(middle_column), c='c')
-					plt.plot(peaks, 10 * np.log10(middle_column[peaks]), "x")
+					
+					plt.plot(frequencies, middle_column, c='c')
+					plt.plot(peaks, middle_column[peaks], "x")
 					for g in range(len(peaks)):
-						plt.text(peaks[g], 10 * np.log10(middle_column[peaks[g]]), peaks[g])
+						plt.text(peaks[g], middle_column[peaks[g]], peaks[g])
 					plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
 
-					plt.xlim(2+(0.02*int(fs/2)),int(fs/2)-(0.02*int(fs/2)))
-
+					plt.xlim(0,int(fs/2))
+					#plt.ylim(vmin,vmax)
 					plt.xlabel('Freq [Hz]')
 					plt.ylabel('Amplitude [dB]')
 					plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
