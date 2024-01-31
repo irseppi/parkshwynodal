@@ -123,6 +123,9 @@ for n in range(0,5):
 					ax1.margins(x=0)
 					
 					spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
+					#spec = 10 * np.log10(Sxx)
+					#spec = 10 * np.log10(MDF)
+
 					middle_index = len(times) // 2
 					middle_column = spec[:, middle_index]
 					vmin = np.min(middle_column)
