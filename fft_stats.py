@@ -96,13 +96,23 @@ for line in text.readlines():
 
 			# Compute spectrogram
 			frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9) 
-
+			a, b = Sxx.shape
+				
+			MDF = np.zeros((a,b))
+			for row in range(len(Sxx)):
+				m = len(Sxx[row])
+				p = sorted(Sxx[row])
+				median = p[int(m/2)]
+				for col in range(m):
+					MDF[row][col] = median
+			spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
+				
 			# Find the index of the middle frequency
 			middle_index = len(times) // 2
 
 			# Extract the middle line of the spectrogram
-			middle_column = Sxx[:, middle_index]
-			peaks, _ = signal.find_peaks(10 * np.log10(middle_column), prominence=10, distance = 10) 
+			middle_column = spec[:, middle_index]
+			peaks, _ = signal.find_peaks(middle_column, prominence=20) 
 			np.diff(peaks)
 			print(peaks, len(peaks))
 			if os.path.exists(base_dir):
