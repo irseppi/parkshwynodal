@@ -128,11 +128,11 @@ for n in range(0,5):
 
 					middle_index = len(times) // 2
 					middle_column = spec[:, middle_index]
-					vmin = np.min(middle_column)
-					vmax = np.max(middle_column)
+					vmin = np.min(middle_index)
+					vmax = np.max(middle_index)
 
 					# Plot spectrogram
-					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='hot_r', vmin=vmin, vmax=vmax)
 					ax2.set_xlabel('Time [s]')
 
 					# Find the center of the trace
