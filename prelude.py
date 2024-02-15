@@ -3,6 +3,7 @@ import fileinput
 from datetime import datetime
 import os
 import pandas as pd
+import numpy as np
 
 def make_base_dir(base_dir):
 	base_dir = Path(base_dir)
