@@ -4,8 +4,6 @@ from datetime import datetime
 import os
 import pandas as pd
 
-
-
 def make_base_dir(base_dir):
 	base_dir = Path(base_dir)
 	if not base_dir.exists():
@@ -40,109 +38,115 @@ def calc_time(t, l, vo):
 	c = 0.343
 	to=t+(sqrt(l**2+(vo*t)**2))/c
 	return to
- 
-def modify_file(input_file_name, output_file_name):
-    # Function to modify the content of the file
-    def modify_content(content):
+
+
+def modify_content(content):
+	# Function to modify the content of the file
         return content.upper()
 
-    # Read the input file
-    with open(input_file_name, 'r') as file:
-        content = file.read()
+def modify_file(input_file_name, output_file_name):
+	# Read the input file
+	with open(input_file_name, 'r') as file:
+		content = file.read()
 
-    # Modify the content
-    modified_content = modify_content(content)
+	# Modify the content
+	modified_content = modify_content(content)
 
-    # Write the modified content to the output file
-    with open(output_file_name, 'w') as file:
-        file.write(modified_content)
+	# Write the modified content to the output file
+	with open(output_file_name, 'w') as file:
+		file.write(modified_content)
 
-modify_file('input.txt', 'output.txt')
 def station_subset(filename,steps,outputname):
+	#steps = the amunt of steps you want to subset stations by (ie. every 4th station is in the subset)
+	#outputname = filename for ouput file
 	# Read the input file
 	with open(filename) as handle:
 		for lineno, line in enumerate(handle):
-		if lineno % step == 0:
-			print(line)
-	return 
+			if lineno % step == 0:
+				print(line) 
+
+def replace(filename,old_string,new_string):
+	# replace all occurrences of 'old_string' with 'new_string'
+	for i, line in enumerate(fileinput.input(filename, inplace=1)):
+		sys.stdout.write(line.replace (old_string, new_string))
+
+	#ex. - replace all occurrences of ''' with '"' 
+	#replace('filename.site'.' '', ' "'))
+	# or replace('#', '\n#')
+
+def round_replace(filename,col_2round, precision, m2km):
+	#if m2km = 0 - replace number with rounded number
+	#if m2km = 1 - replace number with rounded number converted to km
+	#precision =  digit precision to round to
+	#col_2round = column in text file to round
+	col_2round = int(col_2round)
+	precision = int(precision)
+
+	for i, line in enumerate(fileinput.input(filename, inplace=1)):
+		val = line.split()
+			
+		if m2km == False:
+			new_val = round(float(val[col_2round]), precision)
+			sys.stdout.write(line.replace(str(val[col_2round]), str(new_val)))
 
 
-# replace all occurrences of ''' with '"'
-for i, line in enumerate(fileinput.input('master_stations(_all).site', inplace=1)):
-	sys.stdout.write(line.replace ('-    -     0.0000       0.0000  1687896210.00000', '-    -         0.0000    0.0000  1687896210.00000')) 
+		if m2km == True:
+			new_val = round(float(val[col_2round])/1000,precision)
+			sys.stdout.write(line.replace(str(val[col_2round]), str(new_val)))
+
+def rename_file(flight_name):
+	os.getcwd()
+	collection = flight_name + '/'
+	for i, filename in enumerate(os.listdir(collection)):
+		for p, fil in enumerate(os.listdir(collection+filename)):
+			os.rename(collection + filename + '/' + fil, collection + filename +'_'+ fil)
+
+def extract_col(input_file,output_file,col,split_str):
+	# col = column to extract
+	# split_str = string that splits the text file into columns
+	i = int(col)
+	with open(input_file, 'r') as f_in, open(output_file, 'w') as f_out:
+	    for line in f_in:
+	       line=line.split(split_str)
+	       print(line[i])
+	       f_out.write(line[i]) 
 
 
-for i, line in enumerate(fileinput.input('master_stations(_all).site', inplace=1)):
-	val = line.split()
-	new_val = round(float(val[4]), 4) # 3 digit precision
-	sys.stdout.write(line.replace(str(val[4]), str(new_val)))
+def date_round(input_file,output_file):
+	#remove the milliseconds from time stamp
+	with open(input_file, 'r') as f_in, open(output_file, 'w') as f_out:
+		for line in f_in:
+			dt = datetime.strptime(line.strip(), '%Y-%m-%dT%H:%M:%S.%f')
+			rounded_dt = dt.replace(second=round(dt.second))
+			f_out.write(rounded_dt.strftime('%Y-%m-%d %H:%M:%S') + '\n') 
 
+def count_flight(input_file,col_f,output_file,designator): 
+	#col_f = colum flight equipment is in
+	#designator = aircraft type designator you are looling for
+	text = open(input_file, 'r')
+	f = open(output_file, 'w')
+	i = int(col_f)
 
+	flight_data = pd.read_csv('20231010_Aircraft_UA_Fairbanks.csv', sep=",")
+	eq = flight_data['TypeDesignator']
+	des = flight_data['Description']
 
-for i, line in enumerate(fileinput.input('master_stations(_all).site', inplace=1)):
-	val = line.split()
-	new_val = round(float(val[5])/1000,4)
-	sys.stdout.write(line.replace(str(val[5]), str(new_val)))
+	count = 0
+	for line in text.readlines():
+		val = line.split(',')
+		equip = val[i]
+		for l in range(len(eq)):
+			if str(eq[l]) == str(equip[0:4]) and str(des[l]) == designator:
+				count = count + 1
+				f.write(eq[l]+'\n')
+	f.write(count)
+	f.close()
+def print_eq():
+	#designator = aircraft type designator you are looling for
+	text = open('all_station_crossing_db.txt', 'r')
 
+	for line in text.readlines():
+		val = line.split(',')
+		equip = val[6]
+		print(equip)
 
-
-# replace all occurrences of ''' with '"'
-for i, line in enumerate(fileinput.input('filename.site', inplace=1)):
-    sys.stdout.write(line.replace(' '', ' "')) 
- 
-
-
-os.getcwd()
-collection = '533595343'
-for i, filename in enumerate(os.listdir(collection)):
-	for p, fil in enumerate(os.listdir('533595343/'+filename)):
-		
-		os.rename('533595343/' + filename + '/' + fil, '533595343/' + filename +'_'+ fil)
-
-input_file = 'color_codes.txt'
-output_file = 'colors.txt'
-
-with open(input_file, 'r') as f_in, open(output_file, 'w') as f_out:
-    for line in f_in:
-       line=line.split(' 	')
-       print(line[0])
-       f_out.write(line[0]) 
-
-for i, line in enumerate(fileinput.input('colors.txt', inplace=1)):
-    sys.stdout.write(line.replace('#', '\n#')) 
-
-
-
-input_file = 'dates1.txt'
-output_file = 'dates2.txt'
-
-with open(input_file, 'r') as f_in, open(output_file, 'w') as f_out:
-    for line in f_in:
-        dt = datetime.strptime(line.strip(), '%Y-%m-%dT%H:%M:%S.%f')
-        rounded_dt = dt.replace(second=round(dt.second))
-        f_out.write(rounded_dt.strftime('%Y-%m-%d %H:%M:%S') + '\n') 
-
-for i, line in enumerate(fileinput.input('dates1.txt', inplace=1)):
-        sys.stdout.write(line.replace(line[-, '')) 
-
-f = open('coun.txt', 'w')
-text = open('all_station_crossing_db.txt', 'r')
-flight_data = pd.read_csv('20231010_Aircraft _UA_Fairbanks.csv', sep=",")
-eq = flight_data['TypeDesignator']
-des = flight_data['Description']
-count = 0
-for line in text.readlines():
-	val = line.split(',')
-	equip = val[6]
-	for l in range(len(eq)):
-		if str(eq[l]) == str(equip[0:4]) and str(des[l]) == 'Helicopter':
-			count = count + 1
-			f.write(eq[l]+'\n')
-f.write(count)
-f.close()
-text = open('all_station_crossing_db.txt', 'r')
-
-for line in text.readlines():
-	val = line.split(',')
-	equip = val[6]
-	print(equip)
