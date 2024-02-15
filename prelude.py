@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
 def make_base_dir(base_dir):
 	base_dir = Path(base_dir)
@@ -37,7 +38,7 @@ def calc_time(t, l, vo):
 	#vo is the aircraft velocity
 	#c is the speed of aucostic wave propogation
 	c = 0.343
-	to=t+(sqrt(l**2+(vo*t)**2))/c
+	to=t+(np.sqrt(l**2+(vo*t)**2))/c
 	return to
 
 

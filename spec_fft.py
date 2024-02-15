@@ -12,15 +12,7 @@ from obspy.core import UTCDateTime
 import datetime
 from numpy.fft import fft, ifft
 from pathlib import Path
-
-def make_base_dir(base_dir):
-	base_dir = Path(base_dir)
-	if not base_dir.exists():
-		current_path = Path("/")
-		for parent in base_dir.parts:
-			current_path = current_path/parent
-			if not current_path.exists():
-				current_path.mkdir()
+from prelude import make_base_dir
 
 text = open('input/all_station_crossing_db.txt', 'r')
 
