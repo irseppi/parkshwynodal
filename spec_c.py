@@ -15,6 +15,40 @@ from pathlib import Path
 from math import radians, sin, cos, sqrt, atan2
 from prelude import make_base_dir
 
+import math
+from datetime import datetime
+from geopy.distance import geodesic
+
+def calculate_closest_approach(data_points, seismometer_location):
+    # Sort the data points by timestamp
+    data_points = data_points.sort_values(by='snapshot_id')
+
+    closest_points = data_points.iloc[(data_points[['latitude', 'longitude']].apply(lambda row: geodesic((row['latitude'], row['longitude']), seismometer_location).meters, axis=1)).nsmallest(2).index.tolist()]
+    line_vector = (closest_points[1]['latitude'] - closest_points[0]['latitude'], closest_points[1]['longitude'] - closest_points[0]['longitude'])
+    station_vector = (seismometer_location[0] - closest_points[0]['latitude'], seismometer_location[1] - closest_points[0]['longitude'])
+
+    # Calculate the projection of the station vector onto the line vector
+    dot_product = line_vector[0]*station_vector[0] + line_vector[1]*station_vector[1]
+    line_magnitude_squared = line_vector[0]**2 + line_vector[1]**2
+    projection_length_ratio = dot_product / line_magnitude_squared
+
+    # Calculate the coordinates of the closest point on the line to the station
+    closest_point_on_line = (closest_points[0]['latitude'] + projection_length_ratio * line_vector[0], closest_points[0]['longitude'] + projection_length_ratio * line_vector[1])
+
+    # Calculate the distance from the closest point on the line to the station
+    closest_distance = geodesic(closest_point_on_line, seismometer_location).meters
+
+    # Calculate the average speed and heading direction between the two closest points
+    time_difference = (closest_points[1]['snapshot_id'] - closest_points[0]['snapshot_id']).total_seconds()
+    distance = geodesic((closest_points[0]['latitude'], closest_points[0]['longitude']), (closest_points[1]['latitude'], closest_points[1]['longitude'])).meters
+    average_speed = distance / time_difference
+    heading_direction = (closest_points[1]['heading'] + closest_points[0]['heading']) / 2
+
+    # Calculate the time of the closest approach
+    time_of_closest_approach = closest_points[0]['timestamp'] + datetime.timedelta(seconds=time_difference*projection_length_ratio)
+
+    return closest_distance, average_speed, heading_direction, time_of_closest_approach
+
 def closest_encounter(flight_latitudes, flight_longitudes, timestamp, altitude, speed, head, seismo_latitudes, seismo_longitudes, stations):
     closest_distance = float('inf')
     closest_time = None
@@ -84,7 +118,7 @@ max_lat = 64.6
 flight_files=[]
 filenames = []
 
-for month in (2,4):
+for month in (3,4):
 	if month == 2:
 		month = '02'
 		for day in range(26,29):
@@ -102,7 +136,7 @@ for month in (2,4):
 					flight_files.append(f)
 	elif month == 3:
 		month = '03'
-		for day in range(1, 5):
+		for day in range(14, 15):
 			if day < 10:
 				day = '0' + str(day)
 				# assign directory
@@ -139,9 +173,12 @@ for i, flight_file in enumerate(flight_files):
 	speed = flight_data['speed']
 	alt = flight_data['altitude']
 	head = flight_data['heading']
-		
-	ctime, cdist, calt, cspeed, chead, cseislat, cseislon, csta = closest_encounter(flight_latitudes, flight_longitudes, timestamp, alt, speed, head, seismo_latitudes, seismo_longitudes, stations)	
-	tm = calculate_wave_arrival(ctime, cdist, calt, cspeed, chead, cseislat, cseislon)
+	seismometer_location = (seismo_latitudes,seismo_longitudes)
+
+	closest_time, closest_distance, closest_altitude, closest_speed, closest_head, closest_seislat, closest_seislon, closest_station = calculate_closest_approach(flight_data, seismometer_location)
+
+	#ctime, cdist, calt, cspeed, chead, cseislat, cseislon, csta = closest_encounter(flight_latitudes, flight_longitudes, timestamp, alt, speed, head, seismo_latitudes, seismo_longitudes, stations)	
+	tm = calculate_wave_arrival(closest_time, closest_distance, closest_altitude, closest_speed, closest_head, closest_seislat, closest_seislon)
 
 	ht = datetime.datetime.utcfromtimestamp(tm)
 	h = ht.hour
@@ -233,7 +270,13 @@ for i, flight_file in enumerate(flight_files):
 
 		vmin = 0
 		vmax = np.max(middle_column)
-
+		if np.min(middle_column) < 0:
+			vmax = np.abs(np.min(middle_column))+np.max(middle_column)
+			spec = np.abs(np.min(middle_column)) + np.array(spec)
+			middle_column = np.abs(np.min(middle_column)) + np.array(middle_column)
+		else:
+			vmin = 0
+			vmax = np.max(middle_column)
 		# Plot spectrogram
 		cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='hot_r', vmin=vmin, vmax=vmax) #'hsv' w/ vmin = np.min(middle_column) 
 		ax2.set_xlabel('Time [s]')
