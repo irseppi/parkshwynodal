@@ -15,7 +15,7 @@ from prelude import make_base_dir, dist_less, load_flights, distance
 
 def closest_encounter(flight_latitudes, flight_longitudes, timestamp, altitude, speed, head, seismo_latitudes, seismo_longitudes, stations):
 	closest_distance = float('inf')
-	closest_time = None
+	closest_time = 0
 	closest_altitude = None
 	closest_speed = None
 	closest_head = None
@@ -23,7 +23,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, timestamp, altitude, 
 	closest_lon = 0
 	closest_seislat = 0
 	closest_seislon = 0
-	closest_station = None
+	closest_station = 0
 	closest_distance2 = float('inf')
 	closest_time2 = None
 	closest_altitude2 = None
@@ -34,10 +34,9 @@ def closest_encounter(flight_latitudes, flight_longitudes, timestamp, altitude, 
 	for n in range(len(flight_latitudes)):
 		for t in range(len(seismo_latitudes)):
 			_, _, distance = gps2dist_azimuth(flight_latitudes[n], flight_longitudes[n], seismo_latitudes[t], seismo_longitudes[t])
-			#distance = distance / 1000  # convert distance to kilometers
 
-			if distance < closest_distance:
-				if seismo_latitudes[t] == closest_seislat and seismo_longitudes[t] == closest_seislon:
+			if float(distance) < float(closest_distance):
+				if int(stations[t]) == int(closest_station):
 					if closest_distance2 < closest_distance:
 						closest_distance2 = closest_distance
 						closest_time2 = closest_time
@@ -60,8 +59,8 @@ def closest_encounter(flight_latitudes, flight_longitudes, timestamp, altitude, 
 				closest_seislon = seismo_longitudes[t]
 				closest_station = stations[t]
 
-			elif seismo_latitudes[t] == closest_seislat and seismo_longitudes[t] == closest_seislon:
-				if distance < closest_distance2:
+			elif int(stations[t]) == int(closest_station):
+				if float(distance) < float(closest_distance2):
 					closes_distance2 = distance
 					closest_time2 = timestamp[n]
 					closest_altitude2 = altitude[n] * 0.3048
@@ -69,53 +68,57 @@ def closest_encounter(flight_latitudes, flight_longitudes, timestamp, altitude, 
 					closest_head2 = head[n]
 					closest_lat2 = flight_latitudes[n] 
 					closest_lon2 = flight_longitudes[n]
-				
-	# Check the output
-	print(closest_distance, closest_distance2)
+	if float(closest_distance2) == float('inf'):
+		average_speed = closest_speed
+		heading_direction = closest_head
+		time_of_closest_approach = closest_time
+		avg_alt = closest_altitude
+		closest_seis = closest_seislat
+		closest_seislon = closest_seislon
+	else:
+		line_vector = (closest_lat2 - closest_lat, closest_lon2 - closest_lon)
+		station_vector = (closest_seislat - closest_lat, closest_seislon - closest_lon)
 
-	line_vector = (closest_lat2 - closest_lat, closest_lon2 - closest_lon)
-	station_vector = (closest_seislat - closest_lat, closest_seislon - closest_lon)
+		# Calculate the projection of the station vector onto the line vector
+		dot_product = line_vector[0]*station_vector[0] + line_vector[1]*station_vector[1]
+		line_magnitude_squared = line_vector[0]**2 + line_vector[1]**2
+		projection_length_ratio = dot_product / line_magnitude_squared
 
-	# Calculate the projection of the station vector onto the line vector
-	dot_product = line_vector[0]*station_vector[0] + line_vector[1]*station_vector[1]
-	line_magnitude_squared = line_vector[0]**2 + line_vector[1]**2
-	projection_length_ratio = dot_product / line_magnitude_squared
+		# Calculate the coordinates of the closest point on the line to the station
+		closest_point_on_line = (closest_lat + projection_length_ratio * line_vector[0], closest_lon + projection_length_ratio * line_vector[1])
 
-	# Calculate the coordinates of the closest point on the line to the station
-	closest_point_on_line = (closest_lat + projection_length_ratio * line_vector[0], closest_lon + projection_length_ratio * line_vector[1])
+		# Calculate the distance from the closest point on the line to the station
+		closest_distance = distance(closest_point_on_line[0],closest_point_on_line[1], closest_lat, closest_seislon)*1000
 
-	# Calculate the distance from the closest point on the line to the station
-	closest_distance = distance(closest_point_on_line[0],closest_point_on_line[1], closest_seislon)*1000
+		# Calculate the average speed and heading direction between the two closest points
+		time_difference = (closest_time2 - closest_time).total_seconds()
+		#distance = distance(closest_lat, closest_lon, closest_lat2, closest_lon2)*1000
+		#average_speed = distance / time_difference
+		#print(average_speed)
+		average_speed = (closest_speed + closest_speed2)/2
+		print(average_speed)
+		heading_direction = (closest_head + closest_head2) / 2
+		avg_alt = (closest_altitude + closest_altitude2) / 2
 
-	# Calculate the average speed and heading direction between the two closest points
-	time_difference = (closest_time2 - closest_time).total_seconds()
-	distance = distance(closest_lat, closest_lon, closest_lat2, closest_lon2)*1000
-	average_speed = distance / time_difference
-	print(average_speed)
-	average_speed = (closest_speed + closest_speed2)/2
-	print(average_speed)
-	heading_direction = (closest_head + closest_head2) / 2
-	avg_alt = (closest_altitude + closest_altitude2) / 2
-
-	# Calculate the time of the closest approach
-	time_of_closest_approach = closest_time + datetime.timedelta(seconds=time_difference*projection_length_ratio)
-
-	return closest_distance, average_speed, heading_direction, time_of_closest_approach, avg_alt, closest_seis, closest_seislon
+		# Calculate the time of the closest approach
+		time_of_closest_approach = closest_time + datetime.timedelta(seconds=time_difference*projection_length_ratio)
+	
+	return time_of_closest_approach, closest_distance, average_speed, heading_direction, avg_alt, closest_seislat, closest_seislon, closest_station
 
 
 def calculate_wave_arrival(closest_time, closest_distance, closest_altitude, aircraft_speed, aircraft_heading, seismo_latitudes, seismo_longitudes):
 	speed_of_sound = 343  # speed of sound in m/s at sea level
-	aircraft_speed_mps = aircraft_speed * 0.514  # convert aircraft speed from knots to m/s
+	aircraft_speed_mps = aircraft_speed 
 
 	# calculate the component of the aircraft's speed in the direction of the seismometer
 	relative_heading = radians(aircraft_heading)
 	relative_speed = aircraft_speed_mps * cos(relative_heading)
 
 	# calculate the time it takes for the sound to travel from the aircraft to the seismometer
-	time_for_sound_to_travel = np.sqrt((closest_distance)**2 + (closest_altitude * 0.3048)**2) / (speed_of_sound + relative_speed)
-	print(time_for_sound_to_travel)
-	wave_arrival_time = int(closest_time + time_for_sound_to_travel)
+	time_for_sound_to_travel = np.sqrt((closest_distance)**2 + (closest_altitude)**2) / (speed_of_sound + relative_speed)
 
+	wave_arrival_time = float(closest_time + time_for_sound_to_travel)
+	print(closest_time, wave_arrival_time)
 	return wave_arrival_time
 
 
@@ -126,7 +129,7 @@ seismo_longitudes = seismo_data['Longitude']
 stations = seismo_data['Station']
 
 flight_files = load_flights(2,3,15,20)[0]				
-
+filenames = load_flights(2,3,15,20)[1]
 for i, flight_file in enumerate(flight_files):
 	flight_data = pd.read_csv(flight_file, sep=",")
 	flight_latitudes = flight_data['latitude']
@@ -135,14 +138,12 @@ for i, flight_file in enumerate(flight_files):
 	speed = flight_data['speed']
 	alt = flight_data['altitude']
 	head = flight_data['heading']
-	
-	#dist_less = dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes)
-	print(dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes))
-	if dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes) == True:
-		ctime, cdist, calt, cspeed, chead, cseislat, cseislon, csta = closest_encounter(flight_latitudes, flight_longitudes, timestamp, alt, speed, head, seismo_latitudes, seismo_longitudes, stations)	
-		tm = calculate_wave_arrival(closest_time, closest_distance, closest_altitude, closest_speed, closest_head, closest_seislat, closest_seislon)
 
-		ht = datetime.datetime.utcfromtimestamp(tm)
+	if dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes) == True:
+		ctime, cdist, cspeed, chead, calt,  cseislat, cseislon, csta = closest_encounter(flight_latitudes, flight_longitudes, timestamp, alt, speed, head, seismo_latitudes, seismo_longitudes, stations)	
+		tm = calculate_wave_arrival(ctime, cdist, calt, cspeed, chead, cseislat, cseislon)
+
+		ht = datetime.utcfromtimestamp(tm)
 		h = ht.hour
 		month = ht.month
 		day = ht.day
@@ -175,14 +176,6 @@ for i, flight_file in enumerate(flight_files):
 		
 		tim = 120	
 
-		#ht = datetime.datetime.utcfromtimestamp(ctime)
-		#h = ht.hour
-		#mins = ht.minute
-		#secs = ht.second
-		#t = 0 #(mins*60)+secs
-		#l = np.sqrt(cdist**2 + calt**2)
-		#vo = cspeed
-		#xloc = calc_time(t, l, vo)
 		
 		n = "/scratch/naalexeev/NODAL/2019-0"+ str(month)+"-"+str(day)+"T"+str(h)+":00:00.000000Z.2019-0"+str(month2)+"-"+str(day2)+"T"+str(h_u)+":00:00.000000Z."+str(csta)+".mseed"
 
@@ -231,7 +224,7 @@ for i, flight_file in enumerate(flight_files):
 			middle_column = spec[:, middle_index]
 
 			vmin = 0
-			vmax = np.max(middle_column)
+			vmax = 1
 			if np.min(middle_column) < 0:
 				vmax = np.abs(np.min(middle_column))+np.max(middle_column)
 				spec = np.abs(np.min(middle_column)) + np.array(spec)
