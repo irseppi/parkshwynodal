@@ -11,7 +11,7 @@ from obspy.geodetics import gps2dist_azimuth
 from datetime import datetime
 from pathlib import Path
 from math import radians, sin, cos, sqrt, atan2
-from prelude import make_base_dir, dist_less, load_flights
+from prelude import make_base_dir, dist_less, load_flights, distance
 
 def closest_encounter(flight_latitudes, flight_longitudes, timestamp, altitude, speed, head, seismo_latitudes, seismo_longitudes, stations):
 	closest_distance = float('inf')
@@ -85,12 +85,15 @@ def closest_encounter(flight_latitudes, flight_longitudes, timestamp, altitude, 
 	closest_point_on_line = (closest_lat + projection_length_ratio * line_vector[0], closest_lon + projection_length_ratio * line_vector[1])
 
 	# Calculate the distance from the closest point on the line to the station
-	closest_distance = geodesic(closest_point_on_line, seismometer_location).meters
+	closest_distance = distance(closest_point_on_line[0],closest_point_on_line[1], closest_seislon)*1000
 
 	# Calculate the average speed and heading direction between the two closest points
 	time_difference = (closest_time2 - closest_time).total_seconds()
-	distance = geodesic((closest_lat, closest_lon), (closest_lat2, closest_lon2)).meters
+	distance = distance(closest_lat, closest_lon, closest_lat2, closest_lon2)*1000
 	average_speed = distance / time_difference
+	print(average_speed)
+	average_speed = (closest_speed + closest_speed2)/2
+	print(average_speed)
 	heading_direction = (closest_head + closest_head2) / 2
 	avg_alt = (closest_altitude + closest_altitude2) / 2
 
@@ -136,7 +139,6 @@ for i, flight_file in enumerate(flight_files):
 	#dist_less = dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes)
 	print(dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes))
 	if dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes) == True:
-		'here'
 		ctime, cdist, calt, cspeed, chead, cseislat, cseislon, csta = closest_encounter(flight_latitudes, flight_longitudes, timestamp, alt, speed, head, seismo_latitudes, seismo_longitudes, stations)	
 		tm = calculate_wave_arrival(closest_time, closest_distance, closest_altitude, closest_speed, closest_head, closest_seislat, closest_seislon)
 

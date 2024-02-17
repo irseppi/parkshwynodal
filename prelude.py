@@ -34,7 +34,6 @@ def dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_long
 		for l in range(len(seismo_latitudes)):
 			dist = distance(seismo_latitudes[l], seismo_longitudes[l], flight_latitudes[s], flight_longitudes[s])
 			if dist <= 5:
-				print('here')
 				f = True
 				break
 			else:
