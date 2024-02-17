@@ -1,169 +1,128 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.signal import spectrogram
-from scipy import signal
-from obspy.geodetics import gps2dist_azimuth
 import math
 import scipy.io
 import os
 import obspy
-from obspy.core import UTCDateTime
-import datetime
-from numpy.fft import fft, ifft
+from scipy.signal import spectrogram
+from scipy import signal
+from obspy.geodetics import gps2dist_azimuth
+from datetime import datetime
 from pathlib import Path
 from math import radians, sin, cos, sqrt, atan2
-from prelude import make_base_dir
-
-import math
-from datetime import datetime
-from geopy.distance import geodesic
-
-def calculate_closest_approach(data_points, seismometer_location):
-    # Sort the data points by timestamp
-    data_points = data_points.sort_values(by='snapshot_id')
-
-    closest_points = data_points.iloc[(data_points[['latitude', 'longitude']].apply(lambda row: geodesic((row['latitude'], row['longitude']), seismometer_location).meters, axis=1)).nsmallest(2).index.tolist()]
-    line_vector = (closest_points[1]['latitude'] - closest_points[0]['latitude'], closest_points[1]['longitude'] - closest_points[0]['longitude'])
-    station_vector = (seismometer_location[0] - closest_points[0]['latitude'], seismometer_location[1] - closest_points[0]['longitude'])
-
-    # Calculate the projection of the station vector onto the line vector
-    dot_product = line_vector[0]*station_vector[0] + line_vector[1]*station_vector[1]
-    line_magnitude_squared = line_vector[0]**2 + line_vector[1]**2
-    projection_length_ratio = dot_product / line_magnitude_squared
-
-    # Calculate the coordinates of the closest point on the line to the station
-    closest_point_on_line = (closest_points[0]['latitude'] + projection_length_ratio * line_vector[0], closest_points[0]['longitude'] + projection_length_ratio * line_vector[1])
-
-    # Calculate the distance from the closest point on the line to the station
-    closest_distance = geodesic(closest_point_on_line, seismometer_location).meters
-
-    # Calculate the average speed and heading direction between the two closest points
-    time_difference = (closest_points[1]['snapshot_id'] - closest_points[0]['snapshot_id']).total_seconds()
-    distance = geodesic((closest_points[0]['latitude'], closest_points[0]['longitude']), (closest_points[1]['latitude'], closest_points[1]['longitude'])).meters
-    average_speed = distance / time_difference
-    heading_direction = (closest_points[1]['heading'] + closest_points[0]['heading']) / 2
-
-    # Calculate the time of the closest approach
-    time_of_closest_approach = closest_points[0]['timestamp'] + datetime.timedelta(seconds=time_difference*projection_length_ratio)
-
-    return closest_distance, average_speed, heading_direction, time_of_closest_approach
+from prelude import make_base_dir, dist_less, load_flights
 
 def closest_encounter(flight_latitudes, flight_longitudes, timestamp, altitude, speed, head, seismo_latitudes, seismo_longitudes, stations):
-    closest_distance = float('inf')
-    closest_time = None
-    closest_altitude = None
-    closest_speed = None
-    closest_head = None
-    closest_seislat = None
-    closest_seislon = None
-    closest_station = None
+	closest_distance = float('inf')
+	closest_time = None
+	closest_altitude = None
+	closest_speed = None
+	closest_head = None
+	closest_lat = 0 
+	closest_lon = 0
+	closest_seislat = 0
+	closest_seislon = 0
+	closest_station = None
+	closest_distance2 = float('inf')
+	closest_time2 = None
+	closest_altitude2 = None
+	closest_speed2 = None
+	closest_head2 = None
+	closest_lat2 = 0 
+	closest_lon2 = 0
+	for n in range(len(flight_latitudes)):
+		for t in range(len(seismo_latitudes)):
+			_, _, distance = gps2dist_azimuth(flight_latitudes[n], flight_longitudes[n], seismo_latitudes[t], seismo_longitudes[t])
+			#distance = distance / 1000  # convert distance to kilometers
 
-    for n in range(len(flight_latitudes)):
-        for t in range(len(seismo_latitudes)):
-            _, _, distance = gps2dist_azimuth(flight_latitudes[n], flight_longitudes[n], seismo_latitudes[t], seismo_longitudes[t])
-            #distance = distance / 1000  # convert distance to kilometers
+			if distance < closest_distance:
+				if seismo_latitudes[t] == closest_seislat and seismo_longitudes[t] == closest_seislon:
+					if closest_distance2 < closest_distance:
+						closest_distance2 = closest_distance
+						closest_time2 = closest_time
+						closest_altitude2 = closest_altitude
+						closest_speed2 = closest_speed
+						closest_head2 = closest_head
+						closest_lat2 = closest_lat
+						closest_lon2 = closest_lon
 
-            if distance < closest_distance:
-                closest_distance = distance
-                closest_time = timestamp[n]
-                closest_altitude = altitude[n] * 0.3048
-                closest_speed = speed[n] * 0.514
-                closest_head = head[n]
-                closest_seislat = seismo_latitudes[t] 
-                closest_seislon = seismo_longitudes[t]
-                closest_station = stations[t]
 
-    return closest_time, closest_distance, closest_altitude, closest_speed, closest_head, closest_seislat, closest_seislon, closest_station
+				closest_distance = distance
+				closest_time = timestamp[n]
+				closest_altitude = altitude[n] * 0.3048
+				closest_speed = speed[n] * 0.514
+				closest_head = head[n]
+				closest_lat = flight_latitudes[n] 
+				closest_lon = flight_longitudes[n]
+
+				closest_seislat = seismo_latitudes[t] 
+				closest_seislon = seismo_longitudes[t]
+				closest_station = stations[t]
+
+			elif seismo_latitudes[t] == closest_seislat and seismo_longitudes[t] == closest_seislon:
+				if distance < closest_distance2:
+					closes_distance2 = distance
+					closest_time2 = timestamp[n]
+					closest_altitude2 = altitude[n] * 0.3048
+					closest_speed2 = speed[n] * 0.514
+					closest_head2 = head[n]
+					closest_lat2 = flight_latitudes[n] 
+					closest_lon2 = flight_longitudes[n]
+				
+	# Check the output
+	print(closest_distance, closest_distance2)
+
+	line_vector = (closest_lat2 - closest_lat, closest_lon2 - closest_lon)
+	station_vector = (closest_seislat - closest_lat, closest_seislon - closest_lon)
+
+	# Calculate the projection of the station vector onto the line vector
+	dot_product = line_vector[0]*station_vector[0] + line_vector[1]*station_vector[1]
+	line_magnitude_squared = line_vector[0]**2 + line_vector[1]**2
+	projection_length_ratio = dot_product / line_magnitude_squared
+
+	# Calculate the coordinates of the closest point on the line to the station
+	closest_point_on_line = (closest_lat + projection_length_ratio * line_vector[0], closest_lon + projection_length_ratio * line_vector[1])
+
+	# Calculate the distance from the closest point on the line to the station
+	closest_distance = geodesic(closest_point_on_line, seismometer_location).meters
+
+	# Calculate the average speed and heading direction between the two closest points
+	time_difference = (closest_time2 - closest_time).total_seconds()
+	distance = geodesic((closest_lat, closest_lon), (closest_lat2, closest_lon2)).meters
+	average_speed = distance / time_difference
+	heading_direction = (closest_head + closest_head2) / 2
+	avg_alt = (closest_altitude + closest_altitude2) / 2
+
+	# Calculate the time of the closest approach
+	time_of_closest_approach = closest_time + datetime.timedelta(seconds=time_difference*projection_length_ratio)
+
+	return closest_distance, average_speed, heading_direction, time_of_closest_approach, avg_alt, closest_seis, closest_seislon
 
 
 def calculate_wave_arrival(closest_time, closest_distance, closest_altitude, aircraft_speed, aircraft_heading, seismo_latitudes, seismo_longitudes):
-    speed_of_sound = 343  # speed of sound in m/s at sea level
-    aircraft_speed_mps = aircraft_speed * 0.514  # convert aircraft speed from knots to m/s
+	speed_of_sound = 343  # speed of sound in m/s at sea level
+	aircraft_speed_mps = aircraft_speed * 0.514  # convert aircraft speed from knots to m/s
 
-    # calculate the component of the aircraft's speed in the direction of the seismometer
-    relative_heading = radians(aircraft_heading)
-    relative_speed = aircraft_speed_mps * cos(relative_heading)
+	# calculate the component of the aircraft's speed in the direction of the seismometer
+	relative_heading = radians(aircraft_heading)
+	relative_speed = aircraft_speed_mps * cos(relative_heading)
 
-    # calculate the time it takes for the sound to travel from the aircraft to the seismometer
-    time_for_sound_to_travel = np.sqrt((closest_distance)**2 + (closest_altitude * 0.3048)**2) / (speed_of_sound + relative_speed)
-    print(time_for_sound_to_travel)
-    wave_arrival_time = int(closest_time + time_for_sound_to_travel)
+	# calculate the time it takes for the sound to travel from the aircraft to the seismometer
+	time_for_sound_to_travel = np.sqrt((closest_distance)**2 + (closest_altitude * 0.3048)**2) / (speed_of_sound + relative_speed)
+	print(time_for_sound_to_travel)
+	wave_arrival_time = int(closest_time + time_for_sound_to_travel)
 
-    return wave_arrival_time
+	return wave_arrival_time
 
-#def calc_time(t, l, vo):
-#t is epoch time at time wave is generated by aircraft
-#l is the shortest distance to between the station and aircraft
-#vo is the aircraft velocity
-#c is the speed of aucostic wave propogation
-#c = 343
-#to=t+((np.sqrt(l**2+(vo*t)**2))/c)
-#print(to)
-#return to
 
 # Load the seismometer location data
 seismo_data = pd.read_csv('input/nodes_stations.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
-seismo_stations = seismo_data['Latitude']
 stations = seismo_data['Station']
 
-min_lon = -150.5
-max_lon = -148.5
-min_lat = 62.227
-max_lat = 64.6
-
-
-flight_files=[]
-filenames = []
-
-for month in (3,4):
-	if month == 2:
-		month = '02'
-		for day in range(26,29):
-			day = str(day)
-			# assign directory
-			directory = '/scratch/irseppi/nodal_data/flightradar24/2019'+month+day+'_positions'
-
-			# iterate over files in directory
-			for filename in os.listdir(directory):
-				filenames.append(filename)
-				f = os.path.join(directory, filename)
-				
-				# checking if it is a file
-				if os.path.isfile(f):
-					flight_files.append(f)
-	elif month == 3:
-		month = '03'
-		for day in range(14, 15):
-			if day < 10:
-				day = '0' + str(day)
-				# assign directory
-				directory = '/scratch/irseppi/nodal_data/flightradar24/2019'+month+day+'_positions'
-			
-				# iterate over files in directory
-				for filename in os.listdir(directory):
-					filenames.append(filename)
-					f = os.path.join(directory, filename)
-					
-					# checking if it is a file
-					if os.path.isfile(f):
-						flight_files.append(f)
-			else:
-				day = str(day)
-				# assign directory
-				directory = '/scratch/irseppi/nodal_data/flightradar24/2019'+month+day+'_positions'
-				
-				# iterate over files in directory
-				for filename in os.listdir(directory):
-					filenames.append(filename)
-					f = os.path.join(directory, filename)
-					
-					# checking if it is a file
-					if os.path.isfile(f):
-						flight_files.append(f)
-				
+flight_files = load_flights(2,3,15,20)[0]				
 
 for i, flight_file in enumerate(flight_files):
 	flight_data = pd.read_csv(flight_file, sep=",")
@@ -173,150 +132,152 @@ for i, flight_file in enumerate(flight_files):
 	speed = flight_data['speed']
 	alt = flight_data['altitude']
 	head = flight_data['heading']
-	seismometer_location = (seismo_latitudes,seismo_longitudes)
-
-	closest_time, closest_distance, closest_altitude, closest_speed, closest_head, closest_seislat, closest_seislon, closest_station = calculate_closest_approach(flight_data, seismometer_location)
-
-	#ctime, cdist, calt, cspeed, chead, cseislat, cseislon, csta = closest_encounter(flight_latitudes, flight_longitudes, timestamp, alt, speed, head, seismo_latitudes, seismo_longitudes, stations)	
-	tm = calculate_wave_arrival(closest_time, closest_distance, closest_altitude, closest_speed, closest_head, closest_seislat, closest_seislon)
-
-	ht = datetime.datetime.utcfromtimestamp(tm)
-	h = ht.hour
-	month = ht.month
-	day = ht.day
-	mins = ht.minute
-	secs = ht.second
 	
-	month2 = str(month)
-	if month == 3 and day < 10:
-		day1 = '0'+str(day)
-	else:
-		day1 = str(day)
-	h_u = str(h+1)
-	if h < 23:
+	#dist_less = dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes)
+	print(dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes))
+	if dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes) == True:
+		'here'
+		ctime, cdist, calt, cspeed, chead, cseislat, cseislon, csta = closest_encounter(flight_latitudes, flight_longitudes, timestamp, alt, speed, head, seismo_latitudes, seismo_longitudes, stations)	
+		tm = calculate_wave_arrival(closest_time, closest_distance, closest_altitude, closest_speed, closest_head, closest_seislat, closest_seislon)
+
+		ht = datetime.datetime.utcfromtimestamp(tm)
+		h = ht.hour
+		month = ht.month
+		day = ht.day
+		mins = ht.minute
+		secs = ht.second
+		
+		month2 = str(month)
+		if month == 3 and day < 10:
+			day1 = '0'+str(day)
+		else:
+			day1 = str(day)
+		h_u = str(h+1)
+		if h < 23:
+				
+			day2 = day1
+			if h < 10:
+				h_u = '0'+str(h+1)
+				h = '0'+str(h)
+			else:
+				h_u = str(h+1)
+				h = str(h)
+		else:
+			h_u = '00'
+			if month == '02' and day == '28':
+				month2 = '03'
+				day2 = '01'
+			else:
+				day2 = str(day + 1)
+				 
+		
+		tim = 120	
+
+		#ht = datetime.datetime.utcfromtimestamp(ctime)
+		#h = ht.hour
+		#mins = ht.minute
+		#secs = ht.second
+		#t = 0 #(mins*60)+secs
+		#l = np.sqrt(cdist**2 + calt**2)
+		#vo = cspeed
+		#xloc = calc_time(t, l, vo)
+		
+		n = "/scratch/naalexeev/NODAL/2019-0"+ str(month)+"-"+str(day)+"T"+str(h)+":00:00.000000Z.2019-0"+str(month2)+"-"+str(day2)+"T"+str(h_u)+":00:00.000000Z."+str(csta)+".mseed"
+
+		if os.path.isfile(n):
+			print('made it')
+			tr = obspy.read(n)
+			tr[2].trim(tr[2].stats.starttime + (mins*60) + secs - tim, tr[2].stats.starttime + (mins*60) + secs + tim)
+			data = tr[2][0:-1]
+			fs = int(tr[2].stats.sampling_rate)
+			title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'	
+		
+			# Time array
+			t = np.arange(len(data)) / fs
+			g = fs*240
+
+			# Compute spectrogram
+			frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9, detrend = 'constant') 
+			a, b = Sxx.shape
 			
-		day2 = day1
-		if h < 10:
-			h_u = '0'+str(h+1)
-			h = '0'+str(h)
-		else:
-			h_u = str(h+1)
-			h = str(h)
-	else:
-		h_u = '00'
-		if month == '02' and day == '28':
-			month2 = '03'
-			day2 = '01'
-		else:
-			day2 = str(day + 1)
-			 
-	
-	tim = 120	
+			MDF = np.zeros((a,b))
+			for row in range(len(Sxx)):
+				m = len(Sxx[row])
+				p = sorted(Sxx[row])
+				median = p[int(m/2)]
 
-	#ht = datetime.datetime.utcfromtimestamp(ctime)
-	#h = ht.hour
-	#mins = ht.minute
-	#secs = ht.second
-	#t = 0 #(mins*60)+secs
-	#l = np.sqrt(cdist**2 + calt**2)
-	#vo = cspeed
-	#xloc = calc_time(t, l, vo)
-	
-	n = "/scratch/naalexeev/NODAL/2019-0"+ str(month)+"-"+str(day)+"T"+str(h)+":00:00.000000Z.2019-0"+str(month2)+"-"+str(day2)+"T"+str(h_u)+":00:00.000000Z."+str(csta)+".mseed"
+				for col in range(m):
+					MDF[row][col] = median
 
-	if os.path.isfile(n):
-		print('made it')
-		tr = obspy.read(n)
-		tr[2].trim(tr[2].stats.starttime + (mins*60) + secs - tim, tr[2].stats.starttime + (mins*60) + secs + tim)
-		data = tr[2][0:-1]
-		fs = int(tr[2].stats.sampling_rate)
-		title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'	
-	
-		# Time array
-		t = np.arange(len(data)) / fs
-		g = fs*240
+			fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))
+	     
+			# Find the center of the trace
+			center_index = len(data) // 2
+			center_time = t[center_index]
 
-		# Compute spectrogram
-		frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9, detrend = 'constant') 
-		a, b = Sxx.shape
-		
-		MDF = np.zeros((a,b))
-		for row in range(len(Sxx)):
-			m = len(Sxx[row])
-			p = sorted(Sxx[row])
-			median = p[int(m/2)]
+			ax1.plot(t, data, 'k', linewidth=0.5)
+			ax1.set_title(title)
+			ax1.axvline(x=center_time, c = 'r', ls = '--')
+			ax1.margins(x=0)
+			
+			spec = (10 * np.log10(Sxx)) - (10 * np.log10(MDF))
 
-			for col in range(m):
-				MDF[row][col] = median
+			# Find the index of the middle frequency
+			middle_index = len(times) // 2
 
-		fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))
-     
-		# Find the center of the trace
-		center_index = len(data) // 2
-		center_time = t[center_index]
+			# Extract the middle line of the spectrogram
+			middle_column = spec[:, middle_index]
 
-		ax1.plot(t, data, 'k', linewidth=0.5)
-		ax1.set_title(title)
-		ax1.axvline(x=center_time, c = 'r', ls = '--')
-		ax1.margins(x=0)
-		
-		spec = (10 * np.log10(Sxx)) - (10 * np.log10(MDF))
-
-		# Find the index of the middle frequency
-		middle_index = len(times) // 2
-
-		# Extract the middle line of the spectrogram
-		middle_column = spec[:, middle_index]
-
-		vmin = 0
-		vmax = np.max(middle_column)
-		if np.min(middle_column) < 0:
-			vmax = np.abs(np.min(middle_column))+np.max(middle_column)
-			spec = np.abs(np.min(middle_column)) + np.array(spec)
-			middle_column = np.abs(np.min(middle_column)) + np.array(middle_column)
-		else:
 			vmin = 0
 			vmax = np.max(middle_column)
-		# Plot spectrogram
-		cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='hot_r', vmin=vmin, vmax=vmax) #'hsv' w/ vmin = np.min(middle_column) 
-		ax2.set_xlabel('Time [s]')
+			if np.min(middle_column) < 0:
+				vmax = np.abs(np.min(middle_column))+np.max(middle_column)
+				spec = np.abs(np.min(middle_column)) + np.array(spec)
+				middle_column = np.abs(np.min(middle_column)) + np.array(middle_column)
+			else:
+				vmin = 0
+				vmax = np.max(middle_column)
+			# Plot spectrogram
+			cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='hot_r', vmin=vmin, vmax=vmax) #'hsv' w/ vmin = np.min(middle_column) 
+			ax2.set_xlabel('Time [s]')
 
 
 
-		ax2.axvline(x=center_time, c = 'k', ls = '--')
-		ax2.set_ylabel('Frequency (Hz)')
-		ax2.margins(x=0)
-		ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
+			ax2.axvline(x=center_time, c = 'k', ls = '--')
+			ax2.set_ylabel('Frequency (Hz)')
+			ax2.margins(x=0)
+			ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
 
-		plt.colorbar(mappable=cax, cax=ax3)
-		ax3.set_ylabel('Relative Amplitude (dB)')
-		dire = '/scratch/irseppi/nodal_data/Plane_map_spec/'
-		make_base_dir(dire)
-		fig.savefig('/scratch/irseppi/nodal_data/Plane_map_spec/spec_'+str(tm)+'_'+str(csta)+'_'+filenames[i]+'.png')
-		
-		plt.close()
-		
-		peaks, _ = signal.find_peaks(middle_column, prominence=20) #, distance = 10) 
-		np.diff(peaks)
-		fig = plt.figure(figsize=(10,6))
-		plt.grid()
-		
-		plt.plot(frequencies, middle_column, c='c')
-		plt.plot(peaks, middle_column[peaks], "x")
-		for g in range(len(peaks)):
-			plt.text(peaks[g], middle_column[peaks[g]], peaks[g])
-		plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
+			plt.colorbar(mappable=cax, cax=ax3)
+			ax3.set_ylabel('Relative Amplitude (dB)')
 
-		plt.xlim(0,int(fs/2))
-		plt.ylim(vmin,vmax*1.1)
-		plt.xlabel('Freq [Hz]')
-		plt.ylabel('Amplitude [dB]')
-		plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
-		dire = '/scratch/irseppi/nodal_data/Plane_map_spec/'
-		make_base_dir(dire)
-		fig.savefig('/scratch/irseppi/nodal_data/Plane_map_spec/fft_'+str(tm)+'_'+str(csta)+'_'+filenames[i]+'.png')
-		plt.close()
-	
+			make_base_dir('/scratch/irseppi/nodal_data/Plane_map_spec/')
+			fig.savefig('/scratch/irseppi/nodal_data/Plane_map_spec/spec_'+str(tm)+'_'+str(csta)+'_'+filenames[i]+'.png')
+			
+			plt.close()
+			
+			peaks, _ = signal.find_peaks(middle_column, prominence=20) #, distance = 10) 
+			np.diff(peaks)
+			fig = plt.figure(figsize=(10,6))
+			plt.grid()
+			
+			plt.plot(frequencies, middle_column, c='c')
+			plt.plot(peaks, middle_column[peaks], "x")
+			for g in range(len(peaks)):
+				plt.text(peaks[g], middle_column[peaks[g]], peaks[g])
+			plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
+
+			plt.xlim(0,int(fs/2))
+			plt.ylim(vmin,vmax*1.1)
+			plt.xlabel('Freq [Hz]')
+			plt.ylabel('Amplitude [dB]')
+			plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
+
+			make_base_dir('/scratch/irseppi/nodal_data/Plane_map_spec/')
+			fig.savefig('/scratch/irseppi/nodal_data/Plane_map_spec/fft_'+str(tm)+'_'+str(csta)+'_'+filenames[i]+'.png')
+			plt.close()
+	else:
+		continue
 print(i/len(flight_files), '% Done')	
 
 
