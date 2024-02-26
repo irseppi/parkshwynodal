@@ -275,9 +275,3 @@ for i, flight_file in enumerate(flight_files):
 	else:
 		continue
 print(i/len(flight_files), '% Done')	
-
-
-	
-	
-
-	

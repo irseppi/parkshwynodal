@@ -257,7 +257,7 @@ for i in range(0,6):
 			# Extract the middle line of the spectrogram
 			middle_column = spec[:, middle_index]
 
-			vmin = np.min(middle_column)
+			vmin = 0 #np.min(middle_column)
 			vmax = np.max(middle_column)
 			# Plot spectrogram
 			cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='hsv', vmin = vmin, vmax = vmax)

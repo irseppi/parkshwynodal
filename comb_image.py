@@ -38,7 +38,7 @@ month.append('02')
 
 text = open('input/all_station_crossing_db.txt', 'r')
 
-airplane = 'input/20231010_Aircraft _UA_Fairbanks.csv'
+airplane = 'input/20231010_Aircraft_UA_Fairbanks.csv'
 
 plane_data = pd.read_csv(airplane, sep=",")
 man = plane_data['MANUFACTURER']
