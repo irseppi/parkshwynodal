@@ -132,6 +132,7 @@ for n in range(0,5):
 					ax1.margins(x=0)
 
 					spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
+
 					# Find the index of the middle frequency
 					middle_index = len(times) // 2
 					middle_column = spec[:, middle_index]
@@ -147,6 +148,7 @@ for n in range(0,5):
 
 					l = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
 					start_time = tr[2].stats.starttime + (mins * 60) + secs - tim
+
 					# Convert ObsPy time to timestamp
 					start_time = UTCDateTime(start_time)
 					start_time= start_time.datetime.timestamp()
@@ -162,13 +164,10 @@ for n in range(0,5):
 						tnew = times[gg]
 					
 						peaks, _ = signal.find_peaks(column, prominence=10)
-						#largest_peak_index = np.argmax(column[peaks])
-						#print(largest_peak_index)
-						
+
 						np.diff(peaks)
 			
 						largest_peak_index = np.argmax(column[peaks])
-						#print(peaks[largest_peak_index])
 
 						# Scatter plot
 						ax2.scatter(tnew, peaks[largest_peak_index]+50, marker='x', color='k', linewidth=0.5)
@@ -185,58 +184,11 @@ for n in range(0,5):
 					plt.colorbar(mappable=cax, cax=ax3)
 					ax3.set_ylabel('Relative Amplitude (dB)')
 					plt.show()
-					# v0 = speed * 0.514444
-					# c = 343 
-					#freqtrue = []
-					# freq1 = np.array(freq1)
-					# time1 = [t - start_time for t in time1]
-					# time1 = np.array(time1)
-					# tt = np.arange(0, 240, 0.10041841004)
-					# Vectorized calculations
-					# tflight = (tt - (np.sqrt(tt**2 - (1 - v0**2 / c**2) * (tt**2 - l**2 / c**2)))) / (1 - v0**2 / c**2)
-
-					# true_freq = freq1 * (1 + (v0 / c) * (v0 * tflight / np.sqrt(l**2 + (v0 * tflight)**2)))
-					# f0 = np.mean(true_freq)
-
-					# Vectorized calculations for observed_freq and tprime
-					# times = np.array([t - start_time for t in times])
-
-					#tt = np.arange(0, 240, 1)
-					# f, tp = calc_f(f0, tt, l, v0)
 				
-					# for hh in range(len(freq1)):
-					#     fobs = freq1[hh]
-					#     tflight = time1[hh]-(np.sqrt(time1[hh]**2-(1-v0**2/c**2)*(time1[hh]**2-l**2/c**2)))/(1-v0**2/c**2)
-					#     true_freq = fobs * (1+(v0/c)*(v0*tflight/(np.sqrt(l**2+(v0*tflight)**2))))
-					#     freqtrue.append(true_freq)
-					# f0 = np.sum(freqtrue)/len(freqtrue)
-					# print(f0)
-					# observed_freq = []
-					# tprime = []
-					# for ttt in times:
-					#     f,tp = calc_f(f0, ttt, l, v0)
-					#     observed_freq.append(f)
-					#     tprime.append(tp)
-
-					# Plot Doppler shift
-					# plt.figure()
-					# plt.scatter(tp, f)
-					# plt.xlabel('Time [s]')
-					# plt.ylabel('Doppler Shift [Hz]')
-					# plt.title('Doppler Shift of Primary Overtone')
-					# plt.ylim(0,250)
-					# plt.show()
-					# Save the figure
-					#make_base_dir('/scratch/irseppi/nodal_data/Plane_map_spec/')
-					#fig.savefig('/scratch/irseppi/nodal_data/pec_'+str(t)+'_'+str(sta[n])+'_'+str(flight_num[n])+'.png')
-					
-					#plt.close()
-					
-					# Convert lists to numpy arrays
-
-					# Assume you have a spectrogram stored in the variable `S`
+					plt.figure()
+					# Spectrogram 
 					plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-					#plt.imshow(spec.T, aspect='auto')
+				
 
 					coords = []
 
@@ -253,4 +205,25 @@ for n in range(0,5):
 					coords_array = np.array(coords)
 
 					# Save the coordinates to a text file
-					np.savetxt('coords_'+str(flight_num[n])+'.txt', coords_array)
+					#np.savetxt('home/irseppi/REPOSITORIES/parkshwynodal/coords_'+str(flight_num[n])+'.txt', coords_array)
+					
+					# Vectorized calculations
+					# tflight = (tt - (np.sqrt(tt**2 - (1 - v0**2 / c**2) * (tt**2 - l**2 / c**2)))) / (1 - v0**2 / c**2)
+					plt.figure()
+					plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+					# true_freq = freq1 * (1 + (v0 / c) * (v0 * tflight / np.sqrt(l**2 + (v0 * tflight)**2)))
+					# f0 = np.mean(true_freq)
+					plt.plot(coords[0], coords[1])
+					plt.show()
+					# Vectorized calculations for observed_freq and tprime
+					# times = np.array([t - start_time for t in times])
+
+					#tt = np.arange(0, 240, 1)
+					# f, tp = calc_f(f0, tt, l, v0)
+				
+					#make_base_dir('/scratch/irseppi/nodal_data/Plane_map_spec/')
+					#fig.savefig('/scratch/irseppi/nodal_data/pec_'+str(t)+'_'+str(sta[n])+'_'+str(flight_num[n])+'.png')
+					
+					#plt.close()
+					
+					# Convert lists to numpy arrays
