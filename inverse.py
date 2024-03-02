@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import math
 import matplotlib
@@ -7,13 +6,12 @@ import numpy.matlib
 import scipy.linalg as la
 from numpy.linalg import inv
 from scipy.stats.distributions import chi2
-from sympy import symbols, diff
+#from sympy import symbols, diff
+def invert_f(f0,v0,l,tprime0):
+    tprime = np.sqrt(l**2-(v0*t)**2/c)
+    t = (tprime - np.sqrt(tprime**2-(1-v0**2/c**2)(tprime**2-l**2/c**2)))/(1-v0**2/c**2)
 
-tprime = np.sqrt(l**2-(v0*t)**2/c)
-t = (tprime - np.sqrt(tprime**2-(1-v0**2/c**2)(tprime**2-l**2/c**2)))/(1-v0**2/c**2)
-t = ((tprime - tprime0)-np.sqrt((tprime - tprime0)*2-(1-v0**2/c**2)((tprime - tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-
-f = f0*1/(1+(v0/c)*(v0*t/(np.sqrt(l**2-(v0*t)**2))))
+    f = f0*1/(1+(v0/c)*(v0*t/(np.sqrt(l**2-(v0*t)**2))))
 
 #m0 = [f0, v0, l, tprime0].T
 
@@ -34,7 +32,7 @@ f = f0*1/(1+(v0/c)*(v0*t/(np.sqrt(l**2-(v0*t)**2))))
 #partial derivative matrix of f with respect to m when m=m0
 
 #G = np.array([[f_derivef0, 0, 0, 0], 
-#[0, f_derivev0, 0, 0], 
-#[0, 0, f_derivel, 0], 
-#[0, 0, 0, f_derivetprime]])
+              #[0, f_derivev0, 0, 0], 
+              #[0, 0, f_derivel, 0], 
+              #[0, 0, 0, f_derivetprime]])
 #m = m0 +inv(G.T@G)@G.T[fobs(tprime) - f(m0,tprime)]

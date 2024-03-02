@@ -298,5 +298,4 @@ for i in range(0,6):
 			fig.savefig('/scratch/irseppi/nodal_data/P_map_spec/fft_'+str(ctime)+'_'+str(csta)+'_'+str(flight_num[i])+'.png')
 			plt.close()
 	else:
-		continue
-print(i/len(flight_files), '% Done')	
+		continue	
