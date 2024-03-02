@@ -174,13 +174,13 @@ def modify_file(input_file_name, output_file_name):
 
 ####################################################################################################################
 
-def station_subset(filename,steps,outputname):
-	#steps = the amunt of steps you want to subset stations by (ie. every 4th station is in the subset)
-	#outputname = filename for ouput file
+def station_subset(filename, steps, outputname):
+	# steps = the amount of steps you want to subset stations by (ie. every 4th station is in the subset)
+	# outputname = filename for output file
 	# Read the input file
 	with open(filename) as handle:
 		for lineno, line in enumerate(handle):
-			if lineno % step == 0:
+			if lineno % steps == 0:
 				print(line) 
 
 #######################################################################################
@@ -232,10 +232,10 @@ def extract_col(input_file,output_file,col,split_str):
 	# split_str = string that splits the text file into columns
 	i = int(col)
 	with open(input_file, 'r') as f_in, open(output_file, 'w') as f_out:
-	    for line in f_in:
-	       line=line.split(split_str)
-	       print(line[i])
-	       f_out.write(line[i]) 
+		for line in f_in:
+			line=line.split(split_str)
+			print(line[i])
+			f_out.write(line[i]) 
 
 #########################################################################################
 
