@@ -11,10 +11,7 @@ from obspy.geodetics import gps2dist_azimuth
 from prelude import make_base_dir, distance
 import datetime
 from obspy import UTCDateTime
-
-
-
-
+from prelude import make_base_dir, distance, closest_encounter
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
