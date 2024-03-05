@@ -77,99 +77,122 @@ for n in range(0,5):
 						median = p[int(m/2)]
 						for col in range(m):
 							MDF[row][col] = median
-					fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
+					#fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
 
-					ax1.plot(t, data, 'k', linewidth=0.5)
-					ax1.set_title(title)
-					ax1.axvline(x=tim, c = 'r', ls = '--')
-					ax1.margins(x=0)
+					#ax1.plot(t, data, 'k', linewidth=0.5)
+					#ax1.set_title(title)
+					#ax1.axvline(x=tim, c = 'r', ls = '--')
+					#ax1.margins(x=0)
 
-					spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
+					#spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
 
 					# Find the index of the middle frequency
 					middle_index = len(times) // 2
-					middle_column = spec[:, middle_index]
-					vmin = 0  
-					vmax = np.max(middle_column) 
+					#middle_column = spec[:, middle_index]
+					#vmin = 0  
+					#vmax = np.max(middle_column) 
 					
 					# Plot spectrogram
-					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
-					ax2.set_xlabel('Time [s]')
+					#cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
+					#ax2.set_xlabel('Time [s]')
 				
-					freq1 = []
-					time1 = []
+					#freq1 = []
+					#time1 = []
 
-					l = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
-					start_time = tr[2].stats.starttime + (mins * 60) + secs - tim
+					#l = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
+					#start_time = tr[2].stats.starttime + (mins * 60) + secs - tim
 
 					# Convert ObsPy time to timestamp
-					start_time = UTCDateTime(start_time)
-					start_time= start_time.datetime.timestamp()
+					#start_time = UTCDateTime(start_time)
+					#start_time= start_time.datetime.timestamp()
 
-					end_time = tr[2].stats.starttime + (mins * 60) + secs + tim
-					end_time  = UTCDateTime(end_time)
-					end_time = end_time.datetime.timestamp()
-					x_values = []
-					y_values = []
-					for gg in range(len(times)):
-						column = spec[50:250, gg]
+					#end_time = tr[2].stats.starttime + (mins * 60) + secs + tim
+					#end_time  = UTCDateTime(end_time)
+					#end_time = end_time.datetime.timestamp()
+					#x_values = []
+					#y_values = []
+					#for gg in range(len(times)):
+					#	column = spec[50:250, gg]
 						
-						tnew = times[gg]
+					#	tnew = times[gg]
 					
-						peaks, _ = signal.find_peaks(column, prominence=10)
+					#	peaks, _ = signal.find_peaks(column, prominence=10)
 
-						np.diff(peaks)
+					#	np.diff(peaks)
 			
-						largest_peak_index = np.argmax(column[peaks])
+					#	largest_peak_index = np.argmax(column[peaks])
 
 						# Scatter plot
-						ax2.scatter(tnew, peaks[largest_peak_index]+50, marker='x', color='k', linewidth=0.5)
+					#	ax2.scatter(tnew, peaks[largest_peak_index]+50, marker='x', color='k', linewidth=0.5)
 					
-						freq1.append(peaks[largest_peak_index]+50)
-						time1.append(tnew)
+					#	freq1.append(peaks[largest_peak_index]+50)
+					#	time1.append(tnew)
 					
 					#ax2.axvline(x=center_time, c = 'k', ls = '--')
-					ax2.set_ylabel('Frequency (Hz)')
-					ax2.margins(x=0)
-					ax2.set_xlim(0, 240)
-					ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
+					#ax2.set_ylabel('Frequency (Hz)')
+					#ax2.margins(x=0)
+					#ax2.set_xlim(0, 240)
+					#ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
 
-					plt.colorbar(mappable=cax, cax=ax3)
-					ax3.set_ylabel('Relative Amplitude (dB)')
-					plt.show()
+					#plt.colorbar(mappable=cax, cax=ax3)
+					#ax3.set_ylabel('Relative Amplitude (dB)')
+					#plt.show()
 				
-					plt.figure()
+					#plt.figure()
 					# Spectrogram 
-					plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+					#plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
 				
 
-					coords = []
+					# '''
+					# 					coords = []
 
-					def onclick(event):
-						global coords
-						coords.append((event.xdata, event.ydata))
-						plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-						plt.draw() 
-						print('Clicked:', event.xdata, event.ydata)  
-					cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+					# 					def onclick(event):
+					# 						global coords
+					# 						coords.append((event.xdata, event.ydata))
+					# 						plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+					# 						plt.draw() 
+					# 						print('Clicked:', event.xdata, event.ydata)  
+					# 					cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
 
-					plt.show(block=True)
-					# Convert the list of coordinates to a numpy array
-					coords_array = np.array(coords)
-					print(coords_array)
-					v0 = speed*0.514444
-					c = 343
-					for jj in range(len(coords_array)):
-						print(coords_array[jj][0], coords_array[jj][1])
-						tflight = coords_array[jj][0]-(np.sqrt(coords_array[jj][0]**2-(1-v0**2/c**2)*(coords_array[jj][0]**2-l**2/c**2)))/(1-v0**2/c**2)
-						f0 = coords_array[jj][1]*(1+(v0/c)*(v0*tflight/(np.sqrt(l**2+(v0*tflight)**2))))
-						print('f0 = ', f0)
-						
-					# Save the coordinates to a text file
-					#np.savetxt('home/irseppi/REPOSITORIES/parkshwynodal/coords_'+str(flight_num[n])+'.txt', coords_array)
-				
-					plt.figure()
-					plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-					plt.plot(coords_array[:,0], coords_array[:,1])
-					plt.show()
+					# 					plt.show(block=True)
+					# 					# Convert the list of coordinates to a numpy array
+					# 					coords_array = np.array(coords)
+					# 					print(coords_array)
+					# 					v0 = speed*0.514444
+					# 					c = 343
+					# 					for jj in range(len(coords_array)):
+					# 						print(coords_array[jj][0], coords_array[jj][1])
+					# 						tflight = coords_array[jj][0]-(np.sqrt(coords_array[jj][0]**2-(1-v0**2/c**2)*(coords_array[jj][0]**2-l**2/c**2)))/(1-v0**2/c**2)
+					# 						f0 = coords_array[jj][1]*(1+(v0/c)*(v0*tflight/(np.sqrt(l**2+(v0*tflight)**2))))
+					# 						print('f0 = ', f0)
+											
+					# 					# Save the coordinates to a text file
+					# 					#np.savetxt('home/irseppi/REPOSITORIES/parkshwynodal/coords_'+str(flight_num[n])+'.txt', coords_array)
+									
+					# 					plt.figure()
+					# 					plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+					# 					plt.plot(coords_array[:,0], coords_array[:,1])
+					# 					plt.show()
+					# '''
+
 			
+					spec2 = 10 * np.log10(MDF)
+
+					middle_column2 = spec2[:, middle_index]
+					vmin = np.min(middle_column2)
+					vmax = np.max(middle_column2)
+
+					fig = plt.figure(figsize=(1.5,3))
+					plt.margins(x=0)
+					plt.plot(middle_column2,frequencies, c='c')
+					plt.ylim(0,int(fs/2))
+					plt.xlim(vmax*1.1,vmin)
+					plt.tick_params(left = False, right = False , labelleft = False , 
+									labelbottom = False, bottom = False)
+					plt.grid(axis='y')
+					plt.show()
+					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5spec2/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'
+					make_base_dir(BASE_DIR)
+					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec2/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'+station[y]+'_'+str(time[n])+'.png', bbox_inches='tight', pad_inches=0)
+					plt.close()
+

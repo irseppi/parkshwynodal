@@ -225,16 +225,9 @@ for i, flight_file in enumerate(flight_files):
 			middle_column = spec[:, middle_index]
 
 			vmin = 0
-			vmax = 1
-			if np.min(middle_column) < 0:
-				vmax = np.abs(np.min(middle_column))+np.max(middle_column)
-				spec = np.abs(np.min(middle_column)) + np.array(spec)
-				middle_column = np.abs(np.min(middle_column)) + np.array(middle_column)
-			else:
-				vmin = 0
-				vmax = np.max(middle_column)
+			vmax = np.max(middle_column)
 			# Plot spectrogram
-			cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='hot_r', vmin=vmin, vmax=vmax) #'hsv' w/ vmin = np.min(middle_column) 
+			cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='hot_r', vmin=vmin, vmax=vmax)
 			ax2.set_xlabel('Time [s]')
 
 

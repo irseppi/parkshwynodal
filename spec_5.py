@@ -297,5 +297,24 @@ for i in range(0,6):
 			make_base_dir('/scratch/irseppi/nodal_data/P_map_spec/')
 			fig.savefig('/scratch/irseppi/nodal_data/P_map_spec/fft_'+str(ctime)+'_'+str(csta)+'_'+str(flight_num[i])+'.png')
 			plt.close()
+
+			spec2 = 10 * np.log10(MDF)
+
+			middle_column2 = spec2[:, middle_index]
+			vmin = np.min(middle_column2)
+			vmax = np.max(middle_column2)
+
+			fig = plt.figure(figsize=(1.5,3))
+			plt.margins(x=0)
+			plt.plot(middle_column2,frequencies, c='c')
+			plt.ylim(0,int(fs/2))
+			plt.xlim(vmax*1.1,vmin)
+			plt.tick_params(left = False, right = False , labelleft = False , 
+		labelbottom = False, bottom = False)
+
+			BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5spec2/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'
+			make_base_dir(BASE_DIR)
+			fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec2/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'+station[y]+'_'+str(time[n])+'.png', bbox_inches='tight',pad_inches =0)
+			plt.close()
 	else:
 		continue	
