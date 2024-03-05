@@ -312,9 +312,9 @@ for i in range(0,6):
 			plt.tick_params(left = False, right = False , labelleft = False , 
 		labelbottom = False, bottom = False)
 
-			BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5spec2/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'
+			BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5spec2/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+sta[i]+'/'
 			make_base_dir(BASE_DIR)
-			fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec2/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'+station[y]+'_'+str(time[n])+'.png', bbox_inches='tight',pad_inches =0)
+			fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec2/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+sta[i]+'/'+sta[i]+'_'+str(time[n])+'.png', bbox_inches='tight',pad_inches =0)
 			plt.close()
 	else:
 		continue	

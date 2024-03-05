@@ -11,7 +11,7 @@ from obspy.geodetics import gps2dist_azimuth
 from prelude import make_base_dir, distance
 import datetime
 from obspy import UTCDateTime
-from prelude import make_base_dir, distance, closest_encounter
+from prelude import make_base_dir, distance, calculate_distance
 
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -77,25 +77,56 @@ for n in range(0,5):
 						median = p[int(m/2)]
 						for col in range(m):
 							MDF[row][col] = median
-					#fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
+					fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6)) #, gridspec_kw={'height_ratios': [3, 1]})     
 
-					#ax1.plot(t, data, 'k', linewidth=0.5)
-					#ax1.set_title(title)
-					#ax1.axvline(x=tim, c = 'r', ls = '--')
-					#ax1.margins(x=0)
+					ax1.plot(t, data, 'k', linewidth=0.5)
+					ax1.set_title(title)
+					ax1.axvline(x=tim, c = 'c', ls = '--')
+					ax1.margins(x=0)
 
-					#spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
+					spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
 
 					# Find the index of the middle frequency
 					middle_index = len(times) // 2
-					#middle_column = spec[:, middle_index]
-					#vmin = 0  
-					#vmax = np.max(middle_column) 
+					middle_column = spec[:, middle_index]
+					vmin = 0  
+					vmax = np.max(middle_column) 
 					
 					# Plot spectrogram
-					#cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
-					#ax2.set_xlabel('Time [s]')
+					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
+					ax2.set_xlabel('Time [s]')
+					v0 = speed * 0.000514444
+					ax2.axvline(x=tim, c = 'c', ls = '--')
+					ax2.axvline(x=(tim+(dist/v0)), c = 'r', ls = '--')
+					ax2.set_ylabel('Frequency (Hz)')
+					ax2.margins(x=0)
+					ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
+
+					plt.colorbar(mappable=cax, cax=ax3)
+					ax3.set_ylabel('Relative Amplitude (dB)')
+
+					ax2.margins(x=0)
+					ax2.set_xlim(0, 240)
+					
+					# Plot overlay
+					spec2 = 10 * np.log10(MDF)
+					middle_column2 = spec2[:, middle_index]
+					vmin = np.min(middle_column2)
+					vmax = np.max(middle_column2)
 				
+					# Create ax4 and plot on the same y-axis as ax2
+					ax4 = fig.add_axes([0.125, 0.11, 0.07, 0.35], sharey=ax2) #, width=vmax*1.1-vmin, height=int(fs/2))
+					ax4.plot(middle_column2, frequencies, c='pink')  
+					ax4.set_ylim(0, int(fs/2))
+					ax4.set_xlim(vmax*1.1, vmin) #, width=vmax*1.1-vmin, height=int(fs/2))
+					ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
+					ax4.grid(axis='y')
+					plt.show()
+					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'
+					make_base_dir(BASE_DIR)
+					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
+					plt.close()
+
 					#freq1 = []
 					#time1 = []
 
@@ -127,17 +158,8 @@ for n in range(0,5):
 					
 					#	freq1.append(peaks[largest_peak_index]+50)
 					#	time1.append(tnew)
-					
-					#ax2.axvline(x=center_time, c = 'k', ls = '--')
-					#ax2.set_ylabel('Frequency (Hz)')
-					#ax2.margins(x=0)
-					#ax2.set_xlim(0, 240)
-					#ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
-
-					#plt.colorbar(mappable=cax, cax=ax3)
-					#ax3.set_ylabel('Relative Amplitude (dB)')
-					#plt.show()
-				
+					# Find the center of the trace
+		
 					#plt.figure()
 					# Spectrogram 
 					#plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
@@ -174,25 +196,3 @@ for n in range(0,5):
 					# 					plt.plot(coords_array[:,0], coords_array[:,1])
 					# 					plt.show()
 					# '''
-
-			
-					spec2 = 10 * np.log10(MDF)
-
-					middle_column2 = spec2[:, middle_index]
-					vmin = np.min(middle_column2)
-					vmax = np.max(middle_column2)
-
-					fig = plt.figure(figsize=(1.5,3))
-					plt.margins(x=0)
-					plt.plot(middle_column2,frequencies, c='c')
-					plt.ylim(0,int(fs/2))
-					plt.xlim(vmax*1.1,vmin)
-					plt.tick_params(left = False, right = False , labelleft = False , 
-									labelbottom = False, bottom = False)
-					plt.grid(axis='y')
-					plt.show()
-					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5spec2/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'
-					make_base_dir(BASE_DIR)
-					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec2/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'+station[y]+'_'+str(time[n])+'.png', bbox_inches='tight', pad_inches=0)
-					plt.close()
-

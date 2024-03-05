@@ -90,9 +90,6 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 	"""
 	distance, _, _ = gps2dist_azimuth(lat1, lon1, lat2, lon2)  # distance in meters
 	return distance
-def calculate_distance(lat1, lon1, lat2, lon2):
-		distance,_, _ = gps2dist_azimuth(lat1, lon1, lat2, lon2) #distance in meters
-		return distance
 
 #################################################################################################################################
 
