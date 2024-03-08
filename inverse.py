@@ -10,22 +10,22 @@ from obspy.core import UTCDateTime
 import datetime
 from prelude import make_base_dir, distance, closest_encounter
 
-def df(f0,v0,l,tprime0):
-
+def df(f0,v0,l,tprime0,tprime):
+    print(f0,v0,l,tprime0,tprime)
     c = 343 # m/sec speed of sound
-    tprime = np.sqrt(l**2-(v0*tprime0)**2/c)
+    #t = np.sqrt(l**2+(v0*tprime0)**2/c)
    
-    t = (tprime - np.sqrt(tprime**2-(1-v0**2/c**2)*(tprime**2-l**2/c**2)))/(1-v0**2/c**2)
-    f = f0*1/(1+(v0/c)*(v0*t/(np.sqrt(l**2+(v0*t)**2))))
+    #t = (tprime - np.sqrt(tprime**2-(1-v0**2/c**2)*(tprime**2-l**2/c**2)))/(1-v0**2/c**2)
+    #f = f0*1/(1+(v0/c)*(v0*t/(np.sqrt(l**2+(v0*t)**2))))
    
-    ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2))))
+    ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
     #derivative with respect to f0
     #f_derivef0 = 1/(1+(v0/c)*(v0*t/(np.sqrt(l**2+(v0*t)**2))))
     f_derivef0 = np.gradient(ft0p, f0)
 
     #derivative of f with respect to v0
     f_derivev0 = np.gradient(ft0p, v0) 
-    print(f_derivev0)
+    
 
     #derivative of f with respect to l
     f_derivel = np.gradient(ft0p, l)
@@ -34,8 +34,7 @@ def df(f0,v0,l,tprime0):
     #f_derivetprime0 = -(c**3 * f0 * l**2 * v0**2 * (c * np.sqrt((-(v0**2 * tprime**2) * c**2) + tprime**2 - (l**2 / c**2))) + (v0**2 - c**2) * tprime) / (np.sqrt((-(v0**2 * tprime**2) * c**2) + tprime**2 - (l**2 / c**2)) * np.sqrt(l**2 - v0 * (-np.sqrt(((-(v0**2 * tprime**2) / c**2) + tprime**2 - (l**2 / c**2))) + tprime - (v0**2 / c**2)))**2 * (c**3 * np.sqrt(l**2 - v0 * (-np.sqrt(((-(v0**2 * tprime**2) / c**2) + tprime**2 - (l**2 / c**2))) + tprime - (v0**2 / c**2))) - c**2 * v0**2 * np.sqrt((-(v0**2 * tprime**2) / c**2) + tprime**2 - (l**2 / c**2)) + c**2 * v0**2 * tprime - v0**4)**2)
     f_derivetprime0 = np.gradient(ft0p, tprime0)
 
-    return f_derivef0, f_derivev0, f_derivel, f_derivetprime0, tprime
-
+    return f_derivef0, f_derivev0, f_derivel, f_derivetprime0
 
 
 
@@ -45,21 +44,23 @@ def invert_f(m0, coords_array, num_iterations):
     coords_array = np.array(coords_array)
     w, z = coords_array.shape
     fobs = coords_array[:,1]
+    tobs = coords_array[:,0]
     n = num_iterations
     G = np.zeros((w,4)) #partial derivative matrix of f with respect to m
     m = m0
+
     for t in range(n):
-        tpa = []
         fnew = []
-        #for i in range(len(coords_array)):
-        f_derivef0, f_derivev0, f_derivel, f_derivetprime, tprime = df(m[0], m[1], m[2], m[3])
-       
+        f_derivef0, f_derivev0, f_derivel, f_derivetprime = df(m[0], m[1], m[2], m[3], tobs)
         #partial derivative matrix of f with respect to m when m=m0
         for i in range(len(coords_array)):
+            
             G[i,0:4] = [f_derivef0[i], f_derivev0[i], f_derivel[i], f_derivetprime[i]]
-            fnew.append(m[0]*1/(1+(m[1]/c)*(m[1]*int(m[3][i])/(np.sqrt(m[2]**2+(m[1]*m[3][i]))**2)))) # Convert m[3][i] to integer
-     
-            m = np.array(np.array([m0[0],m[1],m[2],m[3][i]])) +inv(G.T@G)@G.T@[fobs - np.array(fnew)] #update m fix this
+            fnew.append(m[0]*1/(1+(m[1]/c)*(m[1]*int(tobs[i])/(np.sqrt(m[2]**2+(m[1]*tobs[i]))**2)))) # Convert m[3][i] to integer
+
+        print((G))
+        print(G.T.shape)
+        m = np.reshape(np.array(m0), (4, 1)) + np.reshape(inv(G.T@G)@G.T@[np.reshape(fobs, ((i+1), 1)) - np.reshape(np.array(fnew), ((i+1), 1))], (4,1)) 
         m0 = m
     return m
 
@@ -156,13 +157,14 @@ for n in range(0,5):
                     # Convert the list of coordinates to a numpy array
                     coords_array = np.array(coords)
 
-
+                    t0 = 120
                     f0 = 120
                     t = coords_array[:,0]
                     c = 343
                     v0 = speed*0.514444
                     l = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
-                    m0 = [f0, v0, l, t]
+                    print(l)
+                    m0 = [f0, v0, l, t0]
 
                     m = invert_f(m0, coords_array, 8)
 
