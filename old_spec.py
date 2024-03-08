@@ -21,7 +21,7 @@ flight_num = [530342801,528485724,528473220,528407493,528293430]
 time = [1551066051,1550172833,1550168070,1550165577,1550089044]
 sta = [1022,1272,1173,1283,1004]
 day = [25,14,14,14,13]
-for n in range(2,3):
+for n in range(4,5):
 	ht = datetime.datetime.utcfromtimestamp(time[n])
 	mins = ht.minute
 	secs = ht.second
@@ -128,6 +128,36 @@ for n in range(2,3):
 						c = 343
 						v0 = 122
 						l = 3500
+
+						for f0 in fnot:
+							ft = []
+							for tprime in tpr:
+								ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+								#ft0p = (c/(c-v0))*f0
+								ft.append(ft0p)
+							ax2.plot(tpr, ft, 'k', linewidth=0.5)
+					if n == 3:
+						fnot = [36,73,121,136,144]
+						tprime0 = 116
+						tpr = np.arange(80, 170, 1)
+						c = 343
+						v0 = 142
+						l = 2450
+
+						for f0 in fnot:
+							ft = []
+							for tprime in tpr:
+								ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+								#ft0p = (c/(c-v0))*f0
+								ft.append(ft0p)
+							ax2.plot(tpr, ft, 'k', linewidth=0.5)
+					if n == 4:
+						fnot = [13,27,40,54,67,79,93,108,120,136,147,159,175,189,202,223,239,247,270]
+						tprime0 = 140
+						tpr = np.arange(40, 230, 1)
+						c = 343
+						v0 = 64
+						l = 580
 
 						for f0 in fnot:
 							ft = []
