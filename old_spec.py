@@ -91,87 +91,61 @@ for n in range(0,5):
 					middle_column = spec[:, middle_index]
 					vmin = 0  
 					vmax = np.max(middle_column) 
-					# if n ==0:
-					#     tprime0 = 117
-					#     fnot = [90,112,150,170,225]
-					#     tpr = np.arange(0, 241, 1)
-					#     c = 343
-					#     v0 = 65
-					#     l = 1670 
+					if n == 0:
+						tprime0 = 117
+						fnot = [90, 112, 150, 170, 225]
+						tpr = np.arange(0, 241, 1)
+						c = 343
+						v0 = 65
+						l = 1670
 
-					#     for f0 in fnot:
-					#         ft = []
-					#         for tprime in tpr:
-					#             ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+					if n == 1:
+						fnot = [71, 110, 147, 164, 182, 217, 240]
+						tprime0 = 107
+						tpr = np.arange(0, 241, 1)
+						c = 343
+						v0 = 100
+						l = 2700
 
-					#             ft.append(ft0p)
-					#         ax2.plot(tpr, ft, 'k', linewidth=0.5)
-					# if n == 1:
-					#     fnot = [71,110,147,164,182,217, 240]
-					#     tprime0 = 107
-					#     tpr = np.arange(0, 241, 1)
-					#     c = 343
-					#     v0 = 100
-					#     l = 2700 
+					if n == 2:
+						fnot = [135]
+						tprime0 = 95
+						tpr = np.arange(0, 241, 1)
+						c = 343
+						v0 = 122
+						l = 3500
 
-					#     for f0 in fnot:
-					#         ft = []
-					#         for tprime in tpr:
-					#             ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
-					#             #ft0p = (c/(c-v0))*f0
-					#             ft.append(ft0p)
-					#         ax2.plot(tpr, ft, 'k', linewidth=0.5)
-					# if n == 2:
-					#     fnot = [135]
-					#     tprime0 = 95
-					#     tpr = np.arange(0, 241, 1)
-					#     c = 343
-					#     v0 = 122
-					#     l = 3500
+					if n == 3:
+						fnot = [36,73,121,136,144]
+						tprime0 = 116
+						tpr = np.arange(80, 170, 1)
+						c = 343
+						v0 = 142
+						l = 2450
 
-					#     for f0 in fnot:
-					#         ft = []
-					#         for tprime in tpr:
-					#             ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
-					#             #ft0p = (c/(c-v0))*f0
-					#             ft.append(ft0p)
-					#         ax2.plot(tpr, ft, 'k', linewidth=0.5)
-					# if n == 3:
-					#     fnot = [36,73,121,136,144]
-					#     tprime0 = 116
-					#     tpr = np.arange(80, 170, 1)
-					#     c = 343
-					#     v0 = 142
-					#     l = 2450
+					if n == 4:
+						fnot = [13,27,40,54,67,79,93,108,120,136,147,159,175,189,202,223,239,247,270]
+						tprime0 = 140
+						tpr = np.arange(40, 230, 1)
+						c = 343
+						v0 = 64
+						l = 580
 
-					#     for f0 in fnot:
-					#         ft = []
-					#         for tprime in tpr:
-					#             ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
-					#             #ft0p = (c/(c-v0))*f0
-					#             ft.append(ft0p)
-					#         ax2.plot(tpr, ft, 'k', linewidth=0.5)
-					# if n == 4:
-					#     fnot = [13,27,40,54,67,79,93,108,120,136,147,159,175,189,202,223,239,247,270]
-					#     tprime0 = 140
-					#     tpr = np.arange(40, 230, 1)
-					#     c = 343
-					#     v0 = 64
-					#     l = 580
-
-					#     for f0 in fnot:
-					#         ft = []
-					#         for tprime in tpr:
-					#             ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
-					#             #ft0p = (c/(c-v0))*f0
-					#             ft.append(ft0p)
-					#         ax2.plot(tpr, ft, 'k', linewidth=0.5)
+					for f0 in fnot:
+						ft = []
+						for tprime in tpr:
+							ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+								
+							ft.append(ft0p)
+						ax2.plot(tpr, ft, 'g', linewidth=0.5)
+							
 					# Plot spectrogram
 					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
 					ax2.set_xlabel('Time [s]')
 					v0 = speed * 0.000514444
-					ax2.axvline(x=tim, c = 'c', ls = '--')
-					ax2.axvline(x=(tim+(dist/v0)), c = 'r', ls = '--')
+					#ax2.axvline(x=tim, c = 'c', ls = '--')
+					ax2.axvline(x=tprime0, c = 'g', ls = '--')
+					#ax2.axvline(x=(tim+(dist/v0)), c = 'r', ls = '--')
 					#ax2.plot(tpr, ft, 'k', linewidth=0.5)
 					ax2.set_ylabel('Frequency (Hz)')
 					ax2.margins(x=0)
@@ -196,28 +170,30 @@ for n in range(0,5):
 					ax4.set_xlim(vmax*1.1, vmin) #, width=vmax*1.1-vmin, height=int(fs/2))
 					ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
 					ax4.grid(axis='y')
-					#plt.show()
-					#BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'
-					#make_base_dir(BASE_DIR)
-					#fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
-					#plt.close()
-
-
-					l = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
-					start_time = tr[2].stats.starttime + (mins * 60) + secs - tim
-
-
-					tpr = np.arange(40, 230, 1)
-					middle_index = len(times) // 2
-
-					for tnew in tpr:
-						column = spec[50:250, tnew]
-						peaks, _ = signal.find_peaks(column, prominence=10)
-						sorted_peaks = sorted(peaks, key=lambda x: column[x], reverse=True)[:12]  # Select the 12 largest peaks
-						
-						# Scatter plot
-						ax2.scatter([tnew] * len(sorted_peaks), sorted_peaks + 50, marker='x', color='k', linewidth=0.5)
 					plt.show()
+					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'
+					make_base_dir(BASE_DIR)
+					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
+					plt.close()
+
+
+					'''
+										l = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
+										start_time = tr[2].stats.starttime + (mins * 60) + secs - tim
+
+
+										tpr = np.arange(40, 230, 1)
+										middle_index = len(times) // 2
+
+										for tnew in tpr:
+											column = spec[50:250, tnew]
+											peaks, _ = signal.find_peaks(column, prominence=10)
+											sorted_peaks = sorted(peaks, key=lambda x: column[x], reverse=True)[:12]  # Select the 12 largest peaks
+											
+											# Scatter plot
+											ax2.scatter([tnew] * len(sorted_peaks), sorted_peaks + 50, marker='x', color='k', linewidth=0.5)
+										plt.show()
+					'''
 					# Find the center of the trace
 		
 					#plt.figure()
