@@ -92,12 +92,12 @@ for n in range(0,5):
 					vmin = 0  
 					vmax = np.max(middle_column) 
 					if n == 0:
-						tprime0 = 117
-						fnot = [90, 112, 150, 170, 225]
+						tprime0 = 112
+						fnot = [92, 115, 150, 170, 228]
 						tpr = np.arange(0, 241, 1)
 						c = 343
-						v0 = 65
-						l = 1670
+						v0 = 68
+						l = 2135
 
 					if n == 1:
 						fnot = [71, 110, 147, 164, 182, 217, 240]
@@ -108,12 +108,12 @@ for n in range(0,5):
 						l = 2700
 
 					if n == 2:
-						fnot = [135]
-						tprime0 = 95
+						fnot = [131]
+						tprime0 = 93
 						tpr = np.arange(0, 241, 1)
 						c = 343
-						v0 = 122
-						l = 3500
+						v0 = 139
+						l = 4650
 
 					if n == 3:
 						fnot = [36,73,121,136,144]
@@ -135,6 +135,7 @@ for n in range(0,5):
 						ft = []
 						for tprime in tpr:
 							ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+							#pla distan 
 								
 							ft.append(ft0p)
 						ax2.plot(tpr, ft, 'g', linewidth=0.5)
