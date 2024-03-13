@@ -156,15 +156,55 @@ for n in range(0,5):
                     plt.show(block=True)
                     # Convert the list of coordinates to a numpy array
                     coords_array = np.array(coords)
+                    if n == 0:
+                        tprime0 = 112
+                        fnot = [93, 115, 153, 172, 228]
+                        tpr = np.arange(0, 241, 1)
+                        c = 343
+                        v0 = 68
+                    if n == 1:
+                        fnot = [71, 110, 147, 164, 182, 217, 240]
+                        tprime0 = 107
+                        tpr = np.arange(0, 241, 1)
+                        c = 343
+                        v0 = 100
+                        l = 2700
 
-                    t0 = 120
-                    f0 = 120
-                    t = coords_array[:,0]
-                    c = 343
-                    v0 = speed*0.514444
-                    l = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
-                    print(l)
-                    m0 = [f0, v0, l, t0]
+                    if n == 2:
+                        fnot = [131]
+                        tprime0 = 93
+                        tpr = np.arange(0, 241, 1)
+                        c = 343
+                        v0 = 139
+                    if n == 3:
+                        fnot = [36,73,121,136,144]
+                        tprime0 = 116
+                        tpr = np.arange(80, 170, 1)
+                        c = 343
+                        v0 = 142
+                    if n == 4:
+                        fnot = [13,27,40,54,67,79,93,108,120,136,147,159,175,189,202,223,239,247,270]
+                        tprime0 = 140
+                        tpr = np.arange(40, 230, 1)
+                        c = 343
+                        v0 = 64
+                        l = 580
+
+                    for f0 in fnot:
+                        ft = []
+                        for tprime in tpr:
+                            ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+                            #pla distan 
+                            ft.append(ft0p)
+                        ax2.plot(tpr, ft, 'g', linewidth=0.5)
+                    #t0 = 120
+                    #f0 = 120
+                    #t = coords_array[:,0]
+                    #c = 343
+                    #v0 = speed*0.514444
+                    #l = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
+                    #print(l)
+                    m0 = [f0, v0, l, tprime0]
 
                     m = invert_f(m0, coords_array, 8)
 
