@@ -196,7 +196,7 @@ for n in range(0,5):
                             ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
                             #pla distan 
                             ft.append(ft0p)
-                        ax2.plot(tpr, ft, 'g', linewidth=0.5)
+                        #ax2.plot(tpr, ft, 'g', linewidth=0.5)
                     #t0 = 120
                     #f0 = 120
                     #t = coords_array[:,0]
