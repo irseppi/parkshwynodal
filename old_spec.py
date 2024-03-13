@@ -93,7 +93,7 @@ for n in range(0,5):
 					vmax = np.max(middle_column) 
 					if n == 0:
 						tprime0 = 112
-						fnot = [92, 115, 150, 170, 228]
+						fnot = [93, 115, 153, 172, 228]
 						tpr = np.arange(0, 241, 1)
 						c = 343
 						v0 = 68
