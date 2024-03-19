@@ -11,33 +11,29 @@ import datetime
 from prelude import make_base_dir, distance, closest_encounter
 
 def df(f0,v0,l,tprime0,tprime):
-    print(f0,v0,l,tprime0,tprime)
+    
     c = 343 # m/sec speed of sound
-    #t = np.sqrt(l**2+(v0*tprime0)**2/c)
-   
-    #t = (tprime - np.sqrt(tprime**2-(1-v0**2/c**2)*(tprime**2-l**2/c**2)))/(1-v0**2/c**2)
-    #f = f0*1/(1+(v0/c)*(v0*t/(np.sqrt(l**2+(v0*t)**2))))
-   
-    ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+    
+    ft0p = []
+    for i in range(len(tprime)):
+        t = ((tprime[i] - tprime0)- np.sqrt((tprime[i]-tprime0)**2-(1-v0**2/c**2)*((tprime[i]-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
+        f = f0*(1/(1+(v0/c)*(v0*t/(np.sqrt(l**2+(v0*t)**2)))))
+        ft0p.append(f)
+    
     #derivative with respect to f0
-    #f_derivef0 = 1/(1+(v0/c)*(v0*t/(np.sqrt(l**2+(v0*t)**2))))
     f_derivef0 = np.gradient(ft0p, f0)
-
+    print(f_derivef0)
     #derivative of f with respect to v0
     f_derivev0 = np.gradient(ft0p, v0) 
-    
-
+    print(f_derivev0)
     #derivative of f with respect to l
     f_derivel = np.gradient(ft0p, l)
-
-    #derivative of f with respect to tprime
-    #f_derivetprime0 = -(c**3 * f0 * l**2 * v0**2 * (c * np.sqrt((-(v0**2 * tprime**2) * c**2) + tprime**2 - (l**2 / c**2))) + (v0**2 - c**2) * tprime) / (np.sqrt((-(v0**2 * tprime**2) * c**2) + tprime**2 - (l**2 / c**2)) * np.sqrt(l**2 - v0 * (-np.sqrt(((-(v0**2 * tprime**2) / c**2) + tprime**2 - (l**2 / c**2))) + tprime - (v0**2 / c**2)))**2 * (c**3 * np.sqrt(l**2 - v0 * (-np.sqrt(((-(v0**2 * tprime**2) / c**2) + tprime**2 - (l**2 / c**2))) + tprime - (v0**2 / c**2))) - c**2 * v0**2 * np.sqrt((-(v0**2 * tprime**2) / c**2) + tprime**2 - (l**2 / c**2)) + c**2 * v0**2 * tprime - v0**4)**2)
+    print(f_derivel)
+    #derivative of f with respect to tprime0
     f_derivetprime0 = np.gradient(ft0p, tprime0)
-
+    print(f_derivetprime0)
+    #print(f_derivef0, f_derivev0, f_derivel, f_derivetprime0)
     return f_derivef0, f_derivev0, f_derivel, f_derivetprime0
-
-
-
 
 
 def invert_f(m0, coords_array, num_iterations):
@@ -45,28 +41,28 @@ def invert_f(m0, coords_array, num_iterations):
     w, z = coords_array.shape
     fobs = coords_array[:,1]
     tobs = coords_array[:,0]
-    n = num_iterations
     G = np.zeros((w,4)) #partial derivative matrix of f with respect to m
     m = m0
-
-    for t in range(n):
+    n = 0
+    #print(m)
+    while n < num_iterations:
         fnew = []
-        f_derivef0, f_derivev0, f_derivel, f_derivetprime = df(m[0], m[1], m[2], m[3], tobs)
+        f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(m[0], m[1], m[2], m[3], tobs)
         #partial derivative matrix of f with respect to m when m=m0
         for i in range(len(coords_array)):
-            
-            G[i,0:4] = [f_derivef0[i], f_derivev0[i], f_derivel[i], f_derivetprime[i]]
-            fnew.append(m[0]*1/(1+(m[1]/c)*(m[1]*int(tobs[i])/(np.sqrt(m[2]**2+(m[1]*tobs[i]))**2)))) # Convert m[3][i] to integer
+            #f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(m[0], m[1], m[2], m[3], tobs[i])
+            #print(f_derivef0[i], f_derivev0[i], f_derivel[i], f_derivetprime0[i])
+            G[i,0:4] = [f_derivef0[i], f_derivev0[i], f_derivel[i], f_derivetprime0[i]]
+            fnew.append(m[0]*1/(1+(m[1]/c)*(m[1]*tobs[i]/(np.sqrt(m[2]**2+(m[1]*tobs[i]))**2)))) # Convert m[3][i] to integer
 
-        print((G))
-        print(G.T.shape)
+        #print((G.T@G))
+        #print((G.T@G))
+        #print(np.linalg.det(G.T@G))
+        #print(np.reshape(np.array(m0), (4, 1)).shape)
         m = np.reshape(np.array(m0), (4, 1)) + np.reshape(inv(G.T@G)@G.T@[np.reshape(fobs, ((i+1), 1)) - np.reshape(np.array(fnew), ((i+1), 1))], (4,1)) 
         m0 = m
+        n += 1
     return m
-
-
-
-
 
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -142,8 +138,6 @@ for n in range(0,5):
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                     
-
-                    
                     def onclick(event):
                         global coords
                         coords.append((event.xdata, event.ydata))
@@ -156,54 +150,38 @@ for n in range(0,5):
                     plt.show(block=True)
                     # Convert the list of coordinates to a numpy array
                     coords_array = np.array(coords)
+
                     if n == 0:
                         tprime0 = 112
-                        fnot = [93, 115, 153, 172, 228]
-                        tpr = np.arange(0, 241, 1)
-                        c = 343
+                        f0 = 115
                         v0 = 68
+                        l = 2135
+
                     if n == 1:
-                        fnot = [71, 110, 147, 164, 182, 217, 240]
+                        f0 = 110
                         tprime0 = 107
-                        tpr = np.arange(0, 241, 1)
-                        c = 343
                         v0 = 100
                         l = 2700
 
                     if n == 2:
-                        fnot = [131]
+                        f0 = 131
                         tprime0 = 93
-                        tpr = np.arange(0, 241, 1)
-                        c = 343
                         v0 = 139
+                        l = 4650
+
                     if n == 3:
-                        fnot = [36,73,121,136,144]
+                        f0 = 121
                         tprime0 = 116
-                        tpr = np.arange(80, 170, 1)
-                        c = 343
                         v0 = 142
+                        l = 2450
+
                     if n == 4:
-                        fnot = [13,27,40,54,67,79,93,108,120,136,147,159,175,189,202,223,239,247,270]
+                        f0 = 120
                         tprime0 = 140
-                        tpr = np.arange(40, 230, 1)
-                        c = 343
                         v0 = 64
                         l = 580
 
-                    for f0 in fnot:
-                        ft = []
-                        for tprime in tpr:
-                            ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
-                            #pla distan 
-                            ft.append(ft0p)
-                        #ax2.plot(tpr, ft, 'g', linewidth=0.5)
-                    #t0 = 120
-                    #f0 = 120
-                    #t = coords_array[:,0]
-                    #c = 343
-                    #v0 = speed*0.514444
-                    #l = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
-                    #print(l)
+                    c = 343
                     m0 = [f0, v0, l, tprime0]
 
                     m = invert_f(m0, coords_array, 8)
