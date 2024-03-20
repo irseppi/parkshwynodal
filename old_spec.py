@@ -103,7 +103,7 @@ for n in range(0,5):
 						l = 2135
 
 					if n == 1:
-						fnot = [71, 110, 147, 164, 182, 217, 240]
+						fnot = [37, 56, 73, 110, 146, 165, 182, 218, 238, 256, 275]
 						tprime0 = 107
 						tpr = np.arange(0, 241, 1)
 						c = 343
@@ -111,7 +111,7 @@ for n in range(0,5):
 						l = 2700
 
 					if n == 2:
-						fnot = [131]
+						fnot = [79,131,261]
 						tprime0 = 93
 						tpr = np.arange(0, 241, 1)
 						c = 343
@@ -127,7 +127,7 @@ for n in range(0,5):
 						l = 2450
 
 					if n == 4:
-						fnot = [13,27,40,54,67,79,93,108,120,136,147,159,175,189,202,223,239,247,270]
+						fnot = [13,27,40,47,54,60,67,74,80,87,90,94,101,108,114,121,127,134,148,160,177,189,202,223,239,247,270]
 						tprime0 = 140
 						tpr = np.arange(40, 230, 1)
 						c = 343
@@ -140,20 +140,20 @@ for n in range(0,5):
 							ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
 								
 							ft.append(ft0p)
-						#ax2.plot(tpr, ft, 'g', linewidth=0.5)
+						ax2.plot(tpr, ft, 'g', linewidth=0.5)
 							
 					# Plot spectrogram
 					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
 					ax2.set_xlabel('Time [s]')
 					v0 = speed * 0.000514444
-					ax2.axvline(x=tim, c = 'c', ls = '--', label='Wave generated')
-					#ax2.axvline(x=tprime0, c = 'g', ls = '--')
+					ax2.axvline(x=tim, c = 'c', ls = '--', label='Wave generated (t0): '+str(tim)+' sec')
+					ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated t0: '+str(tprime0)+' sec')
 					print(calc_time(tim,dist_m,alt_m))
 					tarrive = calc_time(tim,dist_m,alt_m)
-					ax2.axvline(x=calc_time(tim,dist_m,alt_m), c = 'r', ls = '--',label='Wave arrvial: '+str(int(tarrive-120))+' sec later')
-					#ax2.plot(tpr, ft, 'k', linewidth=0.5)
+					ax2.axvline(x=calc_time(tim,dist_m,alt_m), c = 'r', ls = '--',label='Wave arrvial: '+str(int(tarrive-120))+' sec after t0')
 					ax2.legend(loc='upper right',fontsize = 'x-small')
 					ax2.set_ylabel('Frequency (Hz)')
+					ax2.set_title("Forward Model: t'= "+str(tprime0)+' sec, v0 = '+str(int(speed_mps))+' m/s, l = '+str(int(dist_m))+' m, \n' + 'f0 = '+str(fnot)+' Hz', fontsize='x-small')
 					ax2.margins(x=0)
 					ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
 
