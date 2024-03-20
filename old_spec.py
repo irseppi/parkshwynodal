@@ -11,7 +11,7 @@ from obspy.geodetics import gps2dist_azimuth
 from prelude import make_base_dir, distance
 import datetime
 from obspy import UTCDateTime
-from prelude import make_base_dir, distance, calculate_distance, closest_encounter
+from prelude import make_base_dir, distance, calculate_distance, closest_encounter, calc_time
 
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -49,12 +49,15 @@ for n in range(0,5):
 	head = flight_data['heading']
 	for line in range(len(tm)):
 		if str(tm[line]) == str(time[n]):
-			speed = flight_data['speed'][line]
-			alt = flight_data['altitude'][line]
+			speed_knots = flight_data['speed'][line]
+			speed_mps = speed_knots * 0.514444
+			alt_ft = flight_data['altitude'][line]
+			alt_m = alt_ft * 0.3048
 			for y in range(len(station)):
 				if str(station[y]) == str(sta[n]):
-					dist = distance(seismo_latitudes[y], seismo_longitudes[y], flight_latitudes[line], flight_longitudes[line])	
-
+					dist_km = distance(seismo_latitudes[y], seismo_longitudes[y], flight_latitudes[line], flight_longitudes[line])	
+					dist_m = dist_km * 1000
+					
 					p = "/scratch/naalexeev/NODAL/2019-02-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-02-"+day2+"T"+h_u+":00:00.000000Z."+station[y]+".mseed"
 					tr = obspy.read(p)
 					tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - tim, tr[2].stats.starttime + (mins * 60) + secs + tim)
@@ -137,16 +140,19 @@ for n in range(0,5):
 							ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
 								
 							ft.append(ft0p)
-						ax2.plot(tpr, ft, 'g', linewidth=0.5)
+						#ax2.plot(tpr, ft, 'g', linewidth=0.5)
 							
 					# Plot spectrogram
 					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
 					ax2.set_xlabel('Time [s]')
 					v0 = speed * 0.000514444
-					#ax2.axvline(x=tim, c = 'c', ls = '--')
-					ax2.axvline(x=tprime0, c = 'g', ls = '--')
-					#ax2.axvline(x=(tim+(dist/v0)), c = 'r', ls = '--')
+					ax2.axvline(x=tim, c = 'c', ls = '--', label='Wave generated')
+					#ax2.axvline(x=tprime0, c = 'g', ls = '--')
+					print(calc_time(tim,dist_m,alt_m))
+					tarrive = calc_time(tim,dist_m,alt_m)
+					ax2.axvline(x=calc_time(tim,dist_m,alt_m), c = 'r', ls = '--',label='Wave arrvial: '+str(int(tarrive-120))+' sec later')
 					#ax2.plot(tpr, ft, 'k', linewidth=0.5)
+					ax2.legend(loc='upper right',fontsize = 'x-small')
 					ax2.set_ylabel('Frequency (Hz)')
 					ax2.margins(x=0)
 					ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
