@@ -17,25 +17,26 @@ seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 station = seismo_data['Station']
-flight_num = [530342801,528485724,528473220,528407493,528293430]
-time = [1551066051,1550172833,1550168070,1550165577,1550089044]
-sta = [1022,1272,1173,1283,1004]
-day = [25,14,14,14,13]
-for n in range(0,5):
+flight_num = [530342801,528485724,528473220,528407493,528293430,527937367,529741194,529776675,529179112,530165646]
+time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,1550773710,1550787637,1550511447,1550974151]
+sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV"]
+day = [25,14,14,14,13,11,21,21,18,24]
+
+for n in range(9,10):
 	ht = datetime.datetime.utcfromtimestamp(time[n])
 	mins = ht.minute
 	secs = ht.second
 	h = ht.hour
 	tim = 120	
-	h_u = str(h+1)
+	h_u = h+1
 	if h < 23:			
-		day2 = str(day[n])
+		day2 = day[n]
 		if h < 10:
 			h_u = '0'+str(h+1)
 			h = '0'+str(h)
 		else:
-			h_u = str(h+1)
-			h = str(h)
+			h_u = h+1
+			h = h
 	else:
 		h_u = '00'
 		day2 = str(day[n]+1)
@@ -57,14 +58,25 @@ for n in range(0,5):
 				if str(station[y]) == str(sta[n]):
 					dist_km = distance(seismo_latitudes[y], seismo_longitudes[y], flight_latitudes[line], flight_longitudes[line])	
 					dist_m = dist_km * 1000
-					
-					p = "/scratch/naalexeev/NODAL/2019-02-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-02-"+day2+"T"+h_u+":00:00.000000Z."+station[y]+".mseed"
-					tr = obspy.read(p)
-					tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - tim, tr[2].stats.starttime + (mins * 60) + secs + tim)
-					data = tr[2][0:-1]
-					fs = int(tr[2].stats.sampling_rate)
-					title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'						
-					t = tr[2].times()
+					if isinstance(sta[n], str):
+						day_of_year = str((ht - datetime.datetime(2019, 1, 1)).days + 1)
+	
+						n = "/aec/wf/2019/0"+day_of_year+"/"+str(sta[n])+".*Z.20190"+day_of_year+"000000+"
+						tr = obspy.read(n)
+						
+						tr[0].trim(tr[0].stats.starttime +(int(h) *60 *60) + (mins * 60) + secs - tim, tr[0].stats.starttime +(int(h) *60 *60) + (mins * 60) + secs + tim)
+						data = tr[0][0:-1]
+						fs = int(tr[0].stats.sampling_rate)
+						title    = f'{tr[0].stats.network}.{tr[0].stats.station}.{tr[0].stats.location}.{tr[0].stats.channel} − starting {tr[0].stats["starttime"]}'						
+						t                  = tr[0].times()
+					else:
+						p = "/scratch/naalexeev/NODAL/2019-02-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-02-"+day2+"T"+h_u+":00:00.000000Z."+station[y]+".mseed"
+						tr = obspy.read(p)
+						tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - tim, tr[2].stats.starttime + (mins * 60) + secs + tim)
+						data = tr[2][0:-1]
+						fs = int(tr[2].stats.sampling_rate)
+						title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'						
+						t = tr[2].times()
 					# Time array
 					t = np.arange(len(data)) / fs
 					g = fs*240
@@ -94,6 +106,7 @@ for n in range(0,5):
 					middle_column = spec[:, middle_index]
 					vmin = 0  
 					vmax = np.max(middle_column) 
+					'''
 					if n == 0:
 						tprime0 = 112
 						fnot = [93, 115, 153, 172, 228]
@@ -131,29 +144,32 @@ for n in range(0,5):
 						tprime0 = 140
 						tpr = np.arange(40, 230, 1)
 						c = 343
-						v0 = 64
+						v0 = 67
+						alt = 480
+						dist_h = 1
 						l = 580
 
 					for f0 in fnot:
 						ft = []
 						for tprime in tpr:
+							l = np.sqrt(dist_h**2 + alt**2)
 							ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
 								
 							ft.append(ft0p)
 						ax2.plot(tpr, ft, 'g', linewidth=0.5)
-							
+					'''	
 					# Plot spectrogram
 					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
 					ax2.set_xlabel('Time [s]')
 					#v0 = speed * 0.000514444
 					ax2.axvline(x=tim, c = 'c', ls = '--', label='Wave generated (t0): '+str(tim)+' sec')
-					ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated t0: '+str(tprime0)+' sec')
+					#ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated t0: '+str(tprime0)+' sec')
 					print(calc_time(tim,dist_m,alt_m))
 					tarrive = calc_time(tim,dist_m,alt_m)
 					ax2.axvline(x=calc_time(tim,dist_m,alt_m), c = 'r', ls = '--',label='Wave arrvial: '+str(int(tarrive-120))+' sec after t0')
 					ax2.legend(loc='upper right',fontsize = 'x-small')
 					ax2.set_ylabel('Frequency (Hz)')
-					ax2.set_title("Forward Model: t'= "+str(tprime0)+' sec, v0 = '+str(v0)+' m/s, l = '+str(l)+' m, \n' + 'f0 = '+str(fnot)+' Hz', fontsize='x-small')
+					#ax2.set_title("Forward Model: t'= "+str(tprime0)+' sec, v0 = '+str(v0)+' m/s, l = '+str(l)+' m, \n' + 'f0 = '+str(fnot)+' Hz', fontsize='x-small')
 					ax2.margins(x=0)
 					ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
 
@@ -177,9 +193,9 @@ for n in range(0,5):
 					ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
 					ax4.grid(axis='y')
 					plt.show()
-					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'
+					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+sta[n]+'/'
 					make_base_dir(BASE_DIR)
-					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
+					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+sta[n]+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
 					plt.close()
 
 
