@@ -145,7 +145,7 @@ for n in range(0,5):
 					# Plot spectrogram
 					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
 					ax2.set_xlabel('Time [s]')
-					v0 = speed * 0.000514444
+					#v0 = speed * 0.000514444
 					ax2.axvline(x=tim, c = 'c', ls = '--', label='Wave generated (t0): '+str(tim)+' sec')
 					ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated t0: '+str(tprime0)+' sec')
 					print(calc_time(tim,dist_m,alt_m))
@@ -153,7 +153,7 @@ for n in range(0,5):
 					ax2.axvline(x=calc_time(tim,dist_m,alt_m), c = 'r', ls = '--',label='Wave arrvial: '+str(int(tarrive-120))+' sec after t0')
 					ax2.legend(loc='upper right',fontsize = 'x-small')
 					ax2.set_ylabel('Frequency (Hz)')
-					ax2.set_title("Forward Model: t'= "+str(tprime0)+' sec, v0 = '+str(int(speed_mps))+' m/s, l = '+str(int(dist_m))+' m, \n' + 'f0 = '+str(fnot)+' Hz', fontsize='x-small')
+					ax2.set_title("Forward Model: t'= "+str(tprime0)+' sec, v0 = '+str(v0)+' m/s, l = '+str(l)+' m, \n' + 'f0 = '+str(fnot)+' Hz', fontsize='x-small')
 					ax2.margins(x=0)
 					ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
 
