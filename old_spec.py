@@ -12,7 +12,6 @@ from prelude import make_base_dir, distance
 import datetime
 from obspy import UTCDateTime
 from prelude import make_base_dir, distance, calculate_distance, closest_encounter, calc_time
-
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
@@ -22,7 +21,7 @@ time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,155077
 sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV"]
 day = [25,14,14,14,13,11,21,21,18,24]
 
-for n in range(9,10):
+for n in range(5,10):
 	ht = datetime.datetime.utcfromtimestamp(time[n])
 	mins = ht.minute
 	secs = ht.second
@@ -61,8 +60,8 @@ for n in range(9,10):
 					if isinstance(sta[n], str):
 						day_of_year = str((ht - datetime.datetime(2019, 1, 1)).days + 1)
 	
-						n = "/aec/wf/2019/0"+day_of_year+"/"+str(sta[n])+".*Z.20190"+day_of_year+"000000+"
-						tr = obspy.read(n)
+						p = "/aec/wf/2019/0"+day_of_year+"/"+str(sta[n])+".*Z.20190"+day_of_year+"000000+"
+						tr = obspy.read(p)
 						
 						tr[0].trim(tr[0].stats.starttime +(int(h) *60 *60) + (mins * 60) + secs - tim, tr[0].stats.starttime +(int(h) *60 *60) + (mins * 60) + secs + tim)
 						data = tr[0][0:-1]
@@ -106,7 +105,7 @@ for n in range(9,10):
 					middle_column = spec[:, middle_index]
 					vmin = 0  
 					vmax = np.max(middle_column) 
-					'''
+					
 					if n == 0:
 						tprime0 = 112
 						fnot = [93, 115, 153, 172, 228]
@@ -145,31 +144,69 @@ for n in range(9,10):
 						tpr = np.arange(40, 230, 1)
 						c = 343
 						v0 = 67
-						alt = 480
-						dist_h = 1
 						l = 580
+
+					if n == 5:
+						fnot = [12.5,17.5]
+						tprime0 = 123
+						tpr = np.arange(105, 140, 1)
+						c = 343
+						v0 = 112
+						l = 1150
+
+					if n == 6:
+						fnot = [18,36]
+						tprime0 = 133
+						tpr = np.arange(100, 200, 1)
+						c = 343
+						v0 = 92
+						l = 2400
+
+					if n == 7:
+						fnot = [26, 49]		
+						tprime0 = 122
+						tpr = np.arange(50, 200, 1)
+						c = 343
+						v0 = 126
+						l = 3000
+
+					if n == 8:
+						fnot = [27,57.7,87.7]
+						tprime0 = 100
+						tpr = np.arange(50, 250, 1)
+						c = 343
+						v0 = 67
+						l = 2300
+
+					if n == 9:
+						fnot = [26]
+						tprime0 = 114
+						tpr = np.arange(60, 170, 1)
+						c = 343
+						v0 = 144
+						l = 1900
 
 					for f0 in fnot:
 						ft = []
 						for tprime in tpr:
-							l = np.sqrt(dist_h**2 + alt**2)
+							#l = np.sqrt(dist_h**2 + alt**2)
 							ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
 								
 							ft.append(ft0p)
 						ax2.plot(tpr, ft, 'g', linewidth=0.5)
-					'''	
+					
 					# Plot spectrogram
 					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
 					ax2.set_xlabel('Time [s]')
-					#v0 = speed * 0.000514444
 					ax2.axvline(x=tim, c = 'c', ls = '--', label='Wave generated (t0): '+str(tim)+' sec')
-					#ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated t0: '+str(tprime0)+' sec')
-					print(calc_time(tim,dist_m,alt_m))
+					ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated t0: '+str(tprime0)+' sec')
+					
 					tarrive = calc_time(tim,dist_m,alt_m)
 					ax2.axvline(x=calc_time(tim,dist_m,alt_m), c = 'r', ls = '--',label='Wave arrvial: '+str(int(tarrive-120))+' sec after t0')
 					ax2.legend(loc='upper right',fontsize = 'x-small')
 					ax2.set_ylabel('Frequency (Hz)')
-					#ax2.set_title("Forward Model: t'= "+str(tprime0)+' sec, v0 = '+str(v0)+' m/s, l = '+str(l)+' m, \n' + 'f0 = '+str(fnot)+' Hz', fontsize='x-small')
+					
+					ax2.set_title("Forward Model: t'= "+str(tprime0)+' sec, v0 = '+str(v0)+' m/s, l = '+str(l)+' m, \n' + 'f0 = '+str(fnot)+' Hz', fontsize='x-small')
 					ax2.margins(x=0)
 					ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
 
@@ -199,6 +236,34 @@ for n in range(9,10):
 					plt.close()
 
 
+
+					'''
+					# Find the center of the trace
+					center_index = len(data) // 2
+					center_time = t[center_index]
+					peaks, _ = signal.find_peaks(middle_column, prominence=10) #, distance = 10) 
+					np.diff(peaks)
+					fig = plt.figure(figsize=(10,6))
+					plt.grid()
+					
+					plt.plot(frequencies, middle_column, c='c')
+					plt.plot(peaks, middle_column[peaks], "x")
+					for g in range(len(peaks)):
+						plt.text(peaks[g], middle_column[peaks[g]], peaks[g])
+					plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
+
+					plt.xlim(0,int(fs/2))
+					plt.ylim(vmin,vmax*1.1)
+					plt.xlabel('Freq [Hz]')
+					plt.ylabel('Amplitude [dB]')
+					plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
+					plt.show()
+					
+					make_base_dir('/scratch/irseppi/nodal_data/plane_info/5spec/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/')
+					
+					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(sta[n])+'_' + str(time[n]) + '.png')
+					plt.close()
+					'''
 					'''
 										l = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
 										start_time = tr[2].stats.starttime + (mins * 60) + secs - tim

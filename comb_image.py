@@ -28,6 +28,8 @@ for d in range(13,15):
 	month.append('02')
 day.append(str(25))
 month.append('02')
+day = ['11','13','14','18','21','24','25']
+month =  ['02','02','02','02','02','02','02']
 #for d in range(1, 10):
 #day.append('0' + str(d))
 #month.append('03')
