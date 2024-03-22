@@ -95,7 +95,7 @@ for line in sta_f.readlines():
                     axs[1].text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=11, fontweight='bold')
                     axs[1].scatter(flight_longitudes[l], flight_latitudes[l], c='lawngreen')
                     axs[1].scatter(seismo_longitudes[t], seismo_latitudes[t], c='pink')
-                    print(head[l], direction)
+                    
                     axs[1].quiver(flight_longitudes[l]-0.01, flight_latitudes[l], np.cos(direction), np.sin(direction), angles='xy') #, scale_units='xy', scale=0.002)
                     
 
@@ -111,7 +111,7 @@ for line in sta_f.readlines():
                     make_base_dir(BASE_DIR)
                     plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all/'+ date + '/'+flight+'/'+station+'/map_'+flight+'_' + str(time[l]) + '.png')
                     plt.close()
-                    print(sta[t], flight)
+                    print(date[l], flight)
                 else:
                     continue
 

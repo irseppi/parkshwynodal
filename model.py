@@ -1,28 +1,97 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-fnot = [37*2, 56*2, 73*2, 110*2, 146*2, 165*2, 182*2, 218*2, 238*2, 256*2, 275*2]
-
-tprime0 = 107
 tpr = np.arange(0, 241, 1)
-c = 343
-v0 = 100
-l = 2700
-plt.figure(figsize=(10, 6))
-for f0 in fnot:
+
+f0_vary = np.arange(0, 250, 20)
+v0_vary = np.arange(0, 200, 20)
+tprime0_vary = np.arange(0, 250, 24)
+l_vary = np.arange(0, 2000, 250)
+
+for n in range(0, 4):
+	f0 = 100
+	tprime0 = 120
+	c = 343
+	v0 = 50
+	l = 1000
+
+	plt.figure(figsize=(10, 6))
+	ft = []
+	if n == 0:
+		norm = plt.Normalize(np.min(f0_vary), np.max(f0_vary))
+		cm = plt.cm.rainbow
+
+		sm = plt.cm.ScalarMappable(cmap=cm, norm=norm)
+		plt.title('Varying f0')
+		for f0 in f0_vary:
+
+			ft = []
+			for tprime in tpr:
+				ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+			
+				ft.append(ft0p)
+			plt.plot(tpr, ft,  color=cm(norm(f0)), linewidth=0.5)
+
+	if n == 1:
+		norm = plt.Normalize(np.min(v0_vary), np.max(v0_vary))
+		cm = plt.cm.rainbow
+
+		sm = plt.cm.ScalarMappable(cmap=cm, norm=norm)
+		plt.title('Varying v0')
+		for v0 in v0_vary:
+			ft = []
+			for tprime in tpr:
+				ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+			
+				ft.append(ft0p)
+			plt.plot(tpr, ft, color=cm(norm(v0)),  linewidth=0.5)
+	if n == 2:
+		norm = plt.Normalize(np.min(tprime0_vary), np.max(tprime0_vary))
+		cm = plt.cm.rainbow
+
+		sm = plt.cm.ScalarMappable(cmap=cm, norm=norm)
+		plt.title("Varying t'")
+		for tprime0 in tprime0_vary:
+			ft = []
+			for tprime in tpr:
+				ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+				
+				ft.append(ft0p)
+			plt.plot(tpr, ft, color=cm(norm(tprime0)), linewidth=0.5)
+			#plt.axvline(x=tprime0, c = 'k', ls = '--')
+	if n == 3:
+		norm = plt.Normalize(np.min(l_vary), np.max(l_vary))
+		cm = plt.cm.rainbow
+
+		sm = plt.cm.ScalarMappable(cmap=cm, norm=norm)
+		plt.title('Varying l')
+		for l in l_vary:
+			ft = []
+			for tprime in tpr:
+				ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+				
+				ft.append(ft0p)
+			plt.plot(tpr, ft, color=cm(norm(l)), linewidth=0.5)
+
+	f0 = 100
+	tprime0 = 120
+	c = 343
+	v0 = 50
+	l = 1000
 	ft = []
 	for tprime in tpr:
 		ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
-			
+				
 		ft.append(ft0p)
-	plt.plot(tpr, ft, 'g', linewidth=0.5)
+	plt.plot(tpr, ft, 'k', linewidth=0.5)
+	plt.axvline(x=tprime0, c = 'k', ls = '--')
 
-plt.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated t0: '+str(tprime0)+' sec')
+	plt.colorbar(sm)
 
-plt.ylabel('Frequency (Hz)')
-plt.title("Forward Model: t'= "+str(tprime0)+' sec, v0 = '+str(int(v0))+' m/s, l = '+str(l)+' m, \n' + 'f0 = '+str(fnot)+' Hz', fontsize='small')
+	plt.ylabel('Frequency (Hz)')
+	plt.xlabel('Time (s)')
+	plt.xlim(0, 240)
+	#plt.ylim(0, 250)
 
-plt.xlim(0, 240)
-
-plt.show()
+	plt.show()
 					
