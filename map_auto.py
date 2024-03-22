@@ -106,12 +106,12 @@ for line in sta_f.readlines():
                     fig.add_artist(con)
                     con = mpatch.ConnectionPatch(xyA=(minl, maxla), xyB=(maxl, maxla), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
                     fig.add_artist(con)
-                              
+                         
                     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all/' + date + '/'+flight+'/'+station+'/'
                     make_base_dir(BASE_DIR)
                     plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all/'+ date + '/'+flight+'/'+station+'/map_'+flight+'_' + str(time[l]) + '.png')
                     plt.close()
-                    print(date[l], flight)
+                    
                 else:
                     continue
 
