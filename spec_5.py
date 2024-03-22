@@ -1,18 +1,13 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import math
-import scipy.io
 import os
 import obspy
 from scipy.signal import spectrogram
 from scipy import signal
 from obspy.geodetics import gps2dist_azimuth
 from datetime import datetime, timedelta
-from pathlib import Path
-from math import radians, sin, cos, sqrt, atan2
-from prelude import make_base_dir, dist_less, load_flights, distance
-from scipy.interpolate import interp1d
+from prelude import make_base_dir, dist_less
 
 def closest_encounter(flight_latitudes, flight_longitudes, timestamp, altitude, speed, head, seismo_latitudes, seismo_longitudes, stations):
 	closest_distance = float('inf')

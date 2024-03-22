@@ -1,27 +1,12 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.signal import spectrogram, windows
+from scipy.signal import spectrogram
 import obspy
-import math
-import matplotlib.pyplot as plt
 import numpy as np
-import scipy.io
 import os
 import obspy
-from obspy.core import UTCDateTime
 import datetime
-from numpy.fft import fft, ifft
 from pathlib import Path
 from scipy import signal
-
-def make_base_dir(base_dir):
-	base_dir = Path(base_dir)
-	if not base_dir.exists():
-		current_path = Path("/")
-		for parent in base_dir.parts:
-			current_path = current_path/parent
-			if not current_path.exists():
-				current_path.mkdir()
 
 text = open('input/all_station_crossing_db.txt', 'r')
 #output = open('okay.txt','w')

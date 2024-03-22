@@ -1,17 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import spectrogram, windows
+from scipy.signal import spectrogram
 import obspy
-import math
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.io
-import os
 import obspy
-from obspy.core import UTCDateTime
 import datetime
-from numpy.fft import fft, ifft
-from pathlib import Path
 from prelude import make_base_dir
 
 text = open('input/all_station_crossing_db.txt', 'r')
