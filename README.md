@@ -3,5 +3,4 @@
 
 ## University of Alaska Fairbanks
 ![stations](sample_image.png)
-![stations](sample_image2.png)
-![stations](sample_image3.png)
+
