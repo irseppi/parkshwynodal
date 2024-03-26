@@ -131,16 +131,21 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 	closest_distance = float('inf')
 	closest_lat = flight_latitudes[index]
 	closest_lon = flight_longitudes[index]
+	timestamp1 = timestamp[index]
 
+	timestamp2 = None
+	closest_lat = flight_latitudes[index]
+	closest_lon = flight_longitudes[index]
 	for i in [index-1, index+1]:
 		if i >= 0 and i < len(flight_latitudes):
 			distance = calculate_distance(flight_latitudes[i], flight_longitudes[i], seismo_latitude, seismo_longitude)
 			if distance < closest_distance:
+				second_closest_lat = flight_latitudes[i]
+				second_closest_lon = flight_longitudes[i]
 				closest_distance = distance
-				closest_lat = flight_latitudes[i]
-				closest_lon = flight_longitudes[i]
+				timestamp2 = timestamp[i]
 
-	line_vector = (flight_latitudes[index] - closest_lat, flight_longitudes[index] - closest_lon)
+	line_vector = (second_closest_lat - closest_lat, second_closest_lon - closest_lon)
 	station_vector = (seismo_latitude - closest_lat, seismo_longitude - closest_lon)
 
 	projection_length_ratio = calculate_projection(line_vector, station_vector)
@@ -150,7 +155,9 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 
 	closest_distance = calculate_distance(closest_point_on_line_lat, closest_point_on_line_lon, seismo_latitude, seismo_longitude)
 
-	return closest_distance
+	closest_time = timestamp1 + projection_length_ratio*(timestamp2 - timestamp1)
+	
+	return closest_distance, closest_time
 
 ###################################################################################################################################
 

@@ -130,22 +130,6 @@ def closest_encounter(flight_latitudes, flight_longitudes, timestamp, altitude, 
 	return time_of_closest_approach, closest_distance, average_speed, heading_direction, avg_alt, closest_seislat, closest_seislon, closest_station, closest_point_on_line
 
 
-def calculate_wave_arrival(closest_time, closest_distance, closest_altitude, aircraft_speed, aircraft_heading, seismo_latitudes, seismo_longitudes):
-	speed_of_sound = 343  # speed of sound in m/s at sea level
-	aircraft_speed_mps = aircraft_speed 
-
-	# calculate the component of the aircraft's speed in the direction of the seismometer
-	#relative_heading = radians(aircraft_heading)
-	#relative_speed = aircraft_speed_mps * cos(relative_heading)
-
-	# calculate the time it takes for the sound to travel from the aircraft to the seismometer
-	time_for_sound_to_travel = np.sqrt((closest_distance)**2 + (closest_altitude)**2) / (speed_of_sound) # + relative_speed)
-
-	wave_arrival_time = closest_time  + timedelta(seconds = time_for_sound_to_travel)
-	print(closest_time, wave_arrival_time)
-	return wave_arrival_time
-
-
 # Load the seismometer location data
 seismo_data = pd.read_csv('input/nodes_stations.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -153,10 +137,11 @@ seismo_longitudes = seismo_data['Longitude']
 stations = seismo_data['Station']
 file_names = ['/scratch/irseppi/nodal_data/flightradar24/20190225_positions/20190225_530342801.csv','/scratch/irseppi/nodal_data/flightradar24/20190214_positions/20190214_528485724.csv','/scratch/irseppi/nodal_data/flightradar24/20190214_positions/20190214_528473220.csv','/scratch/irseppi/nodal_data/flightradar24/20190214_positions/20190214_528407493.csv','/scratch/irseppi/nodal_data/flightradar24/20190213_positions/20190213_528293430.csv']
 
-flight_num = [530342801,528485724,528473220,528407493,528293430]
-time = [1551066051,1550172833,1550168070,1550165577,1550089044]
-sta = [1022,1272,1173,1283,1004]
-day = [25,14,14,14,13]
+flight_num = [530342801,528485724,528473220,528407493,528293430,527937367,529741194,529776675,529179112,530165646]
+time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,1550773710,1550787637,1550511447,1550974151]
+sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV"]
+day = [25,14,14,14,13,11,21,21,18,24]
+
 
 for i in range(0,6):
 	flight_data = pd.read_csv(file_names[i], sep=",")
