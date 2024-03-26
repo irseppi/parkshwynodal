@@ -11,7 +11,7 @@ from obspy.geodetics import gps2dist_azimuth
 from prelude import make_base_dir, distance
 import datetime
 from obspy import UTCDateTime
-from prelude import make_base_dir, distance, calculate_distance, closest_encounter, calc_time
+from prelude import make_base_dir, distance, closest_encounter, calc_time
 
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -141,7 +141,7 @@ for n in range(0,10):
 					tarrive = tim + (time[n] - calc_time(tmid,dist_m,alt_m))
 					tarrive_est = calc_time(tprime0,dist_m,alt_m)
 					print(tmid, tarrive)
-					
+
 					ax2.axvline(x=tarrive, c = 'r', ls = '--',label='Wave arrvial: '+str(tarrive)+'sec')
 					ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated arrival: '+str(tprime0)+' sec')
 					ax2.legend(loc='upper right',fontsize = 'x-small')

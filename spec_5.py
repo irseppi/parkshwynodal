@@ -7,7 +7,7 @@ from scipy.signal import spectrogram
 from scipy import signal
 from obspy.geodetics import gps2dist_azimuth
 from datetime import datetime, timedelta
-from prelude import make_base_dir, dist_less
+from prelude import make_base_dir, dist_less, calc_time
 
 def closest_encounter(flight_latitudes, flight_longitudes, timestamp, altitude, speed, head, seismo_latitudes, seismo_longitudes, stations):
 	closest_distance = float('inf')
@@ -154,7 +154,7 @@ for i in range(0,6):
 
 	if dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes) == True:
 		ctime, cdist, cspeed, chead, calt,  cseislat, cseislon, csta, cpoint = closest_encounter(flight_latitudes, flight_longitudes, timestamp, alt, speed, head, seismo_latitudes, seismo_longitudes, stations)	
-		tm = calculate_wave_arrival(ctime, cdist, calt, cspeed, chead, cseislat, cseislon)
+		tm = calc_time(ctime, cdist, calt)
 
 		ht = ctime
 		h = ht.hour
