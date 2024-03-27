@@ -2,15 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.signal import spectrogram
-from scipy import signal
 import obspy
-import math
-from obspy.core import UTCDateTime
 import datetime
-from obspy.geodetics import gps2dist_azimuth
-from prelude import make_base_dir, distance
-import datetime
-from obspy import UTCDateTime
 from prelude import make_base_dir, distance, closest_encounter, calc_time
 
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
@@ -142,7 +135,7 @@ for n in range(0,10):
 					tarrive_est = calc_time(tprime0,dist_m,alt_m)
 					print(tmid, tarrive)
 
-					ax2.axvline(x=tarrive, c = 'r', ls = '--',label='Wave arrvial: '+str(tarrive)+'sec')
+					ax2.axvline(x=tarrive, c = 'r', ls = '--',label='Wave arrvial: '+str(np.round(tarrive,2))+'sec')
 					ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated arrival: '+str(tprime0)+' sec')
 					ax2.legend(loc='upper right',fontsize = 'x-small')
 					ax2.set_ylabel('Frequency (Hz)')
@@ -174,88 +167,3 @@ for n in range(0,10):
 					make_base_dir(BASE_DIR)
 					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
 					plt.close()
-
-
-
-					'''
-					# Find the center of the trace
-					center_index = len(data) // 2
-					center_time = t[center_index]
-					peaks, _ = signal.find_peaks(middle_column, prominence=10) #, distance = 10) 
-					np.diff(peaks)
-					fig = plt.figure(figsize=(10,6))
-					plt.grid()
-					
-					plt.plot(frequencies, middle_column, c='c')
-					plt.plot(peaks, middle_column[peaks], "x")
-					for g in range(len(peaks)):
-						plt.text(peaks[g], middle_column[peaks[g]], peaks[g])
-					plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
-
-					plt.xlim(0,int(fs/2))
-					plt.ylim(vmin,vmax*1.1)
-					plt.xlabel('Freq [Hz]')
-					plt.ylabel('Amplitude [dB]')
-					plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
-					plt.show()
-					
-					make_base_dir('/scratch/irseppi/nodal_data/plane_info/5spec/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/')
-					
-					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(sta[n])+'_' + str(time[n]) + '.png')
-					plt.close()
-					'''
-					'''
-										l = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
-										start_time = tr[2].stats.starttime + (mins * 60) + secs - tim
-
-
-										tpr = np.arange(40, 230, 1)
-										middle_index = len(times) // 2
-
-										for tnew in tpr:
-											column = spec[50:250, tnew]
-											peaks, _ = signal.find_peaks(column, prominence=10)
-											sorted_peaks = sorted(peaks, key=lambda x: column[x], reverse=True)[:12]  # Select the 12 largest peaks
-											
-											# Scatter plot
-											ax2.scatter([tnew] * len(sorted_peaks), sorted_peaks + 50, marker='x', color='k', linewidth=0.5)
-										plt.show()
-					'''
-					# Find the center of the trace
-		
-					#plt.figure()
-					# Spectrogram 
-					#plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-				
-
-					# '''
-					# 					coords = []
-
-					# 					def onclick(event):
-					# 						global coords
-					# 						coords.append((event.xdata, event.ydata))
-					# 						plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-					# 						plt.draw() 
-					# 						print('Clicked:', event.xdata, event.ydata)  
-					# 					cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-
-					# 					plt.show(block=True)
-					# 					# Convert the list of coordinates to a numpy array
-					# 					coords_array = np.array(coords)
-					# 					print(coords_array)
-					# 					v0 = speed*0.514444
-					# 					c = 343
-					# 					for jj in range(len(coords_array)):
-					# 						print(coords_array[jj][0], coords_array[jj][1])
-					# 						tflight = coords_array[jj][0]-(np.sqrt(coords_array[jj][0]**2-(1-v0**2/c**2)*(coords_array[jj][0]**2-l**2/c**2)))/(1-v0**2/c**2)
-					# 						f0 = coords_array[jj][1]*(1+(v0/c)*(v0*tflight/(np.sqrt(l**2+(v0*tflight)**2))))
-					# 						print('f0 = ', f0)
-											
-					# 					# Save the coordinates to a text file
-					# 					#np.savetxt('home/irseppi/REPOSITORIES/parkshwynodal/coords_'+str(flight_num[n])+'.txt', coords_array)
-									
-					# 					plt.figure()
-					# 					plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-					# 					plt.plot(coords_array[:,0], coords_array[:,1])
-					# 					plt.show()
-					# '''
