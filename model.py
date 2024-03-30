@@ -84,7 +84,7 @@ for n in range(0, 4):
 				
 		ft.append(ft0p)
 	plt.plot(tpr, ft, 'k', linewidth=0.5)
-	plt.axvline(x=tprime0, c = 'k', ls = '--')
+	#plt.axvline(x=tprime0, c = 'k', ls = '--')
 
 	plt.colorbar(sm)
 
@@ -94,4 +94,31 @@ for n in range(0, 4):
 	#plt.ylim(0, 250)
 
 	plt.show()
-					
+
+plt.figure()
+tpr = np.arange(0, 241, 1)
+f0 = 100
+tprime0 = 120
+c = 343
+v0 = 50
+l = 1000
+ft = []
+
+for tprime in tpr:
+	ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+			
+	ft.append(ft0p)
+plt.plot(tpr, ft, 'k', linewidth=0.5)
+l = 10
+ti = [50,200]
+for t in ti:
+	
+	ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+	plt.axhline(ft0p, color='k', linestyle='--')
+
+plt.ylabel('Frequency (Hz)')
+plt.xlabel('Time (s)')
+plt.xlim(0, 240)
+#plt.ylim(0, 250)
+
+plt.show()					
