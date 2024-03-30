@@ -125,7 +125,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 		seismo_longitude (float): Longitude of the seismic station.
 
 	Returns:
-		float: The closest distance between the flight point and the seismic station.
+		float: The closest distance between the flight point and the seismic station and the time this occurrs.
 	"""
 
 	closest_distance = float('inf')
@@ -144,7 +144,11 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 				second_closest_lon = flight_longitudes[i]
 				closest_distance = distance
 				timestamp2 = timestamp[i]
-
+		else: 
+			second_closest_lat = flight_latitudes[index]
+			second_closest_lon = flight_longitudes[index]
+			timestamp2 = timestamp[index]
+			
 	line_vector = (second_closest_lat - closest_lat, second_closest_lon - closest_lon)
 	station_vector = (seismo_latitude - closest_lat, seismo_longitude - closest_lon)
 
