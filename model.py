@@ -8,7 +8,7 @@ v0_vary = np.arange(0, 200, 20)
 tprime0_vary = np.arange(0, 250, 24)
 l_vary = np.arange(0, 2000, 250)
 
-for n in range(0, 4):
+for n in range(0, 3):
 	f0 = 100
 	tprime0 = 120
 	c = 343
@@ -18,6 +18,7 @@ for n in range(0, 4):
 	plt.figure(figsize=(10, 6))
 	ft = []
 	if n == 0:
+		fchange = []
 		#norm = plt.Normalize(np.min(f0_vary), np.max(f0_vary))
 		#cm = plt.cm.rainbow
 
@@ -30,9 +31,13 @@ for n in range(0, 4):
 				ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
 				
 				ft.append(ft0p)
-			plt.scatter(f0, ft[-1]-ft[0]) #,  color=cm(norm(f0)), linewidth=0.5)
-			plt.xlabel('f0')
+			fchange.append(ft[-1]-ft[0])
+			#plt.plot(tpr, ft, color=cm(norm(v0)),  linewidth=0.5)
+		plt.plot(f0_vary, fchange) #,  color=cm(norm(f0)), linewidth=0.5)
+		plt.xlabel('f0')
+
 	if n == 1:
+		fchange = []
 		#norm = plt.Normalize(np.min(v0_vary), np.max(v0_vary))
 		#cm = plt.cm.rainbow
 
@@ -44,61 +49,30 @@ for n in range(0, 4):
 				ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
 			
 				ft.append(ft0p)
+			fchange.append(ft[-1]-ft[0])
 			#plt.plot(tpr, ft, color=cm(norm(v0)),  linewidth=0.5)
-			plt.scatter(v0, ft[-1]-ft[0])
-			plt.xlabel('v0')
+		plt.plot(v0_vary, fchange)
+		plt.xlabel('v0')
 	if n == 2:
-		#norm = plt.Normalize(np.min(tprime0_vary), np.max(tprime0_vary))
-		#cm = plt.cm.rainbow
-
-		#sm = plt.cm.ScalarMappable(cmap=cm, norm=norm)
-		plt.title("Varying t'")
-		for tprime0 in tprime0_vary:
-			ft = []
-			for tprime in tpr:
-				ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
-				
-				ft.append(ft0p)
-			#plt.plot(tpr, ft, color=cm(norm(tprime0)), linewidth=0.5)
-			#plt.axvline(x=tprime0, c = 'k', ls = '--')
-			plt.scatter(tprime0, ft[-1]-ft[0])
-			plt.xlabel("t'")
-	if n == 3:
 		#norm = plt.Normalize(np.min(l_vary), np.max(l_vary))
 		#cm = plt.cm.rainbow
 
 		#sm = plt.cm.ScalarMappable(cmap=cm, norm=norm)
 		plt.title('Varying l')
+		
+		fchange = []
 		for l in l_vary:
 			ft = []
 			for tprime in tpr:
 				ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
 				
 				ft.append(ft0p)
+			
+			fchange.append(ft[-1]-ft[0])
 			#plt.plot(tpr, ft, color=cm(norm(l)), linewidth=0.5)
-			plt.scatter(l, ft[-1]-ft[0])
-			plt.xlabel('l')
-
-	f0 = 100
-	tprime0 = 120
-	c = 343
-	v0 = 50
-	l = 1000
-	ft = []
-	#for tprime in tpr:
-	#	ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
-				
-	#	ft.append(ft0p)
-	#plt.plot(tpr, ft, 'k', linewidth=0.5)
-	#plt.axvline(x=tprime0, c = 'k', ls = '--')
-
-	#plt.colorbar(sm)
-	plt.ylabel('Change Between Starting and Ending Frequency (Hz)')
-	#plt.ylabel('Frequency (Hz)')
-	#plt.xlabel('Time (s)')
-	#plt.xlim(0, 240)
-	#plt.ylim(0, 250)
-
+		plt.plot(l_vary, fchange)
+		plt.xlabel('l')
+	plt.ylabel('Frequency (Hz)')
 	plt.show()
 
 plt.figure()
@@ -117,7 +91,7 @@ for tprime in tpr:
 plt.plot(tpr, ft, 'k', linewidth=0.5)
 l = 10
 ti = [50,200]
-for t in ti:
+for tprime0 in ti:
 	
 	ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
 	plt.axhline(ft0p, color='k', linestyle='--')
@@ -125,6 +99,5 @@ for t in ti:
 plt.ylabel('Frequency (Hz)')
 plt.xlabel('Time (s)')
 plt.xlim(0, 240)
-#plt.ylim(0, 250)
-
+plt.ylim(0, 250)
 plt.show()					
