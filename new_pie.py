@@ -12,32 +12,33 @@ flight_files, filenames = load_flights(2, 4, 11, 27)
 
 # Initialize an empty list to store DataFrames
 eq_list = []
+outfile = open('output.csv', 'w')
 
 for i, flight_file in enumerate(flight_files):
 	flight_data = pd.read_csv(flight_file, sep=",")
-	print(flight_file)
 	flight_latitudes = flight_data['latitude']
 	flight_longitudes = flight_data['longitude']
 	fname = filenames[i]
 	flight_num = fname[9:18]
 	date = fname[0:8]
-
 	con = dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes)
 
 	if con == True:
 		equip_info = pd.read_csv('/scratch/irseppi/nodal_data/flightradar24/' + date + '_flights.csv', sep=",")
 		equip = equip_info['equip']
 		flight_id = equip_info['flight_id']
-		
-		for j, id in enumerate(flight_id):
-			if id == flight_num:
-				equip = equip[j]
-				# Open the file in append mode
-				with open('output.csv', mode='a') as file:
-					# Write the output to the file
-					equip.to_csv(file, header=False, index=False)
+		for j, fid in enumerate(flight_id):
+			if int(fid) == int(flight_num):
+				print('here')
+				equip = str(equip[j])
+				
+				# Write the output to the file
+				outfile.write(equip+'\n')
+					
 				break
-
+			else:
+				continue
+outfile.close()
 
 # Concatenate all the dataframes in the list
 #df = pd.DataFrame(eq_list)
