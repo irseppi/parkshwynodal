@@ -1,64 +1,28 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from prelude import load_flights, dist_less
 
-# Load the seismometer location data
-seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
-seismo_latitudes = seismo_data['Latitude']
-seismo_longitudes = seismo_data['Longitude']
-sta = seismo_data['Station']
+infile = open('input/all_station_crossing_db.txt', 'r')
+outfile = open('output.csv', 'a')  # Open the file in append mode
 
-flight_files, filenames = load_flights(2, 4, 11, 27)
+equip_counts = {}  # Define the "equip_counts" dictionary before the loop
+flight_nums = {}  # Define the "equip_counts" dictionary before the loop
 
-# Initialize an empty list to store DataFrames
-eq_list = []
-outfile = open('output.csv', 'w')
+for line in infile:
+	if line.strip():  # Skip empty lines
+		equip = line.split(',')[-1]  # Get the equipment type from the line
+		flight_num = line.split(',')[1]
+		if flight_num not in flight_nums:
+			equip_counts[equip] = equip_counts.get(equip, 0) + 1  # Increment the count for the equipment type
+			flight_nums[flight_num] = 1
+		else:
+			continue
 
-for i, flight_file in enumerate(flight_files):
-	flight_data = pd.read_csv(flight_file, sep=",")
-	flight_latitudes = flight_data['latitude']
-	flight_longitudes = flight_data['longitude']
-	fname = filenames[i]
-	flight_num = fname[9:18]
-	date = fname[0:8]
-	con = dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes)
+equip_counts = {'Unkown': 296, 'AT73': 50, 'B190': 130, 'B738': 136, 'B737': 367, 'B739': 139, 'C185': 61, 'B77W': 67, 'PA31': 176, 'DH8A': 95, 'DHC6': 1, 'C172': 13, 'C208': 244, 'DH3T': 40, 'BE20': 37, 'E75S': 4, 'AS50': 4, 'B744': 9, 'SW4': 27, 'PC12': 52, 'B772': 33, 'B789': 30, 'DHC2': 12, 'B407': 12, 'R44': 5, 'A359': 10, 'B06': 2, 'C46': 2, 'B763': 9, 'GA8': 20, 'B732': 1, 'C182': 13, 'CH7B': 5, 'B788': 18, 'C441': 7, 'B18T': 4, 'C180': 8, 'PA34': 1, 'B77L': 6, 'B350': 1, 'PA18': 22, 'C206': 7, 'BE35': 1, 'C82S': 1, 'B733': 6, 'PA46': 3, 'A332': 1, 'PA32': 9, 'GLF5': 1, 'B748': 1, 'CRJ2': 1, 'AT8T': 3, 'BE10': 1, 'AC6L': 4, 'B412': 2, 'PA30': 2, 'BE58': 1, 'BE36': 1}
 
-	if con == True:
-		equip_info = pd.read_csv('/scratch/irseppi/nodal_data/flightradar24/' + date + '_flights.csv', sep=",")
-		equip = equip_info['equip']
-		flight_id = equip_info['flight_id']
-		for j, fid in enumerate(flight_id):
-			if int(fid) == int(flight_num):
-				print('here')
-				equip = str(equip[j])
-				
-				# Write the output to the file
-				outfile.write(equip+'\n')
-					
-				break
-			else:
-				continue
-outfile.close()
+# Plotting the pie chart
+labels = equip_counts.keys()
+sizes = equip_counts.values()
 
-# Concatenate all the dataframes in the list
-#df = pd.DataFrame(eq_list)
-
-# Extract the 'equipment type' column and count the occurrences of each type
-#equipment_counts = df['equip'].value_counts()
-#equipment_percent = equipment_counts / equipment_counts.sum() * 100
-
-# Group equipment types that occur less than 0.5% of the time into 'Other'
-#other_count = equipment_counts[equipment_percent < 0.5].sum()
-#equipment_counts = equipment_counts[equipment_percent >= 0.5]
-
-# Ensure 'Other' category always appears in the pie chart
-#if 'Other' not in equipment_counts.index:
-#	equipment_counts = pd.concat([equipment_counts, pd.Series([0], index=['Other'])])
-
-# Add the count of 'Other' equipment types
-#equipment_counts['Other'] += other_count
-
-# Plot the data as a pie chart
-#equipment_counts.plot(kind='pie', autopct=lambda pct: f"{pct:.1f}% ({int(pct/100*equipment_counts.sum())})")
-#plt.title('Occurrences of Equipment Types')
-#plt.show()
+plt.pie(sizes, labels=labels, autopct=str(sizes)) #, startangle=90)
+plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
+plt.show()
