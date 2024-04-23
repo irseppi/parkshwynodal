@@ -8,30 +8,44 @@ import obspy
 import math
 from obspy.core import UTCDateTime
 import datetime
-from prelude import make_base_dir, distance, closest_encounter
+from prelude import make_base_dir, distance
 
-def df(f0,v0,l,tprime0,tprime):
-    
+def df(f0,v0,l,tp0,tp):   
     c = 343 # m/sec speed of sound
-    
-    ft0p = []
-    for i in range(len(tprime)):
-        t = ((tprime[i] - tprime0)- np.sqrt((tprime[i]-tprime0)**2-(1-v0**2/c**2)*((tprime[i]-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-        f = f0*(1/(1+(v0/c)*(v0*t/(np.sqrt(l**2+(v0*t)**2)))))
-        ft0p.append(f)
-    
+
     #derivative with respect to f0
-    f_derivef0 = np.gradient(ft0p, f0)
+    f_derivef0 = (1 / (1 - (c * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))) /((c**2 - v0**2) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2))))
+
     print(f_derivef0)
+
     #derivative of f with respect to v0
-    f_derivev0 = np.gradient(ft0p, v0) 
+    f_derivev0 = (-f0 * v0 * (-2 * l**4 * v0**4 + l**2 * (tp - tp0)**2 * v0**6 + c**6 * (tp - tp0) * (2 * l**2 + (tp - tp0)**2 * v0**2) * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) + 
+    c**2 * (4 * l**4 * v0**2 - (tp - tp0)**4 * v0**6 + l**2 * (tp - tp0) * v0**4 * (5 * tp - 5 * tp0 - 3 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))) - c**4 * 
+    (2 * l**4 - 3 * (tp - tp0)**3 * v0**4 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4)) - l**2 * (tp - tp0) * v0**2 * (-6 * tp + 6 * tp0 + np.sqrt((-l**2 * v0**2 + c**2 * 
+    (l**2 + (tp - tp0)**2 * v0**2))/c**4)))) / (c * (c - v0) * (c + v0) * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * 
+    (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) * (c * (-tp + tp0) * v0**2 + c * v0**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) - c**2 * np.sqrt(l**2 + (c**4 * v0**2 * 
+    (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) + v0**2 * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2))**2))
+    
     print(f_derivev0)
+
     #derivative of f with respect to l
-    f_derivel = np.gradient(ft0p, l)
+    f_derivel = ((f0 * l * (tp - tp0) * (c - v0) * v0**2 * (c + v0) * ((-tp + tp0) * v0**2 + c**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))) / 
+    (c * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + 
+    (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2) * (c * (-tp + tp0) * v0**2 + c * v0**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4) - 
+    c**2 * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2) + v0**2 * np.sqrt(l**2 + 
+    (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2))**2))
+
     print(f_derivel)
+
     #derivative of f with respect to tprime0
-    f_derivetprime0 = np.gradient(ft0p, tprime0)
+    f_derivetprime0 = ((f0 * l**2 * (c - v0) * v0**2 * (c + v0) * ((-tp + tp0) * v0**2 + c**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))) / 
+    (c * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * 
+    (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) * (c * (-tp + tp0) * v0**2 + c * v0**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) - 
+    c**2 * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) + v0**2 * np.sqrt(l**2 + 
+    (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2))**2))
+
     print(f_derivetprime0)
+
     #print(f_derivef0, f_derivev0, f_derivel, f_derivetprime0)
     return f_derivef0, f_derivev0, f_derivel, f_derivetprime0
 
@@ -43,27 +57,23 @@ def invert_f(m0, coords_array, num_iterations):
     tobs = coords_array[:,0]
     G = np.zeros((w,4)) #partial derivative matrix of f with respect to m
     m = m0
-    n = 0
-    #print(m)
-    while n < num_iterations:
+
+    for n in range(num_iterations):
+        print(n)
         fnew = []
-        f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(m[0], m[1], m[2], m[3], tobs)
-        #partial derivative matrix of f with respect to m when m=m0
-        for i in range(len(coords_array)):
-            #f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(m[0], m[1], m[2], m[3], tobs[i])
-            #print(f_derivef0[i], f_derivev0[i], f_derivel[i], f_derivetprime0[i])
-            G[i,0:4] = [f_derivef0[i], f_derivev0[i], f_derivel[i], f_derivetprime0[i]]
+        #partial derivative matrix of f with respect to m 
+        for i in range(0,w-1):
+            f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(m[0], m[1], m[2], m[3], tobs[i])
+            print(f_derivef0, f_derivev0, f_derivel, f_derivetprime0)
+            G[i,0:4] = [f_derivef0, f_derivev0, f_derivel, f_derivetprime0]
             fnew.append(m[0]*1/(1+(m[1]/c)*(m[1]*tobs[i]/(np.sqrt(m[2]**2+(m[1]*tobs[i]))**2)))) # Convert m[3][i] to integer
 
-        #print((G.T@G))
-        #print((G.T@G))
-        #print(np.linalg.det(G.T@G))
-        #print(np.reshape(np.array(m0), (4, 1)).shape)
-        m = np.reshape(np.array(m0), (4, 1)) + np.reshape(inv(G.T@G)@G.T@[np.reshape(fobs, ((i+1), 1)) - np.reshape(np.array(fnew), ((i+1), 1))], (4,1)) 
+        m = np.reshape(np.array(m0), (4, 1)) + np.reshape(inv(G.T@G)@G.T@[np.reshape(fobs, (len(coords_array), 1)) - np.reshape(np.array(fnew), (len(coords_array), 1))], (4,1)) 
         m0 = m
-        n += 1
+        #n = n + 1
     return m
 
+num_iterations = 8
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
@@ -72,6 +82,7 @@ flight_num = [530342801,528485724,528473220,528407493,528293430]
 time = [1551066051,1550172833,1550168070,1550165577,1550089044]
 sta = [1022,1272,1173,1283,1004]
 day = [25,14,14,14,13]
+
 for n in range(0,5):
     ht = datetime.datetime.utcfromtimestamp(time[n])
     mins = ht.minute
