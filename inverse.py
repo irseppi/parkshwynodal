@@ -16,7 +16,6 @@ def df(f0,v0,l,tp0,tp):
     #derivative with respect to f0
     f_derivef0 = (1 / (1 - (c * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))) /((c**2 - v0**2) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2))))
 
-    print(f_derivef0)
 
     #derivative of f with respect to v0
     f_derivev0 = (-f0 * v0 * (-2 * l**4 * v0**4 + l**2 * (tp - tp0)**2 * v0**6 + c**6 * (tp - tp0) * (2 * l**2 + (tp - tp0)**2 * v0**2) * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) + 
@@ -26,7 +25,7 @@ def df(f0,v0,l,tp0,tp):
     (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) * (c * (-tp + tp0) * v0**2 + c * v0**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) - c**2 * np.sqrt(l**2 + (c**4 * v0**2 * 
     (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) + v0**2 * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2))**2))
     
-    print(f_derivev0)
+
 
     #derivative of f with respect to l
     f_derivel = ((f0 * l * (tp - tp0) * (c - v0) * v0**2 * (c + v0) * ((-tp + tp0) * v0**2 + c**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))) / 
@@ -35,7 +34,6 @@ def df(f0,v0,l,tp0,tp):
     c**2 * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2) + v0**2 * np.sqrt(l**2 + 
     (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2))**2))
 
-    print(f_derivel)
 
     #derivative of f with respect to tprime0
     f_derivetprime0 = ((f0 * l**2 * (c - v0) * v0**2 * (c + v0) * ((-tp + tp0) * v0**2 + c**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))) / 
@@ -44,33 +42,38 @@ def df(f0,v0,l,tp0,tp):
     c**2 * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) + v0**2 * np.sqrt(l**2 + 
     (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2))**2))
 
-    print(f_derivetprime0)
 
-    #print(f_derivef0, f_derivev0, f_derivel, f_derivetprime0)
     return f_derivef0, f_derivev0, f_derivel, f_derivetprime0
 
 
 def invert_f(m0, coords_array, num_iterations):
-    coords_array = np.array(coords_array)
-    w, z = coords_array.shape
+    w,_ = coords_array.shape
     fobs = coords_array[:,1]
     tobs = coords_array[:,0]
-    G = np.zeros((w,4)) #partial derivative matrix of f with respect to m
     m = m0
-
-    for n in range(num_iterations):
-        print(n)
+    n = 0
+    c = 343
+    while n < num_iterations:
         fnew = []
+        G = np.zeros((w,4)) #partial derivative matrix of f with respect to m
         #partial derivative matrix of f with respect to m 
-        for i in range(0,w-1):
+        for i in range(0,w):
+            f0 = m[0]
+            v0 = m[1]
+            l = m[2]
+            tprime0 = m[3]
+            tprime = tobs[i]
+            ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
             f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(m[0], m[1], m[2], m[3], tobs[i])
-            print(f_derivef0, f_derivev0, f_derivel, f_derivetprime0)
+            
             G[i,0:4] = [f_derivef0, f_derivev0, f_derivel, f_derivetprime0]
-            fnew.append(m[0]*1/(1+(m[1]/c)*(m[1]*tobs[i]/(np.sqrt(m[2]**2+(m[1]*tobs[i]))**2)))) # Convert m[3][i] to integer
 
-        m = np.reshape(np.array(m0), (4, 1)) + np.reshape(inv(G.T@G)@G.T@[np.reshape(fobs, (len(coords_array), 1)) - np.reshape(np.array(fnew), (len(coords_array), 1))], (4,1)) 
+            fnew.append(ft0p) 
+    
+        m = np.reshape(np.reshape(m0,(4,1))+ np.reshape(inv(G.T@G)@G.T@(np.reshape(fobs, (len(coords_array), 1)) - np.reshape(np.array(fnew), (len(coords_array), 1))), (4,1)), (4,))
+        print(m)
         m0 = m
-        #n = n + 1
+        n += 1
     return m
 
 num_iterations = 8
@@ -195,15 +198,24 @@ for n in range(0,5):
                     c = 343
                     m0 = [f0, v0, l, tprime0]
 
-                    m = invert_f(m0, coords_array, 8)
+                    m = invert_f(m0, coords_array, num_iterations)
+                    ft = []
+                    t = np.arange(0, 250, 1)
+                    for tprime in t:
+                        f0 = m[0]
+                        v0 = m[1]
+                        l = m[2]
+                        tprime0 = m[3]
 
-                    f = m[0]*1/(1+(m[1]/c)*(m[1]*m[3]/(np.sqrt(m[2]**2+(m[1]*m[3])**2))))
-
+                        ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+                            
+                        ft.append(ft0p)
+                    
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    plt.plot(f, m[3])
+                    plt.plot(t, ft, 'g', linewidth=0.5)
                     plt.show()
 
-                    make_base_dir('/scratch/irseppi/nodal_data/plane_info/5inv_spec/')
-                    plt.save('/scratch/irseppi/nodal_data/plane_info/5inv_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'.png')
-                    plt.close()
+                    #make_base_dir('/scratch/irseppi/nodal_data/plane_info/5inv_spec/')
+                    #fig.save('/scratch/irseppi/nodal_data/plane_info/5inv_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'.png')
+                    #plt.close()
