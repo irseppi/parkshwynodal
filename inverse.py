@@ -164,6 +164,32 @@ for n in range(0,5):
                     plt.show(block=True)
                     # Convert the list of coordinates to a numpy array
                     coords_array = np.array(coords)
+                    peaks = []
+                    time = []
+                    for row in range(0,3):
+                        for t in range(int(coords_array[row][0]), int(coords_array[row+1][0])):
+                            tt = np.array(spec[:, t])
+                            p, _ = signal.find_peaks(tt)
+                            peak = []
+                            print(str(coords_array[row][1]), str(coords_array[row+1][1]))
+                            for f in p:
+                                if coords_array[row][1] >= coords_array[row+1][1]:
+                                    if f >= coords_array[row+1][1] and f <= coords_array[row][1]:
+                                        peak.append(f)
+
+                                else:
+                                    if f >= coords_array[row][1] and f <= coords_array[row+1][1]:
+                                        peak.append(f)
+                            if len(peak) != 0:
+                                print(t, np.max(peak))
+                                time.append(t)
+                                pp = np.max(peak)
+                                peaks.append(pp)
+                    
+                    plt.figure()
+                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    plt.scatter(time, peaks, color='black', marker='x')
+                    plt.show()
 
                     if n == 0:
                         tprime0 = 112
