@@ -148,49 +148,65 @@ for n in range(0,5):
                     vmin = 0  
                     vmax = np.max(middle_column) 
 
-                    coords = []
-                    plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    #coords = []
+                    #plt.figure()
+                    #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                     
-                    def onclick(event):
-                        global coords
-                        coords.append((event.xdata, event.ydata))
-                        plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-                        plt.draw() 
-                        print('Clicked:', event.xdata, event.ydata)  
+                    #def onclick(event):
+                    #    global coords
+                    #    coords.append((event.xdata, event.ydata))
+                    #    plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                    #    plt.draw() 
+                    #    print('Clicked:', event.xdata, event.ydata)  
 
-                    cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+                    #cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
 
-                    plt.show(block=True)
+                    #plt.show(block=True)
                     # Convert the list of coordinates to a numpy array
-                    coords_array = np.array(coords)
-                    peaks = []
-                    time = []
-                    for row in range(0,3):
-                        for t in range(int(coords_array[row][0]), int(coords_array[row+1][0])):
-                            tt = np.array(spec[:, t])
-                            p, _ = signal.find_peaks(tt)
-                            peak = []
-                            print(str(coords_array[row][1]), str(coords_array[row+1][1]))
-                            for f in p:
-                                if coords_array[row][1] >= coords_array[row+1][1]:
-                                    if f >= coords_array[row+1][1] and f <= coords_array[row][1]:
-                                        peak.append(f)
-
-                                else:
-                                    if f >= coords_array[row][1] and f <= coords_array[row+1][1]:
-                                        peak.append(f)
-                            if len(peak) != 0:
-                                print(t, np.max(peak))
-                                time.append(t)
-                                pp = np.max(peak)
-                                peaks.append(pp)
-                    
+                    #coords_array = np.array(coords)
+                    #peaks = []
+                    #time = []
+                    #for row in range(0,3):
+                    #    for t in range(int(coords_array[row][0]), int(coords_array[row+1][0])):
+                    #        tt = np.array(spec[:, t])
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    plt.scatter(time, peaks, color='black', marker='x')
-                    plt.show()
 
+                    main_overtone = np.zeros(len(times))
+                    for t in range(len(times)):
+                        tt = np.array(spec[:, t])
+                        p, _ = signal.find_peaks(tt, distance=10)
+                        
+                        if len(p) > 0:
+                            max_peak_index = np.argmax(tt[p])
+                            main_overtone[t] = frequencies[p[max_peak_index]]
+
+                    plt.scatter(times, main_overtone, color='k', marker='x')
+                    plt.xlabel('Time')
+                    plt.ylabel('Main Overtone Frequency')
+                    plt.title('Main Overtone Extraction')
+                    plt.show()
+                    #        peak = []
+                    #        print(str(coords_array[row][1]), str(coords_array[row+1][1]))
+                    #        for f in p:
+                    #           if coords_array[row][1] >= coords_array[row+1][1]:
+                    #               if f >= coords_array[row+1][1] and f <= coords_array[row][1]:
+                    #                    peak.append(f)
+
+                    #            else:
+                    #                if f >= coords_array[row][1] and f <= coords_array[row+1][1]:
+                    #                    peak.append(f)
+                    #        if len(peak) != 0:
+                    #            print(t, np.max(peak))
+                    #            time.append(t)
+                    #            pp = np.max(peak)
+                    #            peaks.append(pp)
+                    
+                    #plt.figure()
+                    #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    #plt.scatter(time, p, color='black', marker='x')
+                    #plt.show()
+                    '''
                     if n == 0:
                         tprime0 = 112
                         f0 = 115
@@ -224,7 +240,7 @@ for n in range(0,5):
                     c = 343
                     m0 = [f0, v0, l, tprime0]
 
-                    m = invert_f(m0, coords_array, num_iterations)
+                    m = invert_f(m0, np.array([times, main_overtone]), num_iterations)
                     ft = []
                     t = np.arange(0, 250, 1)
                     for tprime in t:
@@ -245,3 +261,4 @@ for n in range(0,5):
                     #make_base_dir('/scratch/irseppi/nodal_data/plane_info/5inv_spec/')
                     #fig.save('/scratch/irseppi/nodal_data/plane_info/5inv_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'.png')
                     #plt.close()
+                    '''
