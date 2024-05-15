@@ -9,6 +9,58 @@ import math
 from obspy.core import UTCDateTime
 import datetime
 from prelude import make_base_dir, distance
+import numpy as np
+from scipy.signal import find_peaks
+'''
+def fundamental_freq_HPS(spectrum, sr, max_harmonics=5):
+    """Find the fundamental frequency using the harmonic product spectrum method."""
+    # Create a list to hold our down-sampled spectra
+    spectra = [spectrum]
+    
+    # Downsample the spectrum and add to our list
+    for i in range(1, max_harmonics):
+        spectra.append(spectrum[::i+1])
+    
+    # Make all spectra the same length
+    min_length = min(len(s) for s in spectra)
+    spectra = [s[:min_length] for s in spectra]
+    
+    # Multiply the spectra together
+    product_spectrum = np.prod(spectra, axis=0)
+    
+    # Find the peak
+    peaks, _ = find_peaks(product_spectrum)
+    fundamental_freq_index = peaks[np.argmax(product_spectrum[peaks])]
+    
+    # Convert the index of the peak to a frequency
+    fundamental_freq = fundamental_freq_index * sr / len(spectrum)
+    
+    return fundamental_freq
+'''
+def fundamental_freq_HPS(spectrum, sr, max_harmonics):
+    """Find the fundamental frequency using the harmonic product spectrum method."""
+    # Create a list to hold our down-sampled spectra
+    spectra = [spectrum]
+    
+    # Downsample the spectrum and add to our list
+    for i in range(1, max_harmonics):
+        spectra.append(spectrum[::i+1])
+    
+    # Make all spectra the same length
+    min_length = min(len(s) for s in spectra)
+    spectra = [s[:min_length] for s in spectra]
+    
+    # Multiply the spectra together
+    product_spectrum = np.prod(spectra, axis=0)
+    
+    # Find the peak
+    peaks, _ = find_peaks(product_spectrum)
+    fundamental_freq_index = peaks[np.argmax(product_spectrum[peaks])]
+    
+    # Convert the index of the peak to a frequency
+    fundamental_freq = fundamental_freq_index * sr / len(spectrum)
+    
+    return fundamental_freq
 
 def df(f0,v0,l,tp0,tp):   
     c = 343 # m/sec speed of sound
@@ -147,7 +199,7 @@ for n in range(0,5):
                     middle_column = spec[:, middle_index]
                     vmin = 0  
                     vmax = np.max(middle_column) 
-
+                    p, _ = signal.find_peaks(middle_column, distance=10)
                     #coords = []
                     #plt.figure()
                     #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
@@ -169,19 +221,20 @@ for n in range(0,5):
                     #for row in range(0,3):
                     #    for t in range(int(coords_array[row][0]), int(coords_array[row+1][0])):
                     #        tt = np.array(spec[:, t])
+                   
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-
-                    main_overtone = np.zeros(len(times))
+                    
+                    #main_overtone = np.zeros(len(times))
                     for t in range(len(times)):
                         tt = np.array(spec[:, t])
-                        p, _ = signal.find_peaks(tt, distance=10)
+                        #p, _ = signal.find_peaks(tt, distance=10)
                         
-                        if len(p) > 0:
-                            max_peak_index = np.argmax(tt[p])
-                            main_overtone[t] = frequencies[p[max_peak_index]]
-
-                    plt.scatter(times, main_overtone, color='k', marker='x')
+                        #if len(p) > 0:
+                        #    max_peak_index = np.argmax(tt[p])
+                        #    main_overtone[t] = frequencies[p[max_peak_index]]
+                    
+                        plt.scatter(t, fundamental_freq_HPS(tt,250,len(p)), color='k', marker='x')
                     plt.xlabel('Time')
                     plt.ylabel('Main Overtone Frequency')
                     plt.title('Main Overtone Extraction')
