@@ -11,56 +11,6 @@ import datetime
 from prelude import make_base_dir, distance
 import numpy as np
 from scipy.signal import find_peaks
-'''
-def fundamental_freq_HPS(spectrum, sr, max_harmonics=5):
-    """Find the fundamental frequency using the harmonic product spectrum method."""
-    # Create a list to hold our down-sampled spectra
-    spectra = [spectrum]
-    
-    # Downsample the spectrum and add to our list
-    for i in range(1, max_harmonics):
-        spectra.append(spectrum[::i+1])
-    
-    # Make all spectra the same length
-    min_length = min(len(s) for s in spectra)
-    spectra = [s[:min_length] for s in spectra]
-    
-    # Multiply the spectra together
-    product_spectrum = np.prod(spectra, axis=0)
-    
-    # Find the peak
-    peaks, _ = find_peaks(product_spectrum)
-    fundamental_freq_index = peaks[np.argmax(product_spectrum[peaks])]
-    
-    # Convert the index of the peak to a frequency
-    fundamental_freq = fundamental_freq_index * sr / len(spectrum)
-    
-    return fundamental_freq
-'''
-def fundamental_freq_HPS(spectrum, sr, max_harmonics):
-    """Find the fundamental frequency using the harmonic product spectrum method."""
-    # Create a list to hold our down-sampled spectra
-    spectra = [spectrum]
-    
-    # Downsample the spectrum and add to our list
-    for i in range(1, max_harmonics):
-        spectra.append(spectrum[::i+1])
-    
-    # Make all spectra the same length
-    min_length = min(len(s) for s in spectra)
-    spectra = [s[:min_length] for s in spectra]
-    
-    # Multiply the spectra together
-    product_spectrum = np.prod(spectra, axis=0)
-    
-    # Find the peak
-    peaks, _ = find_peaks(product_spectrum)
-    fundamental_freq_index = peaks[np.argmax(product_spectrum[peaks])]
-    
-    # Convert the index of the peak to a frequency
-    fundamental_freq = fundamental_freq_index * sr / len(spectrum)
-    
-    return fundamental_freq
 
 def df(f0,v0,l,tp0,tp):   
     c = 343 # m/sec speed of sound
@@ -184,7 +134,7 @@ for n in range(0,5):
                     g = fs*240
                     # Compute spectrogram
                     frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9, detrend = 'constant') 
-
+                    
                     a, b = Sxx.shape
 
                     MDF = np.zeros((a,b))
@@ -200,66 +150,23 @@ for n in range(0,5):
                     vmin = 0  
                     vmax = np.max(middle_column) 
                     p, _ = signal.find_peaks(middle_column, distance=10)
-                    #coords = []
-                    #plt.figure()
-                    #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    
-                    #def onclick(event):
-                    #    global coords
-                    #    coords.append((event.xdata, event.ydata))
-                    #    plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-                    #    plt.draw() 
-                    #    print('Clicked:', event.xdata, event.ydata)  
-
-                    #cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-
-                    #plt.show(block=True)
-                    # Convert the list of coordinates to a numpy array
-                    #coords_array = np.array(coords)
-                    #peaks = []
-                    #time = []
-                    #for row in range(0,3):
-                    #    for t in range(int(coords_array[row][0]), int(coords_array[row+1][0])):
-                    #        tt = np.array(spec[:, t])
-                   
+                    coords = []
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    
-                    #main_overtone = np.zeros(len(times))
-                    for t in range(len(times)):
-                        tt = np.array(spec[:, t])
-                        #p, _ = signal.find_peaks(tt, distance=10)
-                        
-                        #if len(p) > 0:
-                        #    max_peak_index = np.argmax(tt[p])
-                        #    main_overtone[t] = frequencies[p[max_peak_index]]
-                    
-                        plt.scatter(t, fundamental_freq_HPS(tt,250,len(p)), color='k', marker='x')
-                    plt.xlabel('Time')
-                    plt.ylabel('Main Overtone Frequency')
-                    plt.title('Main Overtone Extraction')
-                    plt.show()
-                    #        peak = []
-                    #        print(str(coords_array[row][1]), str(coords_array[row+1][1]))
-                    #        for f in p:
-                    #           if coords_array[row][1] >= coords_array[row+1][1]:
-                    #               if f >= coords_array[row+1][1] and f <= coords_array[row][1]:
-                    #                    peak.append(f)
 
-                    #            else:
-                    #                if f >= coords_array[row][1] and f <= coords_array[row+1][1]:
-                    #                    peak.append(f)
-                    #        if len(peak) != 0:
-                    #            print(t, np.max(peak))
-                    #            time.append(t)
-                    #            pp = np.max(peak)
-                    #            peaks.append(pp)
-                    
-                    #plt.figure()
-                    #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    #plt.scatter(time, p, color='black', marker='x')
-                    #plt.show()
-                    '''
+                    def onclick(event):
+                        global coords
+                        coords.append((event.xdata, event.ydata))
+                        plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                        plt.draw() 
+                        print('Clicked:', event.xdata, event.ydata)  
+
+                    cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+
+                    plt.show(block=True)
+                    # Convert the list of coordinates to a numpy array
+                    coords_array = np.array(coords)
+                 
                     if n == 0:
                         tprime0 = 112
                         f0 = 115
@@ -293,7 +200,7 @@ for n in range(0,5):
                     c = 343
                     m0 = [f0, v0, l, tprime0]
 
-                    m = invert_f(m0, np.array([times, main_overtone]), num_iterations)
+                    m = invert_f(m0, coords_array, num_iterations=4)
                     ft = []
                     t = np.arange(0, 250, 1)
                     for tprime in t:
@@ -305,13 +212,63 @@ for n in range(0,5):
                         ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
                             
                         ft.append(ft0p)
-                    
+
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                     plt.plot(t, ft, 'g', linewidth=0.5)
                     plt.show()
 
+                    p, _ = signal.find_peaks(middle_column, distance=10)
+                    corridor_width = (250/len(p))
+                    
+                    peaks = []
+                    freqha = []
+                    pp = []
+                    for t_f in range(len(t)):
+                        tt = np.array(spec[:, t_f])
+                        p, _ = signal.find_peaks(tt, distance=10)
+                        np.diff(p)
+                        print(p)
+                        upper = ft[t_f] + corridor_width
+                        lower = ft[t_f] - corridor_width
+
+                        for i in range(len(p)):
+                            if lower < p[i] < upper:
+                                freqha.append(tt[p[i]])
+                                pp.append(p[i])
+                        #tt = np.array(spec[int(lower):int(upper), t_f])
+                        #print(tt)
+                        #p, _ = signal.find_peaks(tt)
+                        
+                  
+                        #if len(p) == 1:
+                            #peaks.append(p[0]+int(lower))
+                            #peaks.append(int(upper)-p[0])
+                        #else:
+                        print(freqha)
+                        print(pp)
+                        index = np.argmax(freqha)
+                        print(index)
+                        print(pp[index])
+                        #print(p[pp])
+                        peaks.append(pp[index])
+                        #    peaks.append(int(upper)-p[pp])
+                        #plt.figure()
+                        #plt.plot(tt, 'g', linewidth=0.5)
+                        #plt.scatter(p, tt[p], color='black', marker='x')
+                        #plt.scatter(pp[index], tt[pp[index]], color='red', marker='x')
+                        #plt.show()
+                    plt.figure()
+                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    plt.scatter(t, peaks, color='black', marker='x')
+                    plt.show()
+                
+                    #plt.figure()
+                    #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    #plt.plot(t, ft, 'g', linewidth=0.5)
+                    #plt.show()
+
                     #make_base_dir('/scratch/irseppi/nodal_data/plane_info/5inv_spec/')
                     #fig.save('/scratch/irseppi/nodal_data/plane_info/5inv_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'.png')
                     #plt.close()
-                    '''
+           
