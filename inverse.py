@@ -213,25 +213,25 @@ for n in range(0,5):
                             
                         ft.append(ft0p)
                     
-                    plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    plt.plot(times, ft, 'g', linewidth=0.5)
-                    plt.show()
+                    #plt.figure()
+                    #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    #plt.plot(times, ft, 'g', linewidth=0.5)
+                    #plt.show()
 
                     peaks = []
                     p, _ = signal.find_peaks(middle_column, distance=7)
                     corridor_width = 250 / len(p)
 
                     coord_inv = []
-                    plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    #plt.figure()
+                    #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
 
                     for t_f in range(len(times)):
                         upper = int(ft[t_f] + corridor_width)
                         lower = int(ft[t_f] - corridor_width)
 
-                        plt.scatter(times[t_f], upper, color='pink', marker='x')
-                        plt.scatter(times[t_f], lower, color='pink', marker='x')
+                        #plt.scatter(times[t_f], upper, color='pink', marker='x')
+                        #plt.scatter(times[t_f], lower, color='pink', marker='x')
 
                         tt = spec[lower:upper, t_f]
 
@@ -240,13 +240,14 @@ for n in range(0,5):
                         max_amplitude_frequency = frequencies[max_amplitude_index+lower]
                         peaks.append(max_amplitude_frequency)
                         coord_inv.append((times[t_f], max_amplitude_frequency))
-                        plt.scatter(times[t_f], max_amplitude_frequency, color='black', marker='x')
+                        #plt.scatter(times[t_f], max_amplitude_frequency, color='black', marker='x')
                        
-                    plt.show()
-                    plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    plt.scatter(times, peaks, color='black', marker='x')
-                    plt.show()
+                    #plt.show()
+                    #plt.figure()
+                    #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    #plt.scatter(times, peaks, color='black', marker='x')
+                    #plt.show()
+
                     coord_inv_array = np.array(coord_inv)
                     m = invert_f(m0, coord_inv_array, num_iterations=8)
                     ft = []
@@ -260,9 +261,28 @@ for n in range(0,5):
                         ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
                             
                         ft.append(ft0p)
+                    #plt.figure()
+                    #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    plt.plot(times, ft, 'g', linewidth=0.5)
+                    #plt.show()
+                    p, _ = signal.find_peaks(middle_column, prominence=10)
+
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                     plt.plot(times, ft, 'g', linewidth=0.5)
+                    for peak in p:
+                        ft = []
+                        for tprime in times:
+                            f0 = peak
+                            v0 = m[1]
+                            l = m[2]
+                            tprime0 = m[3]
+
+                            ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+                                
+                            ft.append(ft0p)
+                    
+                        plt.plot(times, ft, 'g', linewidth=0.5)
                     plt.show()
                     #plt.figure()
                     #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
