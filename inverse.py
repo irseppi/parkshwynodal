@@ -222,7 +222,8 @@ for n in range(0,5):
                     p, _ = signal.find_peaks(middle_column, distance=7)
                     corridor_width = 250 / len(p)
 
-                    
+                    coord_inv = []
+                    plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
 
                     for t_f in range(len(times)):
@@ -238,6 +239,7 @@ for n in range(0,5):
                         
                         max_amplitude_frequency = frequencies[max_amplitude_index+lower]
                         peaks.append(max_amplitude_frequency)
+                        coord_inv.append((times[t_f], max_amplitude_frequency))
                         plt.scatter(times[t_f], max_amplitude_frequency, color='black', marker='x')
                        
                     plt.show()
@@ -245,8 +247,8 @@ for n in range(0,5):
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                     plt.scatter(times, peaks, color='black', marker='x')
                     plt.show()
-
-                    m = invert_f(m0, np.array([times,peaks]), num_iterations=8)
+                    coord_inv_array = np.array(coord_inv)
+                    m = invert_f(m0, coord_inv_array, num_iterations=8)
                     ft = []
                     t = np.arange(0, 241, 1)
                     for tprime in times:
