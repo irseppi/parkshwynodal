@@ -249,14 +249,14 @@ for n in range(0,5):
                     #plt.show()
 
                     coord_inv_array = np.array(coord_inv)
-                    m = invert_f(m0, coord_inv_array, num_iterations=8)
+                    m = invert_f(m0, coord_inv_array, num_iterations=12)
                     ft = []
                     t = np.arange(0, 241, 1)
+                    f0 = m[0]
+                    v0 = m[1]
+                    l = m[2]
+                    tprime0 = m[3]
                     for tprime in times:
-                        f0 = m[0]
-                        v0 = m[1]
-                        l = m[2]
-                        tprime0 = m[3]
 
                         ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
                             
@@ -273,17 +273,30 @@ for n in range(0,5):
                     col = spec[:, closest_time_index]
                     p, _ = signal.find_peaks(col,prominence=15) #distance = 10) 
                     
+                    coords = []
+                    plt.figure()
+                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    plt.axvline(x=tprime0, c = 'g', ls = '--')
+                    def onclick(event):
+                        global coords
+                        coords.append((event.xdata, event.ydata))
+                        plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                        plt.draw() 
+                        print('Clicked:', event.xdata, event.ydata)  
+
+                    cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+
+                    plt.show(block=True)
+                    # Convert the list of coordinates to a numpy array
+                    coords_array = np.array(coords)
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                     plt.plot(times, ft, 'g', linewidth=0.5)
-                    for peak in p:
+                    
+                    for peak in coords_array:
                         ft = []
                         for tprime in times:
                             f0 = peak
-                            v0 = m[1]
-                            l = m[2]
-                            tprime0 = m[3]
-
                             ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
                                 
                             ft.append(ft0p)
