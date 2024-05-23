@@ -273,13 +273,13 @@ for n in range(0,5):
                     col = spec[:, closest_time_index]
                     p, _ = signal.find_peaks(col,prominence=15) #distance = 10) 
                     
-                    coords = []
+                    peaks = []
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                     plt.axvline(x=tprime0, c = 'g', ls = '--')
                     def onclick(event):
                         global coords
-                        coords.append((event.xdata, event.ydata))
+                        peaks.append(event.ydata)
                         plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
                         plt.draw() 
                         print('Clicked:', event.xdata, event.ydata)  
@@ -287,13 +287,12 @@ for n in range(0,5):
                     cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
 
                     plt.show(block=True)
-                    # Convert the list of coordinates to a numpy array
-                    coords_array = np.array(coords)
+                    
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                     plt.plot(times, ft, 'g', linewidth=0.5)
                     
-                    for peak in coords_array:
+                    for peak in peaks:
                         ft = []
                         for tprime in times:
                             f0 = peak
