@@ -263,10 +263,16 @@ for n in range(0,5):
                         ft.append(ft0p)
                     #plt.figure()
                     #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    plt.plot(times, ft, 'g', linewidth=0.5)
+                    #plt.plot(times, ft, 'g', linewidth=0.5)
                     #plt.show()
-                    p, _ = signal.find_peaks(middle_column, prominence=10)
 
+                    # Find the closest time value to m[3]
+                    closest_time_index = np.argmin(np.abs(times - m[3]))
+
+                    # Extract the corresponding column from the spectrogram
+                    col = spec[:, closest_time_index]
+                    p, _ = signal.find_peaks(col,prominence=15) #distance = 10) 
+                    
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                     plt.plot(times, ft, 'g', linewidth=0.5)
