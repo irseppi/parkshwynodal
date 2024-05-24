@@ -271,23 +271,26 @@ for n in range(0,5):
 
                     # Extract the corresponding column from the spectrogram
                     col = spec[:, closest_time_index]
-                    p, _ = signal.find_peaks(col,prominence=15) #distance = 10) 
+                    peaks, _ = signal.find_peaks(col,prominence=15) #distance = 10) 
                     
-                    peaks = []
+                    #peaks = []
                     plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    plt.axvline(x=tprime0, c = 'g', ls = '--')
-                    def onclick(event):
-                        global coords
-                        peaks.append(event.ydata)
-                        plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-                        plt.draw() 
-                        print('Clicked:', event.xdata, event.ydata)  
+                    #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    #plt.axvline(x=tprime0, c = 'g', ls = '--')
+                    plt.plot(col)
+                    #def onclick(event):
+                    #    global coords
+                    #    peaks.append(event.ydata)
+                    #    plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                    #    plt.draw() 
+                    #    print('Clicked:', event.ydata)  
 
-                    cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-
+                    #cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+                    for p in peaks:
+                        #plt.scatter(times[closest_time_index], frequencies[p], color='black', marker='x')
+                        plt.scatter(p, col[p], color='black', marker='x')
                     plt.show(block=True)
-                    
+
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                     plt.plot(times, ft, 'g', linewidth=0.5)
