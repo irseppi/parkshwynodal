@@ -1,10 +1,12 @@
 import sys
 import fileinput
-from datetime import datetime
 import os
 import pandas as pd
 import numpy as np
+
+from datetime import datetime
 from pathlib import Path
+from numpy.linalg import inv
 from obspy.geodetics import gps2dist_azimuth
 
 ###############################################################
@@ -202,8 +204,100 @@ def calc_f(f0, t, l, v0):
 
 	return f, tflight
 
-#########################################################################################################################################################
+####################################################################################################################################################################################################################################################################################################################
 
+def df(f0,v0,l,tp0,tp):   
+    """
+	Calculate the derivatives of f with respect to f0, v0, l, and tp0.
+
+	Parameters:
+	f0 (float): Central frequency of overtone.
+	v0 (float): Velocity of the aircraft.
+	l (float): Distance of closest approach between the station and the aircraft.
+	tp0 (float): Time of that the central frequency of the overtones occur, when the aircraft is at the closest approach to the station.
+	tp (float): Array of times.
+	Returns:
+	tuple: A tuple containing the derivatives of f with respect to f0, v0, l, and tp0.
+	"""
+    c = 343 # m/sec speed of sound
+
+    #derivative with respect to f0
+    f_derivef0 = (1 / (1 - (c * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))) /((c**2 - v0**2) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2))))
+
+
+    #derivative of f with respect to v0
+    f_derivev0 = (-f0 * v0 * (-2 * l**4 * v0**4 + l**2 * (tp - tp0)**2 * v0**6 + c**6 * (tp - tp0) * (2 * l**2 + (tp - tp0)**2 * v0**2) * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) + 
+    c**2 * (4 * l**4 * v0**2 - (tp - tp0)**4 * v0**6 + l**2 * (tp - tp0) * v0**4 * (5 * tp - 5 * tp0 - 3 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))) - c**4 * 
+    (2 * l**4 - 3 * (tp - tp0)**3 * v0**4 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4)) - l**2 * (tp - tp0) * v0**2 * (-6 * tp + 6 * tp0 + np.sqrt((-l**2 * v0**2 + c**2 * 
+    (l**2 + (tp - tp0)**2 * v0**2))/c**4)))) / (c * (c - v0) * (c + v0) * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * 
+    (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) * (c * (-tp + tp0) * v0**2 + c * v0**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) - c**2 * np.sqrt(l**2 + (c**4 * v0**2 * 
+    (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) + v0**2 * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2))**2))
+    
+
+
+    #derivative of f with respect to l
+    f_derivel = ((f0 * l * (tp - tp0) * (c - v0) * v0**2 * (c + v0) * ((-tp + tp0) * v0**2 + c**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))) / 
+    (c * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + 
+    (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2) * (c * (-tp + tp0) * v0**2 + c * v0**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4) - 
+    c**2 * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2) + v0**2 * np.sqrt(l**2 + 
+    (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2))**2))
+
+
+    #derivative of f with respect to tp0
+    f_derivetprime0 = ((f0 * l**2 * (c - v0) * v0**2 * (c + v0) * ((-tp + tp0) * v0**2 + c**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))) / 
+    (c * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * 
+    (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) * (c * (-tp + tp0) * v0**2 + c * v0**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) - 
+    c**2 * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) + v0**2 * np.sqrt(l**2 + 
+    (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2))**2))
+
+
+    return f_derivef0, f_derivev0, f_derivel, f_derivetprime0
+
+#####################################################################################################################################################################################################################################################################################################################
+
+def invert_f(m0, coords_array, num_iterations):
+	"""
+	Inverts the function f using the given initial parameters and data array.
+
+	Args:
+		m0 (numpy.ndarray): Initial parameters for the function f.
+		coords_array (numpy.ndarray): Data picks along overtone doppler curve.
+		num_iterations (int): Number of iterations to perform.
+
+	Returns:
+		numpy.ndarray: The inverted parameters for the function f.
+	"""
+	w,_ = coords_array.shape
+	fobs = coords_array[:,1]
+	tobs = coords_array[:,0]
+	m = m0
+	n = 0
+	c = 343
+	while n < num_iterations:
+		fnew = []
+		G = np.zeros((w,4)) #partial derivative matrix of f with respect to m
+		#partial derivative matrix of f with respect to m 
+		for i in range(0,w):
+			f0 = m[0]
+			v0 = m[1]
+			l = m[2]
+			tprime0 = m[3]
+			tprime = tobs[i]
+			t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
+			ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
+			f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(m[0], m[1], m[2], m[3], tobs[i])
+			
+			G[i,0:4] = [f_derivef0, f_derivev0, f_derivel, f_derivetprime0]
+
+			fnew.append(ft0p) 
+	
+		m = np.reshape(np.reshape(m0,(4,1))+ np.reshape(inv(G.T@G)@G.T@(np.reshape(fobs, (len(coords_array), 1)) - np.reshape(np.array(fnew), (len(coords_array), 1))), (4,1)), (4,))
+		print(m)
+		m0 = m
+		n += 1
+	return m
+
+####################3####################################################################################################################################################################
 
 def load_flights(month1, month2, first_day, last_day):
 	"""
