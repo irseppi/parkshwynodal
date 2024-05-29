@@ -183,7 +183,6 @@ for n in range(0,10):
                     tprime0 = m[3]
 
                     ft = []
-                    t = np.arange(0, 241, 1)
                     for tprime in times:
                         t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
                         ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
@@ -217,13 +216,14 @@ for n in range(0,10):
                     plt.show()
 
                     coord_inv_array = np.array(coord_inv)
+
                     m = invert_f(m0, coord_inv_array, num_iterations=12)
-                    ft = []
-                    t = np.arange(0, 241, 1)
                     f0 = m[0]
                     v0 = m[1]
                     l = m[2]
                     tprime0 = m[3]
+
+                    ft = []
                     for tprime in times:
                         t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
                         ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
@@ -245,12 +245,12 @@ for n in range(0,10):
                     plt.show()
 
                     m = invert_f(m0, coord_inv_array, num_iterations=12)
-                    ft = []
-                    t = np.arange(0, 241, 1)
                     f0 = m[0]
                     v0 = m[1]
                     l = m[2]
                     tprime0 = m[3]
+
+                    ft = []
                     for tprime in times:
                         t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
                         ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
@@ -272,7 +272,7 @@ for n in range(0,10):
                     def onclick(event):
                         global coords
                         peaks.append(event.ydata)
-                        plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                        plt.scatter(tprime0, event.ydata, color='black', marker='x')  # Add this line
                         plt.draw() 
                         print('Clicked:', event.ydata)  
 
@@ -284,17 +284,21 @@ for n in range(0,10):
 
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    #plt.plot(times, ft, 'g', linewidth=0.5)
-                    
+                    plt.plot(times, ft, 'r', linewidth=0.5)
+                    plt.axvline(x=tprime0, c = 'g', ls = '--')
                     for peak in peaks:
+                        tprime = tprime0
+                        ft0p = peak
+                        t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
+                        f0 = ft0p*(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
                         ft = []
-                        f0 = peak
                         for tprime in times:
                             t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
                             ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
                          
                             ft.append(ft0p)
-                    
+                        
+                        plt.scatter(tprime0, peak, color='black', marker='x')  # Add this line
                         plt.plot(times, ft, 'g', linewidth=0.5)
                     plt.show()
                      
