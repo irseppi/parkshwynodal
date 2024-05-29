@@ -21,7 +21,7 @@ time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,155077
 sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV"]
 day = [25,14,14,14,13,11,21,21,18,24]
 
-for n in range(0,10):
+for n in range(1,10):
     ht = datetime.datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
