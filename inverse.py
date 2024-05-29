@@ -21,7 +21,7 @@ time = [1551066051,1550172833,1550168070,1550165577,1550089044]
 sta = [1022,1272,1173,1283,1004]
 day = [25,14,14,14,13]
 
-for n in range(1,2):
+for n in range(0,5):
     ht = datetime.datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -243,12 +243,12 @@ for n in range(1,2):
 
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    plt.plot(times, ft, 'g', linewidth=0.5)
+                    #plt.plot(times, ft, 'g', linewidth=0.5)
                     
                     for peak in peaks:
                         ft = []
+                        f0 = peak
                         for tprime in times:
-                            f0 = peak
                             t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
                             ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
                          
