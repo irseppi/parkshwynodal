@@ -16,12 +16,12 @@ seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 station = seismo_data['Station']
-flight_num = [530342801,528485724,528473220,528407493,528293430]
-time = [1551066051,1550172833,1550168070,1550165577,1550089044]
-sta = [1022,1272,1173,1283,1004]
-day = [25,14,14,14,13]
+flight_num = [530342801,528485724,528473220,528407493,528293430,527937367,529741194,529776675,529179112,530165646]
+time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,1550773710,1550787637,1550511447,1550974151]
+sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV"]
+day = [25,14,14,14,13,11,21,21,18,24]
 
-for n in range(0,5):
+for n in range(0,10):
     ht = datetime.datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -54,14 +54,26 @@ for n in range(0,5):
             for y in range(len(station)):
                 if str(station[y]) == str(sta[n]):
                     dist = distance(seismo_latitudes[y], seismo_longitudes[y], flight_latitudes[line], flight_longitudes[line])	
-
-                    p = "/scratch/naalexeev/NODAL/2019-02-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-02-"+day2+"T"+h_u+":00:00.000000Z."+station[y]+".mseed"
-                    tr = obspy.read(p)
-                    tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - tim, tr[2].stats.starttime + (mins * 60) + secs + tim)
-                    data = tr[2][0:-1]
-                    fs = int(tr[2].stats.sampling_rate)
-                    title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'						
-                    t = tr[2].times()
+                    if isinstance(sta[n], str):
+                        day_of_year = str((ht - datetime.datetime(2019, 1, 1)).days + 1)
+	
+                        p = "/aec/wf/2019/0"+day_of_year+"/"+str(sta[n])+".*Z.20190"+day_of_year+"000000+"
+                        tr = obspy.read(p)
+						
+                        tr[0].trim(tr[0].stats.starttime +(int(h) *60 *60) + (mins * 60) + secs - tim, tr[0].stats.starttime +(int(h) *60 *60) + (mins * 60) + secs + tim)
+                        data = tr[0][0:-1]
+                        fs = int(tr[0].stats.sampling_rate)
+                        title    = f'{tr[0].stats.network}.{tr[0].stats.station}.{tr[0].stats.location}.{tr[0].stats.channel} − starting {tr[0].stats["starttime"]}'						
+                        t                  = tr[0].times()
+                    else:
+                        p = "/scratch/naalexeev/NODAL/2019-02-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-02-"+str(day2)+"T"+str(h_u)+":00:00.000000Z."+str(station[y])+".mseed"
+                        tr = obspy.read(p)
+                        tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - tim, tr[2].stats.starttime + (mins * 60) + secs + tim)
+                        data = tr[2][0:-1]
+                        fs = int(tr[2].stats.sampling_rate)
+                        title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'						
+                        t = tr[2].times()
+                   
                     # Time array
                     t = np.arange(len(data)) / fs
                     g = fs*240
@@ -131,7 +143,36 @@ for n in range(0,5):
                         tprime0 = 140
                         v0 = 64
                         l = 580
-                
+
+                    if n == 5:
+                        f0 = 17.5
+                        tprime0 = 123
+                        v0 = 112
+                        l = 1150
+
+                    if n == 6:
+                        f0 = 36
+                        tprime0 = 133
+                        v0 = 92
+                        l = 2400
+
+                    if n == 7:
+                        f0 = 26		
+                        tprime0 = 122
+                        v0 = 126
+                        l = 3000
+
+                    if n == 8:
+                        f0 = 87.7
+                        tprime0 = 100
+                        v0 = 67
+                        l = 2300
+
+                    if n == 9:
+                        f0 = 26
+                        tprime0 = 114
+                        v0 = 144
+                        l = 1900
                     c = 343
                     m0 = [f0, v0, l, tprime0]
 
