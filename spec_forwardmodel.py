@@ -17,7 +17,7 @@ seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 station = seismo_data['Station']
-20190304_531605202_1551662362_1010
+
 flight_num = [530342801,528485724,528473220,528407493,528293430,527937367,529741194,529776675,529179112,530165646,531605202,531715679,529805251,529948401,530122923]
 time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,1550773710,1550787637,1550511447,1550974151,1551662362,1551736354,1550803701,1550867033,1550950429]
 sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV",1010,1021,1006,1109,1298]
@@ -99,8 +99,13 @@ for n in range(0,15):
 						median = p[int(m/2)]
 						for col in range(m):
 							MDF[row][col] = median
-
-					ty = False
+					spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF)) 
+					# Find the index of the middle frequency
+					middle_index = len(times) // 2
+					middle_column = spec[:, middle_index]
+					vmin = 0  
+					vmax1 = np.max(middle_column) 
+					ty = True
 					if ty == True:
 						if isinstance(sta[n], str):
 							spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
@@ -113,6 +118,12 @@ for n in range(0,15):
 								for row in range(len(Sxx)):
 
 									spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
+						middle_index = len(times) // 2
+						middle_column = spec[:, middle_index]
+						vmax2 = np.max(spec)
+						prec = vmax2/vmax1
+						spec = spec * prec
+						vmax = vmax1
 					else:
 						spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
 
@@ -125,10 +136,10 @@ for n in range(0,15):
 					ax1.margins(x=0)
 					#spec = 10 * np.log10(Sxx) - ((10 * np.log10(MDF)) 
 					# Find the index of the middle frequency
-					middle_index = len(times) // 2
-					middle_column = spec[:, middle_index]
-					vmin = 0  
-					vmax = np.max(middle_column) 
+					#middle_index = len(times) // 2
+					#middle_column = spec[:, middle_index]
+					#vmin = 0  
+ 
 
 					if n == 0:
 						tprime0 = 112
@@ -229,7 +240,7 @@ for n in range(0,15):
 							ax2.plot(tpr, ft, 'g', linewidth=0.5)
 							ax2.set_title("Forward Model: t'= "+str(tprime0)+' sec, v0 = '+str(v0)+' m/s, l = '+str(l)+' m, \n' + 'f0 = '+str(fnot)+' Hz', fontsize='x-small')
 					# Plot spectrogram
-					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
+					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin) #, vmax=vmax)				
 					ax2.set_xlabel('Time [s]')
 					dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
 					tarrive = tim + (time[n] - calc_time(tmid,dist_m,alt_m))
@@ -265,7 +276,7 @@ for n in range(0,15):
 					ax4.set_xlim(vmax*1.1, vmin) #, width=vmax*1.1-vmin, height=int(fs/2))
 					ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
 					ax4.grid(axis='y')
-					
+					plt.show()
 					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'
 					make_base_dir(BASE_DIR)
 					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
