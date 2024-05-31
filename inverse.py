@@ -21,7 +21,7 @@ time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,155077
 sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV"]
 day = [25,14,14,14,13,11,21,21,18,24]
 
-for n in range(1,10):
+for n in range(5,10):
     ht = datetime.datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -89,7 +89,21 @@ for n in range(1,10):
                         median = p[int(m/2)]
                         for col in range(m):
                             MDF[row][col] = median
-                    spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))		
+                    ty = False
+                    if ty == True:
+                        if isinstance(sta[n], str):
+                            spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
+                        else:
+                            spec = np.zeros((a,b))
+                            for col in range(0,b):
+                                p = sorted(Sxx[:, col])
+                                median = p[int(len(p)/2)]
+
+                                for row in range(len(Sxx)):
+
+                                    spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
+                    else:
+                        spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))		
                     middle_index = len(times) // 2
                     middle_column = spec[:, middle_index]
                     vmin = 0  
@@ -200,7 +214,10 @@ for n in range(1,10):
                     for t_f in range(len(times)):
                         upper = int(ft[t_f] + corridor_width)
                         lower = int(ft[t_f] - corridor_width)
-
+                        if lower < 0:
+                            lower = 0
+                        if upper > len(frequencies):
+                            upper = len(frequencies)
                         plt.scatter(times[t_f], upper, color='pink', marker='x')
                         plt.scatter(times[t_f], lower, color='pink', marker='x')
 

@@ -99,23 +99,24 @@ for n in range(0,15):
 						median = p[int(m/2)]
 						for col in range(m):
 							MDF[row][col] = median
-					MDFtt = np.zeros((a,b))
-					spec = np.zeros((a,b))
-					middle_index = len(times) // 2
-					middle_column = spec[:, middle_index]
-					if isinstance(sta[n], str):
-						spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
+
+					ty = False
+					if ty == True:
+						if isinstance(sta[n], str):
+							spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
+						else:
+							spec = np.zeros((a,b))
+							for col in range(0,b):
+								p = sorted(Sxx[:, col])
+								median = p[int(len(p)/2)]
+
+								for row in range(len(Sxx)):
+
+									spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
 					else:
-						for col in range(0,b):
-							p = sorted(Sxx[:, col])
-							median = p[int(len(p)/2)]
+						spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
 
-							for row in range(len(Sxx)):
 
-								MDFtt[row][col] = np.abs(median)
-								spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
-
-								
 					fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6)) #, gridspec_kw={'height_ratios': [3, 1]})     
 
 					ax1.plot(t, data, 'k', linewidth=0.5)
