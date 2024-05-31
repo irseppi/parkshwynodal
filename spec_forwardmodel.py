@@ -98,14 +98,9 @@ for n in range(0,15):
 						p = sorted(Sxx[row])
 						median = p[int(m/2)]
 						for col in range(m):
-							MDF[row][col] = median
-					spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF)) 
-					# Find the index of the middle frequency
-					middle_index = len(times) // 2
-					middle_column = spec[:, middle_index]
-					vmin = 0  
-					vmax = np.max(middle_column) 
-					ty = True
+							MDF[row][col] = median 
+					
+					ty = False
 					if ty == True:
 						if isinstance(sta[n], str):
 							spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
@@ -118,15 +113,16 @@ for n in range(0,15):
 								for row in range(len(Sxx)):
 
 									spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
-						middle_index = len(times) // 2
-						middle_column = spec[:, middle_index]
-						vmax2 = np.max(spec)
-						prec = vmax2/vmax1
-						spec = spec * prec
+
 
 					else:
 						spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
 
+					# Find the index of the middle frequency
+					middle_index = len(times) // 2
+					middle_column = spec[:, middle_index]
+					vmin = 0  
+					vmax = np.max(middle_column) 
 
 					fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6)) #, gridspec_kw={'height_ratios': [3, 1]})     
 
