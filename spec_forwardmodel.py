@@ -12,18 +12,22 @@ from prelude import make_base_dir, distance
 import datetime
 from obspy import UTCDateTime
 from prelude import make_base_dir, distance, calculate_distance, closest_encounter, calc_time
+from scipy.stats import mode
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 station = seismo_data['Station']
-flight_num = [530342801,528485724,528473220,528407493,528293430,527937367,529741194,529776675,529179112,530165646]
-time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,1550773710,1550787637,1550511447,1550974151]
-sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV"]
-day = [25,14,14,14,13,11,21,21,18,24]
-forward_model = True
+20190304_531605202_1551662362_1010
+flight_num = [530342801,528485724,528473220,528407493,528293430,527937367,529741194,529776675,529179112,530165646,531605202,531715679,529805251,529948401,530122923]
+time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,1550773710,1550787637,1550511447,1550974151,1551662362,1551736354,1550803701,1550867033,1550950429]
+sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV",1010,1021,1006,1109,1298]
+day = [25,14,14,14,13,11,21,21,18,24,4,4,22,22,23]
+month = [2,2,2,2,2,2,2,2,2,2,3,3,2,2,2]
+forward_model = False
 
-for n in range(0,10):
+for n in range(0,15):
 	ht = datetime.datetime.utcfromtimestamp(time[n])
+	
 	mins = ht.minute
 	secs = ht.second
 	h = ht.hour
@@ -40,7 +44,10 @@ for n in range(0,10):
 	else:
 		h_u = '00'
 		day2 = str(day[n]+1)
-	flight_data = pd.read_csv('/scratch/irseppi/nodal_data/flightradar24/201902'+str(day[n])+'_positions/201902'+str(day[n])+'_'+str(flight_num[n])+'.csv', sep=",")
+	if len(str(day[n])) == 1:
+		day[n] = '0'+str(day[n])
+		day2 = day[n]
+	flight_data = pd.read_csv('/scratch/irseppi/nodal_data/flightradar24/20190'+str(month[n])+str(day[n])+'_positions/20190'+str(month[n])+str(day[n])+'_'+str(flight_num[n])+'.csv', sep=",")
 
 	flight_latitudes = flight_data['latitude']
 	flight_longitudes = flight_data['longitude']
@@ -70,7 +77,7 @@ for n in range(0,10):
 						title    = f'{tr[0].stats.network}.{tr[0].stats.station}.{tr[0].stats.location}.{tr[0].stats.channel} − starting {tr[0].stats["starttime"]}'						
 						t                  = tr[0].times()
 					else:
-						p = "/scratch/naalexeev/NODAL/2019-02-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-02-"+str(day2)+"T"+str(h_u)+":00:00.000000Z."+str(station[y])+".mseed"
+						p = "/scratch/naalexeev/NODAL/2019-0"+str(month[n])+"-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-0"+str(month[n])+"-"+str(day2)+"T"+str(h_u)+":00:00.000000Z."+str(station[y])+".mseed"
 						tr = obspy.read(p)
 						tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - tim, tr[2].stats.starttime + (mins * 60) + secs + tim)
 						data = tr[2][0:-1]
@@ -92,15 +99,30 @@ for n in range(0,10):
 						median = p[int(m/2)]
 						for col in range(m):
 							MDF[row][col] = median
+					MDFtt = np.zeros((a,b))
+					spec = np.zeros((a,b))
+					middle_index = len(times) // 2
+					middle_column = spec[:, middle_index]
+					if isinstance(sta[n], str):
+						spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
+					else:
+						for col in range(0,b):
+							p = sorted(Sxx[:, col])
+							median = p[int(len(p)/2)]
+
+							for row in range(len(Sxx)):
+
+								MDFtt[row][col] = np.abs(median)
+								spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
+
+								
 					fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6)) #, gridspec_kw={'height_ratios': [3, 1]})     
 
 					ax1.plot(t, data, 'k', linewidth=0.5)
 					ax1.set_title(title)
-					ax1.axvline(x=tim, c = 'c', ls = '--')
+					#ax1.axvline(x=tim, c = 'c', ls = '--')
 					ax1.margins(x=0)
-
-					spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
-
+					#spec = 10 * np.log10(Sxx) - ((10 * np.log10(MDF)) 
 					# Find the index of the middle frequency
 					middle_index = len(times) // 2
 					middle_column = spec[:, middle_index]
@@ -193,6 +215,7 @@ for n in range(0,10):
 						c = 343
 						v0 = 144
 						l = 1900
+					
 					# Plot forward model
 					if forward_model == True:
 						for f0 in fnot:
@@ -203,7 +226,7 @@ for n in range(0,10):
 									
 								ft.append(ft0p)
 							ax2.plot(tpr, ft, 'g', linewidth=0.5)
-					
+							ax2.set_title("Forward Model: t'= "+str(tprime0)+' sec, v0 = '+str(v0)+' m/s, l = '+str(l)+' m, \n' + 'f0 = '+str(fnot)+' Hz', fontsize='x-small')
 					# Plot spectrogram
 					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
 					ax2.set_xlabel('Time [s]')
@@ -213,12 +236,12 @@ for n in range(0,10):
 					print(tmid, tarrive)
 
 					ax2.axvline(x=tarrive, c = 'r', ls = '--',label='Wave arrvial: '+str(np.round(tarrive,2))+'sec')
-					ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated arrival: '+str(tprime0)+' sec')
+					if n < 10:
+						ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated arrival: '+str(tprime0)+' sec')
 					ax2.legend(loc='upper right',fontsize = 'x-small')
 					ax2.set_ylabel('Frequency (Hz)')
 
 					
-					ax2.set_title("Forward Model: t'= "+str(tprime0)+' sec, v0 = '+str(v0)+' m/s, l = '+str(l)+' m, \n' + 'f0 = '+str(fnot)+' Hz', fontsize='x-small')
 					ax2.margins(x=0)
 					ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
 
@@ -241,41 +264,43 @@ for n in range(0,10):
 					ax4.set_xlim(vmax*1.1, vmin) #, width=vmax*1.1-vmin, height=int(fs/2))
 					ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
 					ax4.grid(axis='y')
-					plt.show()
-					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'
+					
+					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'
 					make_base_dir(BASE_DIR)
-					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
+					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
 					plt.close()
 
 
 
-					'''
+					
 					# Find the center of the trace
-					center_index = len(data) // 2
-					center_time = t[center_index]
-					peaks, _ = signal.find_peaks(middle_column, prominence=10) #, distance = 10) 
+					closest_index = np.argmin(np.abs(tarrive - times))
+					arrive_time = spec[:,closest_index]
+					vmin =np.min(arrive_time) 
+					vmax = np.max(arrive_time) 
+					peaks, _ = signal.find_peaks(arrive_time, prominence=15, distance = 10) 
 					np.diff(peaks)
 					fig = plt.figure(figsize=(10,6))
 					plt.grid()
 					
-					plt.plot(frequencies, middle_column, c='c')
-					plt.plot(peaks, middle_column[peaks], "x")
+					plt.plot(frequencies, arrive_time, c='c')
+					plt.plot(peaks, arrive_time[peaks], "x")
 					for g in range(len(peaks)):
-						plt.text(peaks[g], middle_column[peaks[g]], peaks[g])
-					plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
+						plt.text(peaks[g], arrive_time[peaks[g]], peaks[g])
+
 
 					plt.xlim(0,int(fs/2))
 					plt.ylim(vmin,vmax*1.1)
 					plt.xlabel('Freq [Hz]')
 					plt.ylabel('Amplitude [dB]')
-					plt.title('Amplitude Spectrum at t = {:.2f} s'.format(center_time))
-					plt.show()
+					plt.title('Amplitude Spectrum at t = {:.2f} s'.format(tarrive))
 					
-					make_base_dir('/scratch/irseppi/nodal_data/plane_info/5spec/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/')
 					
-					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec/201902'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(sta[n])+'_' + str(time[n]) + '.png')
+					make_base_dir('/scratch/irseppi/nodal_data/plane_info/5spec/20190'+str(month[n])+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/')
+					
+					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec/20190'+str(month[n])+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(sta[n])+'_' + str(time[n]) + '.png')
 					plt.close()
-					'''
+
 					'''
 										l = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
 										start_time = tr[2].stats.starttime + (mins * 60) + secs - tim
