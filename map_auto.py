@@ -90,9 +90,9 @@ for line in sta_f.readlines():
                     axs[1].plot(flight_longitudes, flight_latitudes, c='c',linestyle ='dotted')
                     axs[1].set_xlim(minl, maxl)
                     axs[1].set_ylim(minla, maxla)
-                    axs[1].text(seismo_longitudes[t], seismo_latitudes[t], sta[t], fontsize=11, fontweight='bold')
+                    #axs[1].text(seismo_longitudes[t], seismo_latitudes[t], sta[t], fontsize=11, fontweight='bold')
                     axs[1].tick_params(axis='both', which='major', labelsize=13)
-                    axs[1].text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=11, fontweight='bold')
+                    #axs[1].text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=11, fontweight='bold')
                     axs[1].scatter(flight_longitudes[l], flight_latitudes[l], c='lawngreen')
                     axs[1].scatter(seismo_longitudes[t], seismo_latitudes[t], c='pink')
                     

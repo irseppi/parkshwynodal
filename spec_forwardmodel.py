@@ -104,7 +104,7 @@ for n in range(0,15):
 					middle_index = len(times) // 2
 					middle_column = spec[:, middle_index]
 					vmin = 0  
-					vmax1 = np.max(middle_column) 
+					vmax = np.max(middle_column) 
 					ty = True
 					if ty == True:
 						if isinstance(sta[n], str):
@@ -123,7 +123,7 @@ for n in range(0,15):
 						vmax2 = np.max(spec)
 						prec = vmax2/vmax1
 						spec = spec * prec
-						vmax = vmax1
+
 					else:
 						spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
 
@@ -134,12 +134,6 @@ for n in range(0,15):
 					ax1.set_title(title)
 					#ax1.axvline(x=tim, c = 'c', ls = '--')
 					ax1.margins(x=0)
-					#spec = 10 * np.log10(Sxx) - ((10 * np.log10(MDF)) 
-					# Find the index of the middle frequency
-					#middle_index = len(times) // 2
-					#middle_column = spec[:, middle_index]
-					#vmin = 0  
- 
 
 					if n == 0:
 						tprime0 = 112
