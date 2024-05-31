@@ -21,7 +21,7 @@ time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,155077
 sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV"]
 day = [25,14,14,14,13,11,21,21,18,24]
 
-for n in range(5,10):
+for n in range(4,10):
     ht = datetime.datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -202,84 +202,84 @@ for n in range(5,10):
                         ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
 
                         ft.append(ft0p)
-                    
-                    peaks = []
-                    p, _ = signal.find_peaks(middle_column, distance=7)
-                    corridor_width = 250 / len(p)
+                    if isinstance(sta[n], int):
+                        peaks = []
+                        p, _ = signal.find_peaks(middle_column, distance=7)
+                        corridor_width = 250 / len(p)
 
-                    coord_inv = []
-                    plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                        coord_inv = []
+                        plt.figure()
+                        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
 
-                    for t_f in range(len(times)):
-                        upper = int(ft[t_f] + corridor_width)
-                        lower = int(ft[t_f] - corridor_width)
-                        if lower < 0:
-                            lower = 0
-                        if upper > len(frequencies):
-                            upper = len(frequencies)
-                        plt.scatter(times[t_f], upper, color='pink', marker='x')
-                        plt.scatter(times[t_f], lower, color='pink', marker='x')
+                        for t_f in range(len(times)):
+                            upper = int(ft[t_f] + corridor_width)
+                            lower = int(ft[t_f] - corridor_width)
+                            if lower < 0:
+                                lower = 0
+                            if upper > len(frequencies):
+                                upper = len(frequencies)
+                            plt.scatter(times[t_f], upper, color='pink', marker='x')
+                            plt.scatter(times[t_f], lower, color='pink', marker='x')
 
-                        tt = spec[lower:upper, t_f]
+                            tt = spec[lower:upper, t_f]
 
-                        max_amplitude_index = np.argmax(tt)
+                            max_amplitude_index = np.argmax(tt)
+                            
+                            max_amplitude_frequency = frequencies[max_amplitude_index+lower]
+                            peaks.append(max_amplitude_frequency)
+                            coord_inv.append((times[t_f], max_amplitude_frequency))
+                            plt.scatter(times[t_f], max_amplitude_frequency, color='black', marker='x')
                         
-                        max_amplitude_frequency = frequencies[max_amplitude_index+lower]
-                        peaks.append(max_amplitude_frequency)
-                        coord_inv.append((times[t_f], max_amplitude_frequency))
-                        plt.scatter(times[t_f], max_amplitude_frequency, color='black', marker='x')
-                       
-                    plt.show()
+                        plt.show()
 
-                    coord_inv_array = np.array(coord_inv)
+                        coord_inv_array = np.array(coord_inv)
 
-                    m = invert_f(m0, coord_inv_array, num_iterations=12)
-                    f0 = m[0]
-                    v0 = m[1]
-                    l = m[2]
-                    tprime0 = m[3]
+                        m = invert_f(m0, coord_inv_array, num_iterations=12)
+                        f0 = m[0]
+                        v0 = m[1]
+                        l = m[2]
+                        tprime0 = m[3]
 
-                    ft = []
-                    for tprime in times:
-                        t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-                        ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
-                            
-                        ft.append(ft0p)
+                        ft = []
+                        for tprime in times:
+                            t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
+                            ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
+                                
+                            ft.append(ft0p)
 
-                    delf = np.array(ft) - np.array(peaks)
+                        delf = np.array(ft) - np.array(peaks)
+                        
+                        new_coord_inv_array = []
+                        for i in range(len(delf)):
+                            if np.abs(delf[i]) <= 3:
+                                new_coord_inv_array.append(coord_inv_array[i])
+                        coord_inv_array = np.array(new_coord_inv_array)
+
+                        plt.show()
+                        plt.figure()
+                        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                        plt.scatter(coord_inv_array[:,0], coord_inv_array[:,1], color='black', marker='x')
+                        plt.show()
+
+                        m = invert_f(m0, coord_inv_array, num_iterations=12)
+                        f0 = m[0]
+                        v0 = m[1]
+                        l = m[2]
+                        tprime0 = m[3]
+
+                        ft = []
+                        for tprime in times:
+                            t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
+                            ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
+                                
+                            ft.append(ft0p)
                     
-                    new_coord_inv_array = []
-                    for i in range(len(delf)):
-                        if np.abs(delf[i]) <= 3:
-                            new_coord_inv_array.append(coord_inv_array[i])
-                    coord_inv_array = np.array(new_coord_inv_array)
+                        # Find the closest time value to m[3]
+                        #closest_time_index = np.argmin(np.abs(times - m[3]))
 
-                    plt.show()
-                    plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    plt.scatter(coord_inv_array[:,0], coord_inv_array[:,1], color='black', marker='x')
-                    plt.show()
-
-                    m = invert_f(m0, coord_inv_array, num_iterations=12)
-                    f0 = m[0]
-                    v0 = m[1]
-                    l = m[2]
-                    tprime0 = m[3]
-
-                    ft = []
-                    for tprime in times:
-                        t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-                        ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
-                            
-                        ft.append(ft0p)
-                   
-                    # Find the closest time value to m[3]
-                    #closest_time_index = np.argmin(np.abs(times - m[3]))
-
-                    # Extract the corresponding column from the spectrogram
-                    #col = spec[:, closest_time_index]
-                    #peaks, _ = signal.find_peaks(col,prominence=15) #distance = 10) 
+                        # Extract the corresponding column from the spectrogram
+                        #col = spec[:, closest_time_index]
+                        #peaks, _ = signal.find_peaks(col,prominence=15) #distance = 10) 
                     
                     peaks = []
                     plt.figure()
