@@ -42,6 +42,7 @@ sta = seismo_data['Station']
 for line in sta_f.readlines():
     val = line.split(',')
     date = val[0]
+    print(date)
     flight = val[1]
     station = val[5]
     flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + date + '_positions/' + date + '_' + flight + '.csv'
