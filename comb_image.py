@@ -1,42 +1,10 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib
 import os
-import numpy as np
-from obspy.geodetics import gps2dist_azimuth
-from obspy.core import UTCDateTime
-import datetime
-import pytz
-import obspy
-import math 
-from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
+from prelude import make_base_dir
 
-def make_base_dir(base_dir):
-	base_dir = Path(base_dir)
-	if not base_dir.exists():
-		current_path = Path("/")
-		for parent in base_dir.parts:
-			current_path = current_path/parent
-			if not current_path.exists():
-				current_path.mkdir()
-month = []
-day = []
-
-for d in range(13,15):
-	day.append(str(d))
-	month.append('02')
-day.append(str(25))
-month.append('02')
 day = ['11','13','14','18','21','24','25','04','04','22','22','23']
 month =  ['02','02','02','02','02','02','02','03','03','02','02','02']
-#for d in range(1, 10):
-#day.append('0' + str(d))
-#month.append('03')
-
-#for d in range(10, 27):
-#day.append(str(d))
-#month.append('03')
 
 text = open('input/all_station_crossing_db.txt', 'r')
 
@@ -64,6 +32,7 @@ for i in range(len(day)):
 		f = os.path.join(spec_dir, flight)
 		for l in range(len(flight_id)):
 			if str(flight_id[l]) == str(flight):
+
 				#search text files for plane
 				pla = equipment[l]
 				for h in range(len(des)):
@@ -125,6 +94,7 @@ for i in range(len(day)):
 				speed = flight_data['speed']
 				alt = flight_data['altitude']
 				font2 = ImageFont.truetype('input/Arialn.ttf', 25)
+
 				# Label each image
 				draw.text((15, 35), '(a)', fill='black', font=font2)
 				draw.text((15, 350), '(b)', fill='black', font=font2)
@@ -137,12 +107,11 @@ for i in range(len(day)):
 						text1 = 'Speed: '+str(round(speed[l]*0.514444,2))+' m/s\n           : '+str(round(speed[l]*1.15078,2))+' mph\nAltitude: '+str(round(alt[l]*0.3048,2))+' m\n            : '+str(round(alt[l],2)) +' ft'
 					else:
 						continue
+				
 				bbox = draw.textbbox((google_slide_width - plane.width, 0), text2, font=font)
 				draw.rectangle(bbox, fill="white")
-				draw.text((google_slide_width - plane.width, 0), text2, fill='black', font=font)
-				
+				draw.text((google_slide_width - plane.width, 0), text2, fill='black', font=font)			
 				draw.text((google_slide_width - 132, 400), text1,fill='black', font=font)
-				
 				draw.text((google_slide_width - 350, 400), text3, fill='black', font=font)
 				
 				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5fig/'

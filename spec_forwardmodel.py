@@ -273,14 +273,14 @@ for n in range(0,15):
 					plt.close()
 
 
-
-					
-					# Find the center of the trace
 					closest_index = np.argmin(np.abs(tarrive - times))
 					arrive_time = spec[:,closest_index]
-					vmin =np.min(arrive_time) 
+					for i in range(len(arrive_time)):
+						if arrive_time[i] < 0:
+							arrive_time[i] = 0
+					vmin = np.min(arrive_time) 
 					vmax = np.max(arrive_time) 
-					peaks, _ = signal.find_peaks(arrive_time, prominence=15, distance = 10) 
+					peaks, _ = signal.find_peaks(arrive_time, prominence=10, distance = 10, height = 5, width=1) #for later change parameters for jets and permenant stations
 					np.diff(peaks)
 					fig = plt.figure(figsize=(10,6))
 					plt.grid()
@@ -294,7 +294,7 @@ for n in range(0,15):
 					plt.xlim(0, int(fs/2))
 					plt.xticks(fontsize=12)
 					plt.yticks(fontsize=12)
-					plt.ylim(vmin,vmax*1.1)
+					plt.ylim(0,vmax*1.1)
 					plt.xlabel('Frequency (Hz)', fontsize=17)
 					plt.ylabel('Amplitude Spectrum at t = {:.2f} s (dB)'.format(tarrive), fontsize=17)
 					
@@ -304,41 +304,3 @@ for n in range(0,15):
 					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec/20190'+str(month[n])+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(sta[n])+'_' + str(time[n]) + '.png')
 					plt.close()
 
-					# Find the center of the trace
-		
-					#plt.figure()
-					# Spectrogram 
-					#plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-				
-
-					# '''
-					# 					coords = []
-
-					# 					def onclick(event):
-					# 						global coords
-					# 						coords.append((event.xdata, event.ydata))
-					# 						plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-					# 						plt.draw() 
-					# 						print('Clicked:', event.xdata, event.ydata)  
-					# 					cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-
-					# 					plt.show(block=True)
-					# 					# Convert the list of coordinates to a numpy array
-					# 					coords_array = np.array(coords)
-					# 					print(coords_array)
-					# 					v0 = speed*0.514444
-					# 					c = 343
-					# 					for jj in range(len(coords_array)):
-					# 						print(coords_array[jj][0], coords_array[jj][1])
-					# 						tflight = coords_array[jj][0]-(np.sqrt(coords_array[jj][0]**2-(1-v0**2/c**2)*(coords_array[jj][0]**2-l**2/c**2)))/(1-v0**2/c**2)
-					# 						f0 = coords_array[jj][1]*(1+(v0/c)*(v0*tflight/(np.sqrt(l**2+(v0*tflight)**2))))
-					# 						print('f0 = ', f0)
-											
-					# 					# Save the coordinates to a text file
-					# 					#np.savetxt('home/irseppi/REPOSITORIES/parkshwynodal/coords_'+str(flight_num[n])+'.txt', coords_array)
-									
-					# 					plt.figure()
-					# 					plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-					# 					plt.plot(coords_array[:,0], coords_array[:,1])
-					# 					plt.show()
-					# '''

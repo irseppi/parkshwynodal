@@ -86,6 +86,7 @@ for line in sta_f.readlines():
                     rect = Rectangle((minl, minla), 0.1, 0.06, ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
                     axs[0].add_patch(rect)
                     axs[1].plot(x,y, '--', c='orange')
+                    
                     # Draw the zoomed in map on the second subplot
                     axs[1].scatter(seismo_longitudes, seismo_latitudes, c='red')
                     axs[1].plot(flight_longitudes, flight_latitudes, c='c',linestyle ='dotted')
