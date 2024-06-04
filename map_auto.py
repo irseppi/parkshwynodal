@@ -69,7 +69,7 @@ for line in sta_f.readlines():
                     # Set labels and title
                     axs[0].set_xlim(min_lon, max_lon)
                     axs[0].set_ylim(min_lat, max_lat)
-                    axs[0].tick_params(axis='both', which='major', labelsize=13)
+                    axs[0].tick_params(axis='both', which='major', labelsize=12)
 
 			
                     y =[flight_latitudes[l],  seismo_latitudes[t]]
@@ -92,22 +92,24 @@ for line in sta_f.readlines():
                     axs[1].set_xlim(minl, maxl)
                     axs[1].set_ylim(minla, maxla)
                     #axs[1].text(seismo_longitudes[t], seismo_latitudes[t], sta[t], fontsize=11, fontweight='bold')
-                    axs[1].tick_params(axis='both', which='major', labelsize=13)
+                    axs[1].tick_params(axis='both', which='major', labelsize=10)
+                    
+                    
                     #axs[1].text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=11, fontweight='bold')
+                    
+                    
+                    axs[1].quiver(flight_longitudes[l], flight_latitudes[l], np.cos(direction), np.sin(direction), angles='xy') #, scale_units='xy', scale=0.002)
                     axs[1].scatter(flight_longitudes[l], flight_latitudes[l], c='lawngreen')
                     axs[1].scatter(seismo_longitudes[t], seismo_latitudes[t], c='pink')
-                    
-                    axs[1].quiver(flight_longitudes[l]-0.01, flight_latitudes[l], np.cos(direction), np.sin(direction), angles='xy') #, scale_units='xy', scale=0.002)
-                    
 
-                    axs[1].text(xx,yy, str(round(dist, 2))+'km', fontsize=10, fontweight='bold')
+                    axs[1].text(xx,yy, str(round(dist, 2))+' km', fontsize=12, fontweight='bold')
 
                     # Draw dashed lines connecting the rectangle on the existing map to the zoomed-in map
                     con = mpatch.ConnectionPatch(xyA=(minl, minla), xyB=(maxl, minla), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
                     fig.add_artist(con)
                     con = mpatch.ConnectionPatch(xyA=(minl, maxla), xyB=(maxl, maxla), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
                     fig.add_artist(con)
-                         
+                      
                     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all/' + date + '/'+flight+'/'+station+'/'
                     make_base_dir(BASE_DIR)
                     plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all/'+ date + '/'+flight+'/'+station+'/map_'+flight+'_' + str(time[l]) + '.png')

@@ -68,7 +68,7 @@ for i in range(len(day)):
 				pla = equipment[l]
 				for h in range(len(des)):
 					if pla == des[h]:
-						text2 = str(man[h]) + ', '+ str(model[h]) + ' (' + str(descrip[h]) + ')'
+						text2 = str(des[h]) + ': ' + str(man[h]) + ', '+ str(model[h]) + ' (' + str(descrip[h]) + ')'
 						text3 = 'Flight Designator: '+str(des[h]) + '\nEngine: '+str(engine[h])+'\nEngine Count: ' +str(coun[h])+'\nWake Turbulence Category: '+str(coun[h])
 						break
 					else:
@@ -127,16 +127,16 @@ for i in range(len(day)):
 				
 				for l in range(len(t)):
 					if int(time) == int(t[l]):
-						text1 = 'Speed: '+str(round(speed[l]*0.514444,2))+'m/s\n           : '+str(round(speed[l]*1.15078,2))+'mph\nAltitude: '+str(round(alt[l]*0.3048,2))+'m\n            : '+str(round(alt[l],2)) +'ft'
+						text1 = 'Speed: '+str(round(speed[l]*0.514444,2))+' m/s\n           : '+str(round(speed[l]*1.15078,2))+' mph\nAltitude: '+str(round(alt[l]*0.3048,2))+' m\n            : '+str(round(alt[l],2)) +' ft'
 					else:
 						continue
 				bbox = draw.textbbox((google_slide_width - plane.width, 0), text2, font=font)
 				draw.rectangle(bbox, fill="white")
 				draw.text((google_slide_width - plane.width, 0), text2, fill='black', font=font)
 				
-				draw.text((google_slide_width - 130, 390), text1,fill='black', font=font)
+				draw.text((google_slide_width - 132, 400), text1,fill='black', font=font)
 				
-				draw.text((google_slide_width - 350, 390), text3, fill='black', font=font)
+				draw.text((google_slide_width - 350, 400), text3, fill='black', font=font)
 				
 				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5fig/'
 				make_base_dir(BASE_DIR)

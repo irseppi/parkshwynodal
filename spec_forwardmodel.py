@@ -124,11 +124,11 @@ for n in range(0,15):
 					vmin = 0  
 					vmax = np.max(middle_column) 
 
-					fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6)) #, gridspec_kw={'height_ratios': [3, 1]})     
+					fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
 
 					ax1.plot(t, data, 'k', linewidth=0.5)
 					ax1.set_title(title)
-					#ax1.axvline(x=tim, c = 'c', ls = '--')
+
 					ax1.margins(x=0)
 
 					if n == 0:
@@ -230,16 +230,16 @@ for n in range(0,15):
 							ax2.plot(tpr, ft, 'g', linewidth=0.5)
 							ax2.set_title("Forward Model: t'= "+str(tprime0)+' sec, v0 = '+str(v0)+' m/s, l = '+str(l)+' m, \n' + 'f0 = '+str(fnot)+' Hz', fontsize='x-small')
 					# Plot spectrogram
-					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin) #, vmax=vmax)				
-					ax2.set_xlabel('Time [s]')
+					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
+					ax2.set_xlabel('Time (s)')
 					dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
 					tarrive = tim + (time[n] - calc_time(tmid,dist_m,alt_m))
 					tarrive_est = calc_time(tprime0,dist_m,alt_m)
 					print(tmid, tarrive)
 
-					ax2.axvline(x=tarrive, c = 'r', ls = '--',label='Wave arrvial: '+str(np.round(tarrive,2))+'sec')
+					ax2.axvline(x=tarrive, c = 'r', ls = '--',label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
 					if n < 10:
-						ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated arrival: '+str(tprime0)+' sec')
+						ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated arrival: '+str(tprime0)+' s')
 					ax2.legend(loc='upper right',fontsize = 'x-small')
 					ax2.set_ylabel('Frequency (Hz)')
 
@@ -260,10 +260,10 @@ for n in range(0,15):
 					vmax = np.max(middle_column2)
 				
 					# Create ax4 and plot on the same y-axis as ax2
-					ax4 = fig.add_axes([0.125, 0.11, 0.07, 0.35], sharey=ax2) #, width=vmax*1.1-vmin, height=int(fs/2))
+					ax4 = fig.add_axes([0.125, 0.11, 0.07, 0.35], sharey=ax2) 
 					ax4.plot(middle_column2, frequencies, c='orange')  
 					ax4.set_ylim(0, int(fs/2))
-					ax4.set_xlim(vmax*1.1, vmin) #, width=vmax*1.1-vmin, height=int(fs/2))
+					ax4.set_xlim(vmax*1.1, vmin) 
 					ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
 					ax4.grid(axis='y')
 					
@@ -288,14 +288,15 @@ for n in range(0,15):
 					plt.plot(frequencies, arrive_time, c='c')
 					plt.plot(peaks, arrive_time[peaks], "x")
 					for g in range(len(peaks)):
-						plt.text(peaks[g], arrive_time[peaks[g]], peaks[g])
+						plt.text(peaks[g], arrive_time[peaks[g]], peaks[g], fontsize=15)
 
 
-					plt.xlim(0,int(fs/2))
+					plt.xlim(0, int(fs/2))
+					plt.xticks(fontsize=12)
+					plt.yticks(fontsize=12)
 					plt.ylim(vmin,vmax*1.1)
-					plt.xlabel('Freq [Hz]')
-					plt.ylabel('Amplitude [dB]')
-					plt.title('Amplitude Spectrum at t = {:.2f} s'.format(tarrive))
+					plt.xlabel('Frequency (Hz)', fontsize=17)
+					plt.ylabel('Amplitude Spectrum at t = {:.2f} s (dB)'.format(tarrive), fontsize=17)
 					
 					
 					make_base_dir('/scratch/irseppi/nodal_data/plane_info/5spec/20190'+str(month[n])+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/')
@@ -303,23 +304,6 @@ for n in range(0,15):
 					fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec/20190'+str(month[n])+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(sta[n])+'_' + str(time[n]) + '.png')
 					plt.close()
 
-					'''
-										l = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
-										start_time = tr[2].stats.starttime + (mins * 60) + secs - tim
-
-
-										tpr = np.arange(40, 230, 1)
-										middle_index = len(times) // 2
-
-										for tnew in tpr:
-											column = spec[50:250, tnew]
-											peaks, _ = signal.find_peaks(column, prominence=10)
-											sorted_peaks = sorted(peaks, key=lambda x: column[x], reverse=True)[:12]  # Select the 12 largest peaks
-											
-											# Scatter plot
-											ax2.scatter([tnew] * len(sorted_peaks), sorted_peaks + 50, marker='x', color='k', linewidth=0.5)
-										plt.show()
-					'''
 					# Find the center of the trace
 		
 					#plt.figure()
