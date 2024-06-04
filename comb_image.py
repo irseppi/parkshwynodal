@@ -124,7 +124,14 @@ for i in range(len(day)):
 				t = flight_data['snapshot_id']
 				speed = flight_data['speed']
 				alt = flight_data['altitude']
-				
+				font2 = ImageFont.truetype('input/Arialn.ttf', 25)
+				# Label each image
+				draw.text((15, 35), '(a)', fill='black', font=font2)
+				draw.text((15, 350), '(b)', fill='black', font=font2)
+				draw.text((google_slide_width - int(maps.width), 20), '(c)', fill='black', font=font2)
+				draw.text((google_slide_width - int(maps.width), int(plane.height) + int(plane.height*0.05)), '(d)', fill='black', font=font2)
+				draw.text((google_slide_width - spec.width + int(spec.width/12) - 15, google_slide_height - spec.height + 20), '(e)', fill='black', font=font2)
+
 				for l in range(len(t)):
 					if int(time) == int(t[l]):
 						text1 = 'Speed: '+str(round(speed[l]*0.514444,2))+' m/s\n           : '+str(round(speed[l]*1.15078,2))+' mph\nAltitude: '+str(round(alt[l]*0.3048,2))+' m\n            : '+str(round(alt[l],2)) +' ft'

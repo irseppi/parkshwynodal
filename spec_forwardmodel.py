@@ -124,11 +124,11 @@ for n in range(0,15):
 					vmin = 0  
 					vmax = np.max(middle_column) 
 
-					fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
+					fig, (ax1, ax2) = plt.subplots(2, 1, sharex=False, figsize=(8,6))     
 
 					ax1.plot(t, data, 'k', linewidth=0.5)
 					ax1.set_title(title)
-
+					
 					ax1.margins(x=0)
 
 					if n == 0:
