@@ -18,7 +18,7 @@ sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV",1010,1021,1006
 day = [25,14,14,14,13,11,21,21,18,24,4,4,22,22,23]
 month = [2,2,2,2,2,2,2,2,2,2,3,3,2,2,2]
 
-for n in range(2,3):
+for n in range(13,14):
     ht = datetime.datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -194,6 +194,7 @@ for n in range(2,3):
                         tprime0 = tarrive
                         v0 = speed_mps
                         l = np.sqrt(dist_m**2 + alt_m**2)
+
                     c = 343
                     m0 = [f0, v0, l, tprime0]
 
@@ -340,12 +341,12 @@ for n in range(2,3):
                         ft = calc_ft(times, tprime0, f0, v0, l, c)
 
                         ax2.plot(times, ft, 'g', linewidth=0.5)
-                        if np.abs(tprime -tprime0) < 5:
+                        if np.abs(tprime -tprime0) < 2:
                             ax2.scatter(tprime0, ft0p, color='black', marker='x') 
                         ax2.plot(times, ft, 'g', linewidth=0.5)
                         f0lab.append(int(f0)) 
                     ax2.set_title("Final Model: t'= "+str(int(tprime0))+' sec, v0 = '+str(int(v0))+' m/s, l = '+str(int(l))+' m, \n' + 'f0 = '+str(f0lab)+' Hz', fontsize='x-small')
-                    ax2.axvline(x=tarrive, c = 'r', ls = '--',label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
+                    ax2.axvline(x=tarrive, c = 'pink', ls = '--',label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
 
                     ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
                     ax2.legend(loc='upper right',fontsize = 'x-small')
@@ -392,15 +393,28 @@ for n in range(2,3):
                             arrive_time[i] = 0
                     vmin = np.min(arrive_time) 
                     vmax = np.max(arrive_time) 
-                    peaks, _ = find_peaks(arrive_time, prominence=15)#0, distance = 10, height = 5, width=1) #for later change parameters for jets and permenant stations
-                    np.diff(peaks)
+                    
                     fig = plt.figure(figsize=(10,6))
                     plt.grid()
 
-                    plt.plot(frequencies, arrive_time, c='c')
-                    plt.plot(peaks, arrive_time[peaks], "x")
-                    for g in range(len(peaks)):
-                        plt.text(peaks[g], arrive_time[peaks[g]], peaks[g], fontsize=15)
+                    plt.plot(frequencies, arrive_time, c='g')
+                    if auto_peak_pick == True:
+                        peaks, _ = find_peaks(arrive_time, prominence=15)#0, distance = 10, height = 5, width=1) #for later change parameters for jets and permenant stations
+                        np.diff(peaks)
+                        plt.plot(peaks, arrive_time[peaks], c='k', marker="x")
+                        for g in range(len(peaks)):
+                            plt.text(peaks[g], arrive_time[peaks[g]], peaks[g], fontsize=15)
+                    else:    
+                        for pp in range(len(peaks)):
+                            if np.abs(freqpeak[pp] -tprime0) < 2:
+                                upper = int(peaks[pp] + 3)
+                                lower = int(peaks[pp] - 3)
+                                tt = spec[lower:upper, closest_index]
+                                ampp = np.max(tt)
+                                freqp = np.argmax(tt)+lower
+                                plt.scatter(freqp, ampp, color='black', marker='x')
+
+                                plt.text(freqp - 0.5, ampp + 0.5, freqp, fontsize=15)
 
                     plt.xlim(0, int(fs/2))
                     plt.xticks(fontsize=12)
