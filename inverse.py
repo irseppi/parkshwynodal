@@ -321,7 +321,7 @@ for n in range(2,3):
                         cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
                         
                         plt.show(block=True)
-                    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=False, figsize=(8,6))     
+                    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
 
                     ax1.plot(torg, data, 'k', linewidth=0.5)
                     ax1.set_title(title)
