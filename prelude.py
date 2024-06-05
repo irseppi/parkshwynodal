@@ -183,7 +183,7 @@ def calc_time(t0,dist,alt):
 	t = t0 + (np.sqrt(dist**2 + alt**2))/c 
 	return t
 
-####################################################################################
+#####################################################################################################################
 
 def calc_f(f0, t, l, v0):
 	"""
@@ -204,6 +204,52 @@ def calc_f(f0, t, l, v0):
 
 	return f, tflight
 
+############################################################################################################################
+
+def calc_ft(times, tprime0, f0, v0, l, c):
+	"""
+	Calculate the frequency at each given time using the model parameters.
+
+	Args:
+		times (list): List of time values.
+		tprime0 (float): The time at which the central frequency of the overtones occur, when the aircraft is at the closest approach to the station.
+		f0 (float): Fundamental frequency produced by the aircraft.
+		v0 (float): Velocity of the aircraft.
+		l (float): Distance between the station and the aircraft at the closest approach.
+		c (float): Speed of sound.
+
+	Returns:
+		list: List of calculated frequency values.
+	"""
+	ft = []
+	for tprime in times:
+		t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
+		ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
+								
+		ft.append(ft0p)
+	return ft
+
+###################################################################################################################################################################
+
+def calc_f0(tprime, tprime0, ft0p, v0, l, c):
+	"""
+	Calculate the fundamental frequency produced by an aircraft where the wave is generated given the model parameters.
+
+	Parameters:
+	tprime (float): Time at which an aribitrary frequency (ft0p) is observed on the station.
+	tprime0 (float):  The time at which the central frequency of the overtones occur, when the aircraft is at the closest approach to the station.
+	ft0p (float): Frequencyrecorded on the seismometer, picked from the overtone doppler curve.
+	v0 (float): Velocity of the aircraft.
+	l (float): Distance between the station and the aircraft at the closest approach.
+	c (float): Speed of sound..
+
+	Returns:
+	f0 (float): Fundamental frequency produced by the aircraft. (Frequency at the source.) 
+	"""
+	t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
+	f0 = ft0p*(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
+	return f0
+
 ####################################################################################################################################################################################################################################################################################################################
 
 def df(f0,v0,l,tp0,tp):   
@@ -211,7 +257,7 @@ def df(f0,v0,l,tp0,tp):
 	Calculate the derivatives of f with respect to f0, v0, l, and tp0.
 
 	Parameters:
-	f0 (float): Central frequency of overtone.
+	f0 (float): Fundamental frequency produced by the aircraft.
 	v0 (float): Velocity of the aircraft.
 	l (float): Distance of closest approach between the station and the aircraft.
 	tp0 (float): Time of that the central frequency of the overtones occur, when the aircraft is at the closest approach to the station.

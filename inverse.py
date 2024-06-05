@@ -1,27 +1,24 @@
 import numpy as np
-from numpy.linalg import inv
 import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.signal import spectrogram
-from scipy import signal
 import obspy
-import math
-from obspy.core import UTCDateTime
 import datetime
-from prelude import make_base_dir, invert_f, distance
-import numpy as np
-from scipy.signal import find_peaks
+from prelude import make_base_dir, invert_f, distance, closest_encounter, calc_time, calc_ft, calc_f0
+from scipy.signal import find_peaks, spectrogram
 
+show_process = False
+auto_peak_pick = False
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 station = seismo_data['Station']
-flight_num = [530342801,528485724,528473220,528407493,528293430,527937367,529741194,529776675,529179112,530165646]
-time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,1550773710,1550787637,1550511447,1550974151]
-sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV"]
-day = [25,14,14,14,13,11,21,21,18,24]
+flight_num = [530342801,528485724,528473220,528407493,528293430,527937367,529741194,529776675,529179112,530165646,531605202,531715679,529805251,529948401,530122923]
+time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,1550773710,1550787637,1550511447,1550974151,1551662362,1551736354,1550803701,1550867033,1550950429]
+sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV",1010,1021,1006,1109,1298]
+day = [25,14,14,14,13,11,21,21,18,24,4,4,22,22,23]
+month = [2,2,2,2,2,2,2,2,2,2,3,3,2,2,2]
 
-for n in range(4,10):
+for n in range(2,3):
     ht = datetime.datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -39,7 +36,10 @@ for n in range(4,10):
     else:
         h_u = '00'
         day2 = str(day[n]+1)
-    flight_data = pd.read_csv('/scratch/irseppi/nodal_data/flightradar24/201902'+str(day[n])+'_positions/201902'+str(day[n])+'_'+str(flight_num[n])+'.csv', sep=",")
+    if len(str(day[n])) == 1:
+        day[n] = '0'+str(day[n])
+        day2 = day[n]
+    flight_data = pd.read_csv('/scratch/irseppi/nodal_data/flightradar24/20190'+str(month[n])+str(day[n])+'_positions/20190'+str(month[n])+str(day[n])+'_'+str(flight_num[n])+'.csv', sep=",")
 
     flight_latitudes = flight_data['latitude']
     flight_longitudes = flight_data['longitude']
@@ -50,7 +50,9 @@ for n in range(4,10):
     for line in range(len(tm)):
         if str(tm[line]) == str(time[n]):
             speed = flight_data['speed'][line]
+            speed_mps = speed * 0.514444
             alt = flight_data['altitude'][line]
+            alt_m = alt * 0.3048
             for y in range(len(station)):
                 if str(station[y]) == str(sta[n]):
                     dist = distance(seismo_latitudes[y], seismo_longitudes[y], flight_latitudes[line], flight_longitudes[line])	
@@ -61,22 +63,22 @@ for n in range(4,10):
                         tr = obspy.read(p)
 						
                         tr[0].trim(tr[0].stats.starttime +(int(h) *60 *60) + (mins * 60) + secs - tim, tr[0].stats.starttime +(int(h) *60 *60) + (mins * 60) + secs + tim)
-                        data = tr[0][0:-1]
+                        data = tr[0][:]
                         fs = int(tr[0].stats.sampling_rate)
                         title    = f'{tr[0].stats.network}.{tr[0].stats.station}.{tr[0].stats.location}.{tr[0].stats.channel} − starting {tr[0].stats["starttime"]}'						
-                        t                  = tr[0].times()
+                        torg                  = tr[0].times()
                     else:
-                        p = "/scratch/naalexeev/NODAL/2019-02-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-02-"+str(day2)+"T"+str(h_u)+":00:00.000000Z."+str(station[y])+".mseed"
+                        p = "/scratch/naalexeev/NODAL/2019-0"+str(month[n])+"-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-0"+str(month[n])+"-"+str(day2)+"T"+str(h_u)+":00:00.000000Z."+str(station[y])+".mseed"
                         tr = obspy.read(p)
                         tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - tim, tr[2].stats.starttime + (mins * 60) + secs + tim)
-                        data = tr[2][0:-1]
+                        data = tr[2][:]
                         fs = int(tr[2].stats.sampling_rate)
                         title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'						
-                        t = tr[2].times()
-                   
-                    # Time array
-                    t = np.arange(len(data)) / fs
-                    g = fs*240
+                        torg = tr[2].times()
+                      
+                    dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
+                    tarrive = tim + (time[n] - calc_time(tmid,dist_m,alt_m))
+
                     # Compute spectrogram
                     frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9, detrend = 'constant') 
                     
@@ -108,7 +110,7 @@ for n in range(4,10):
                     middle_column = spec[:, middle_index]
                     vmin = 0  
                     vmax = np.max(middle_column) 
-                    p, _ = signal.find_peaks(middle_column, distance=10)
+                    p, _ = find_peaks(middle_column, distance=10)
 
 
                     coords = []
@@ -187,29 +189,32 @@ for n in range(4,10):
                         tprime0 = 114
                         v0 = 144
                         l = 1900
+                    if n > 9:
+                        f0 = fs/2
+                        tprime0 = tarrive
+                        v0 = speed_mps
+                        l = np.sqrt(dist_m**2 + alt_m**2)
                     c = 343
                     m0 = [f0, v0, l, tprime0]
 
-                    m = invert_f(m0, coords_array, num_iterations=4)
+                    m = invert_f(m0, coords_array, num_iterations=8)
                     f0 = m[0]
                     v0 = m[1]
                     l = m[2]
                     tprime0 = m[3]
-
-                    ft = []
-                    for tprime in times:
-                        t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-                        ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
-
-                        ft.append(ft0p)
+                    
+                    ft = calc_ft(times, tprime0, f0, v0, l, c)
                     if isinstance(sta[n], int):
                         peaks = []
-                        p, _ = signal.find_peaks(middle_column, distance=7)
-                        corridor_width = 250 / len(p)
+                        p, _ = find_peaks(middle_column, distance=7)
+                        corridor_width = fs / len(p)                 
+                        if len(p) == 0:
+                            corridor_width = fs
 
                         coord_inv = []
-                        plt.figure()
-                        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                        if show_process == True:
+                            plt.figure()
+                            plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
 
                         for t_f in range(len(times)):
                             upper = int(ft[t_f] + corridor_width)
@@ -218,9 +223,6 @@ for n in range(4,10):
                                 lower = 0
                             if upper > len(frequencies):
                                 upper = len(frequencies)
-                            plt.scatter(times[t_f], upper, color='pink', marker='x')
-                            plt.scatter(times[t_f], lower, color='pink', marker='x')
-
                             tt = spec[lower:upper, t_f]
 
                             max_amplitude_index = np.argmax(tt)
@@ -228,9 +230,12 @@ for n in range(4,10):
                             max_amplitude_frequency = frequencies[max_amplitude_index+lower]
                             peaks.append(max_amplitude_frequency)
                             coord_inv.append((times[t_f], max_amplitude_frequency))
-                            plt.scatter(times[t_f], max_amplitude_frequency, color='black', marker='x')
-                        
-                        plt.show()
+                            if show_process == True:
+                                plt.scatter(times[t_f], max_amplitude_frequency, color='black', marker='x')
+                                plt.scatter(times[t_f], upper, color='pink', marker='x')
+                                plt.scatter(times[t_f], lower, color='pink', marker='x')
+                        if show_process == True:
+                            plt.show()
 
                         coord_inv_array = np.array(coord_inv)
 
@@ -240,13 +245,8 @@ for n in range(4,10):
                         l = m[2]
                         tprime0 = m[3]
 
-                        ft = []
-                        for tprime in times:
-                            t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-                            ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
-                                
-                            ft.append(ft0p)
-
+                        ft = calc_ft(times, tprime0, f0, v0, l, c)
+                        
                         delf = np.array(ft) - np.array(peaks)
                         
                         new_coord_inv_array = []
@@ -255,11 +255,11 @@ for n in range(4,10):
                                 new_coord_inv_array.append(coord_inv_array[i])
                         coord_inv_array = np.array(new_coord_inv_array)
 
-                        plt.show()
-                        plt.figure()
-                        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                        plt.scatter(coord_inv_array[:,0], coord_inv_array[:,1], color='black', marker='x')
-                        plt.show()
+                        if show_process == True:
+                            plt.figure()
+                            plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                            plt.scatter(coord_inv_array[:,0], coord_inv_array[:,1], color='black', marker='x')
+                            plt.show()
 
                         m = invert_f(m0, coord_inv_array, num_iterations=12)
                         f0 = m[0]
@@ -267,64 +267,150 @@ for n in range(4,10):
                         l = m[2]
                         tprime0 = m[3]
 
-                        ft = []
-                        for tprime in times:
-                            t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-                            ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
-                                
-                            ft.append(ft0p)
-                    
-                        # Find the closest time value to m[3]
-                        #closest_time_index = np.argmin(np.abs(times - m[3]))
+                        ft = calc_ft(times, tprime0, f0, v0, l, c)
 
-                        # Extract the corresponding column from the spectrogram
-                        #col = spec[:, closest_time_index]
-                        #peaks, _ = signal.find_peaks(col,prominence=15) #distance = 10) 
-                    
-                    peaks = []
-                    plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    plt.axvline(x=tprime0, c = 'g', ls = '--')
-                    #plt.plot(col)
-                    def onclick(event):
-                        global coords
-                        peaks.append(event.ydata)
-                        plt.scatter(tprime0, event.ydata, color='black', marker='x')  # Add this line
-                        plt.draw() 
-                        print('Clicked:', event.ydata)  
+                        if auto_peak_pick == True:
+                            # Find the closest time value to m[3]
+                            closest_time_index = np.argmin(np.abs(times - m[3]))
 
-                    cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-                    #for p in peaks:
-                    #    plt.scatter(times[closest_time_index], frequencies[p], color='black', marker='x')
-                    #    plt.scatter(p, col[p], color='black', marker='x')
-                    plt.show(block=True)
+                            # Extract the corresponding column from the spectrogram
+                            col = spec[:, closest_time_index]
+                            peaks, _ = find_peaks(col,prominence=15) #distance = 10) 
 
-                    plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    plt.plot(times, ft, 'r', linewidth=0.5)
-                    plt.axvline(x=tprime0, c = 'g', ls = '--')
-                    for peak in peaks:
-                        tprime = tprime0
-                        ft0p = peak
-                        t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-                        f0 = ft0p*(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
-                        ft = []
-                        for tprime in times:
-                            t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-                            ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
-                         
-                            ft.append(ft0p)
+                            plt.figure()
+                            plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                            plt.axvline(x=tprime0, c = 'g', ls = '--')
+                            plt.plot(col)
+                            for p in peaks:
+                                plt.scatter(times[closest_time_index], frequencies[p], color='black', marker='x')
+                                plt.scatter(p, col[p], color='black', marker='x')
+                            plt.show()
+                        else:
+                            peaks = []
+                            freqpeak = []
+                            plt.figure()
+                            plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                            plt.axvline(x=tprime0, c = 'g', ls = '--')
+
+                            def onclick(event):
+                                global coords
+                                peaks.append(event.ydata)
+                                freqpeak.append(event.xdata)
+                                plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                                plt.draw() 
+                                print('Clicked:', event.xdata, event.ydata)  
+
+                            cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+                            
+                            plt.show(block=True)
+                    else:
+                        peaks = []
+                        freqpeak = []
+                        plt.figure()
+                        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                        plt.axvline(x=tprime0, c = 'g', ls = '--')
+
+                        def onclick(event):
+                            global coords
+                            peaks.append(event.ydata)
+                            freqpeak.append(event.xdata)
+                            plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                            plt.draw() 
+                            print('Clicked:', event.xdata, event.ydata)  
+
+                        cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
                         
-                        plt.scatter(tprime0, peak, color='black', marker='x')  # Add this line
-                        plt.plot(times, ft, 'g', linewidth=0.5)
-                    plt.show()
-                     
-                    #plt.figure()
-                    #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    #plt.plot(t, ft, 'g', linewidth=0.5)
-                    #plt.show()
+                        plt.show(block=True)
+                    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=False, figsize=(8,6))     
+
+                    ax1.plot(torg, data, 'k', linewidth=0.5)
+                    ax1.set_title(title)
+
+                    ax1.margins(x=0)
+
+                    # Plot spectrogram
+                    cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
+                    ax2.set_xlabel('Time (s)')
+                    f0lab = []
+                    for pp in range(len(peaks)):
+                        tprime = freqpeak[pp]
+                        ft0p = peaks[pp]
+                        f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
+                        
+                        ft = calc_ft(times, tprime0, f0, v0, l, c)
+
+                        ax2.plot(times, ft, 'g', linewidth=0.5)
+                        if np.abs(tprime -tprime0) < 5:
+                            ax2.scatter(tprime0, ft0p, color='black', marker='x') 
+                        ax2.plot(times, ft, 'g', linewidth=0.5)
+                        f0lab.append(int(f0)) 
+                    ax2.set_title("Final Model: t'= "+str(int(tprime0))+' sec, v0 = '+str(int(v0))+' m/s, l = '+str(int(l))+' m, \n' + 'f0 = '+str(f0lab)+' Hz', fontsize='x-small')
+                    ax2.axvline(x=tarrive, c = 'r', ls = '--',label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
+
+                    ax2.axvline(x=tprime0, c = 'g', ls = '--', label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
+                    ax2.legend(loc='upper right',fontsize = 'x-small')
+                    ax2.set_ylabel('Frequency (Hz)')
+
+
+                    ax2.margins(x=0)
+                    ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
+
+                    plt.colorbar(mappable=cax, cax=ax3)
+                    ax3.set_ylabel('Relative Amplitude (dB)')
+
+                    ax2.margins(x=0)
+                    ax2.set_xlim(0, 240)
+                    ax2.set_ylim(0, int(fs/2))
+
+                    # Plot overlay
+                    spec2 = 10 * np.log10(MDF)
+                    middle_column2 = spec2[:, middle_index]
+                    vmin = np.min(middle_column2)
+                    vmax = np.max(middle_column2)
+
+                    # Create ax4 and plot on the same y-axis as ax2
+                    ax4 = fig.add_axes([0.125, 0.11, 0.07, 0.35], sharey=ax2) 
+                    ax4.plot(middle_column2, frequencies, c='orange')  
+                    ax4.set_ylim(0, int(fs/2))
+                    ax4.set_xlim(vmax*1.1, vmin) 
+                    ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
+                    ax4.grid(axis='y')
+
+                    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'
+                    make_base_dir(BASE_DIR)
+                    fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
+                    plt.close()
 
                     #make_base_dir('/scratch/irseppi/nodal_data/plane_info/5inv_spec/')
                     #fig.save('/scratch/irseppi/nodal_data/plane_info/5inv_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'.png')
                     #plt.close()
-                    
+
+                    closest_index = np.argmin(np.abs(tprime0 - times))
+                    arrive_time = spec[:,closest_index]
+                    for i in range(len(arrive_time)):
+                        if arrive_time[i] < 0:
+                            arrive_time[i] = 0
+                    vmin = np.min(arrive_time) 
+                    vmax = np.max(arrive_time) 
+                    peaks, _ = find_peaks(arrive_time, prominence=15)#0, distance = 10, height = 5, width=1) #for later change parameters for jets and permenant stations
+                    np.diff(peaks)
+                    fig = plt.figure(figsize=(10,6))
+                    plt.grid()
+
+                    plt.plot(frequencies, arrive_time, c='c')
+                    plt.plot(peaks, arrive_time[peaks], "x")
+                    for g in range(len(peaks)):
+                        plt.text(peaks[g], arrive_time[peaks[g]], peaks[g], fontsize=15)
+
+                    plt.xlim(0, int(fs/2))
+                    plt.xticks(fontsize=12)
+                    plt.yticks(fontsize=12)
+                    plt.ylim(0,vmax*1.1)
+                    plt.xlabel('Frequency (Hz)', fontsize=17)
+                    plt.ylabel('Amplitude Spectrum at t = {:.2f} s (dB)'.format(tprime0), fontsize=17)
+
+
+                    make_base_dir('/scratch/irseppi/nodal_data/plane_info/5spec/20190'+str(month[n])+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/')
+
+                    fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec/20190'+str(month[n])+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(sta[n])+'_' + str(time[n]) + '.png')
+                    plt.close() 
