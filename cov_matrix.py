@@ -6,7 +6,7 @@ import obspy
 import datetime
 from prelude import invert_f, distance, closest_encounter, calc_time, calc_ft,df
 from scipy.signal import find_peaks, spectrogram
-
+from matplotlib.colors import LogNorm
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
@@ -290,12 +290,13 @@ for n in range(0,4):
                                 for gridline in ygrid:
                                     plt.axhline(y=gridline,color='k',linewidth=1)
 
-                        covm = np.cov(G.T@G)
-
-                        #covmlsq = (sigma**2)*la.inv(G.T@G)
+                        #covm = np.cov(G.T@G)
+                        sigma = 20
+                        covm = (sigma**2)*la.inv(G.T@G)
                         plt.figure()
-                        plot_matrix(covm,True,'binary')
+                        plot_matrix(np.log(np.abs(covm)),True,'binary')
                         plt.xlabel('i')
                         plt.ylabel('i')
-                        plt.colorbar()
+                        plt.colorbar(norm=LogNorm())
+                        #plt.clim(0, 2000)  # Set the colorbar limits
                         plt.show()
