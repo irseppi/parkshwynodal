@@ -6,7 +6,7 @@ import datetime
 from prelude import make_base_dir, invert_f, distance, closest_encounter, calc_time, calc_ft, calc_f0
 from scipy.signal import find_peaks, spectrogram
 
-show_process = False
+show_process = True
 auto_peak_pick = False
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -18,7 +18,7 @@ sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV",1010,1021,1006
 day = [25,14,14,14,13,11,21,21,18,24,4,4,22,22,23]
 month = [2,2,2,2,2,2,2,2,2,2,3,3,2,2,2]
 
-for n in range(13,14):
+for n in range(0,5):
     ht = datetime.datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -207,10 +207,11 @@ for n in range(13,14):
                     ft = calc_ft(times, tprime0, f0, v0, l, c)
                     if isinstance(sta[n], int):
                         peaks = []
-                        p, _ = find_peaks(middle_column, distance=7)
-                        corridor_width = fs / len(p)                 
+                        p, _ = find_peaks(middle_column, distance = 7)
+                        corridor_width = (fs/2) / len(p) 
+                                        
                         if len(p) == 0:
-                            corridor_width = fs
+                            corridor_width = fs/2
 
                         coord_inv = []
                         if show_process == True:
@@ -269,6 +270,11 @@ for n in range(13,14):
                         tprime0 = m[3]
 
                         ft = calc_ft(times, tprime0, f0, v0, l, c)
+                        if show_process == True:
+                            plt.figure()
+                            plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                            plt.plot(times, ft, color='g')
+                            plt.show()        
 
                         if auto_peak_pick == True:
                             # Find the closest time value to m[3]

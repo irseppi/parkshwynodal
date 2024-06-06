@@ -17,7 +17,7 @@ sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV",1010,1021,1006
 day = [25,14,14,14,13,11,21,21,18,24,4,4,22,22,23]
 month = [2,2,2,2,2,2,2,2,2,2,3,3,2,2,2]
 
-for n in range(0,4):
+for n in range(4,5):
     ht = datetime.datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -289,14 +289,13 @@ for n in range(0,4):
                                     plt.axvline(x=gridline,color='k',linewidth=1)
                                 for gridline in ygrid:
                                     plt.axhline(y=gridline,color='k',linewidth=1)
+                        
 
-                        #covm = np.cov(G.T@G)
-                        sigma = 20
-                        covm = (sigma**2)*la.inv(G.T@G)
+                        sigma = 5
+                        covml2 = (sigma**2)*la.inv(G.T@G)
                         plt.figure()
-                        plot_matrix(np.log(np.abs(covm)),True,'binary')
+                        plot_matrix(np.log(np.abs(covml2)),True,'binary')
                         plt.xlabel('i')
                         plt.ylabel('i')
                         plt.colorbar(norm=LogNorm())
-                        #plt.clim(0, 2000)  # Set the colorbar limits
                         plt.show()
