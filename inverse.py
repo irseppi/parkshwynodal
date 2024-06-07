@@ -18,7 +18,7 @@ sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV",1010,1021,1006
 day = [25,14,14,14,13,11,21,21,18,24,4,4,22,22]#,23]
 month = [2,2,2,2,2,2,2,2,2,2,3,3,2,2]#,2]
 
-for n in range(12,13):
+for n in range(5,11):
     ht = datetime.datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
