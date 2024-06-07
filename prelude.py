@@ -313,6 +313,7 @@ def invert_f(m0, coords_array, num_iterations):
 	Returns:
 		numpy.ndarray: The inverted parameters for the function f.
 	"""
+	#if len(m0[0]) == 1:
 	w,_ = coords_array.shape
 	fobs = coords_array[:,1]
 	tobs = coords_array[:,0]
@@ -341,6 +342,38 @@ def invert_f(m0, coords_array, num_iterations):
 		print(m)
 		m0 = m
 		n += 1
+		'''
+		else:
+			for i in range(0,len(m0)):
+			w,_ = coords_array.shape
+			fobs = coords_array[:,1]
+			tobs = coords_array[:,0]
+			m = m0
+			n = 0
+			c = 343
+			while n < num_iterations:
+				fnew = []
+				G = np.zeros((w,4)) #partial derivative matrix of f with respect to m
+				#partial derivative matrix of f with respect to m 
+				for i in range(0,w):
+					f0 = m[0]
+					v0 = m[1]
+					l = m[2]
+					tprime0 = m[3]
+					tprime = tobs[i]
+					t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
+					ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
+					f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(m[0], m[1], m[2], m[3], tobs[i])
+					
+					G[i,0:4] = [f_derivef0, f_derivev0, f_derivel, f_derivetprime0]
+
+					fnew.append(ft0p) 
+			
+				m = np.reshape(np.reshape(m0,(4,1))+ np.reshape(inv(G.T@G)@G.T@(np.reshape(fobs, (len(coords_array), 1)) - np.reshape(np.array(fnew), (len(coords_array), 1))), (4,1)), (4,))
+				print(m)
+				m0 = m
+				n += 1
+			'''
 	return m
 
 ####################3####################################################################################################################################################################
