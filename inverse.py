@@ -6,7 +6,7 @@ import datetime
 from prelude import make_base_dir, invert_f, distance, closest_encounter, calc_time, calc_ft, calc_f0
 from scipy.signal import find_peaks, spectrogram
 from pathlib import Path
-show_process = True
+show_process = False
 auto_peak_pick = False
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -18,7 +18,7 @@ sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV",1010,1021,1006
 day = [25,14,14,14,13,11,21,21,18,24,4,4,22,22]#,23]
 month = [2,2,2,2,2,2,2,2,2,2,3,3,2,2]#,2]
 
-for n in range(5,11):
+for n in range(0,13):
     ht = datetime.datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -212,23 +212,7 @@ for n in range(5,11):
 
                             plt.show(block=True)
                             r1.close()
-	
-                    '''
-                    coords = []
-                    plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
 
-                    def onclick(event):
-                        global coords
-                        coords.append((event.xdata, event.ydata))
-                        plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-                        plt.draw() 
-                        print('Clicked:', event.xdata, event.ydata)  
-
-                    cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-
-                    plt.show(block=True)
-                    '''
                     # Convert the list of coordinates to a numpy array
                     coords_array = np.array(coords)
                 
@@ -507,26 +491,6 @@ for n in range(5,11):
                                 plt.show(block=True)
                                 r2.close()
 
-                    '''
-                    else:
-                        peaks = []
-                        freqpeak = []
-                        plt.figure()
-                        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                        plt.axvline(x=tprime0, c = 'blue', ls = '--')
-
-                        def onclick(event):
-                            global coords
-                            peaks.append(event.ydata)
-                            freqpeak.append(event.xdata)
-                            plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-                            plt.draw() 
-                            print('Clicked:', event.xdata, event.ydata)  
-
-                        cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-                        
-                        plt.show(block=True)
-                    '''
                     closest_index = np.argmin(np.abs(tprime0 - times))
                     arrive_time = spec[:,closest_index]
                     for i in range(len(arrive_time)):
