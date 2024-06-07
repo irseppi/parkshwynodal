@@ -624,9 +624,10 @@ for n in range(5,11):
                                 ampp = np.max(tt)
                                 freqp = np.argmax(tt)+lower
                                 plt.scatter(freqp, ampp, color='black', marker='x', s=100)
-
-                                plt.text(freqp - 5, ampp + 0.8, freqp, fontsize=17, fontweight='bold')
-
+                                if isinstance(sta[n], int):
+                                    plt.text(freqp - 5, ampp + 0.8, freqp, fontsize=17, fontweight='bold')
+                                else:
+                                    plt.text(freqp - 1, ampp + 0.8, freqp, fontsize=17, fontweight='bold')  
                     plt.xlim(0, int(fs/2))
                     plt.xticks(fontsize=12)
                     plt.yticks(fontsize=12)
