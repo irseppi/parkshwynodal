@@ -87,13 +87,13 @@ for i in range(len(day)):
 				
 				# Draw text from files
 				draw = ImageDraw.Draw(canvas)
-				font = ImageFont.truetype('input/Arialn.ttf', 18) #load_default()  
+				font = ImageFont.truetype('input/Arial.ttf', 15) #load_default()  
 				flight_file = '/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+ '_positions/2019'+month[i]+day[i]+ '_' + flight + '.csv'
 				flight_data = pd.read_csv(flight_file, sep=",")
 				t = flight_data['snapshot_id']
 				speed = flight_data['speed']
 				alt = flight_data['altitude']
-				font2 = ImageFont.truetype('input/Arialn.ttf', 25)
+				font2 = ImageFont.truetype('input/Arial.ttf', 25)
 
 				# Label each image
 				draw.text((15, 35), '(a)', fill='black', font=font2)
@@ -111,8 +111,8 @@ for i in range(len(day)):
 				bbox = draw.textbbox((google_slide_width - plane.width, 0), text2, font=font)
 				draw.rectangle(bbox, fill="white")
 				draw.text((google_slide_width - plane.width, 0), text2, fill='black', font=font)			
-				draw.text((google_slide_width - 132, 400), text1,fill='black', font=font)
-				draw.text((google_slide_width - 350, 400), text3, fill='black', font=font)
+				draw.text((google_slide_width - 150, 405), text1,fill='black', font=font)
+				draw.text((google_slide_width - 365, 405), text3, fill='black', font=font)
 				
 				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5fig/'
 				make_base_dir(BASE_DIR)
