@@ -4,9 +4,9 @@ import numpy as np
 from pathlib import Path
 import matplotlib.patches as mpatch
 from matplotlib.patches import Rectangle
-import os
+
 from obspy.geodetics import gps2dist_azimuth
-from obspy.core import UTCDateTime
+
 import datetime
 from pathlib import Path
 
@@ -63,8 +63,8 @@ for line in sta_f.readlines():
                     axs[0].set_aspect(f)
                     axs[1].set_aspect(f)
 
-                    axs[0].scatter(seismo_longitudes, seismo_latitudes, c='red', s = 3, label='seismometers')
-                    axs[0].plot(flight_longitudes, flight_latitudes, '-o', c='c', lw=1, ms = 1, label='flight path')
+                    axs[0].scatter(seismo_longitudes, seismo_latitudes, c='#e41a1c', s = 3, label='seismometers')
+                    axs[0].plot(flight_longitudes, flight_latitudes, '-o', c='#377eb8', lw=1, ms = 1, label='flight path')
 
                     # Set labels and title
                     axs[0].set_xlim(min_lon, max_lon)
@@ -81,15 +81,15 @@ for line in sta_f.readlines():
                     maxl = xx + 0.05
                     minla = yy - 0.03
                     maxla = yy + 0.03
-                    direction = np.deg2rad(head[l])
-
+                    heading = np.deg2rad(head[l])
+                    direction = np.arctan2(flight_latitudes[l+1] - flight_latitudes[l], flight_longitudes[l+1] - flight_longitudes[l])
+                    
                     rect = Rectangle((minl, minla), 0.1, 0.06, ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
                     axs[0].add_patch(rect)
-                    axs[1].plot(x,y, '--', c='orange')
-                    
+                    axs[1].plot(x,y, '--', c='#ff7f00')
+
                     # Draw the zoomed in map on the second subplot
-                    axs[1].scatter(seismo_longitudes, seismo_latitudes, c='red')
-                    axs[1].plot(flight_longitudes, flight_latitudes, c='c',linestyle ='dotted')
+                    axs[1].plot(flight_longitudes, flight_latitudes, c='#377eb8',linestyle ='dotted')
                     axs[1].set_xlim(minl, maxl)
                     axs[1].set_ylim(minla, maxla)
                     #axs[1].text(seismo_longitudes[t], seismo_latitudes[t], sta[t], fontsize=11, fontweight='bold')
@@ -99,18 +99,19 @@ for line in sta_f.readlines():
                     #axs[1].text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=11, fontweight='bold')
                     
                     
-                    axs[1].quiver(flight_longitudes[l], flight_latitudes[l], np.cos(direction), np.sin(direction), angles='xy') #, scale_units='xy', scale=0.002)
-                    axs[1].scatter(flight_longitudes[l], flight_latitudes[l], c='lawngreen')
-                    axs[1].scatter(seismo_longitudes[t], seismo_latitudes[t], c='pink')
+                    axs[1].quiver(flight_longitudes[l], flight_latitudes[l], np.cos(direction), np.sin(direction),angles='xy') 
+                    axs[1].quiver(flight_longitudes[l], flight_latitudes[l], np.cos(heading), np.sin(heading), angles='xy')
+                    axs[1].scatter(flight_longitudes[l], flight_latitudes[l], c='#377eb8', zorder=3)
+                    axs[1].scatter(seismo_longitudes[t], seismo_latitudes[t], c='#e41a1c')
 
-                    axs[1].text(xx,yy, str(round(dist, 2))+' km', fontsize=12, fontweight='bold')
+                    axs[1].text(xx,yy, str(round(dist, 2))+' km', fontsize=15, fontweight='bold')
 
                     # Draw dashed lines connecting the rectangle on the existing map to the zoomed-in map
                     con = mpatch.ConnectionPatch(xyA=(minl, minla), xyB=(maxl, minla), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
                     fig.add_artist(con)
                     con = mpatch.ConnectionPatch(xyA=(minl, maxla), xyB=(maxl, maxla), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
                     fig.add_artist(con)
-                      
+                    plt.show()
                     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all/' + date + '/'+flight+'/'+station+'/'
                     make_base_dir(BASE_DIR)
                     plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all/'+ date + '/'+flight+'/'+station+'/map_'+flight+'_' + str(time[l]) + '.png')

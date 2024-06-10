@@ -385,7 +385,7 @@ for n in range(4,13):
                         if Path(output2).exists():
                             plt.figure()
                             plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                            plt.axvline(x=tprime0, c = 'blue', ls = '--')
+                            plt.axvline(x=tprime0, c = '#377eb8', ls = '--')
                             pick_data = pd.read_csv(output2, header=None)
 
                             plt.scatter(pick_data.iloc[:, 0], pick_data.iloc[:, 1], color='black', marker='x')
@@ -401,7 +401,7 @@ for n in range(4,13):
                                 freqpeak = []
                                 plt.figure()
                                 plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                                plt.axvline(x=tprime0, c = 'blue', ls = '--')
+                                plt.axvline(x=tprime0, c = '#377eb8', ls = '--')
                                 def onclick(event):
                                     global coords
                                     peaks.append(event.ydata)
@@ -423,7 +423,7 @@ for n in range(4,13):
                                     freqpeak = []
                                     plt.figure()
                                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                                    plt.axvline(x=tprime0, c = 'blue', ls = '--')
+                                    plt.axvline(x=tprime0, c = '#377eb8', ls = '--')
                                     def onclick(event):
                                         global coords
                                         peaks.append(event.ydata)
@@ -457,7 +457,7 @@ for n in range(4,13):
                             freqpeak = []
                             plt.figure()
                             plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                            plt.axvline(x=tprime0, c = 'blue', ls = '--')
+                            plt.axvline(x=tprime0, c = '#377eb8', ls = '--')
 
                             def onclick(event):
                                 global coords
@@ -477,7 +477,7 @@ for n in range(4,13):
                                 freqpeak = []
                                 plt.figure()
                                 plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                                plt.axvline(x=tprime0, c = 'blue', ls = '--')
+                                plt.axvline(x=tprime0, c = '#377eb8', ls = '--')
                                 def onclick(event):
                                     global coords
                                     peaks.append(event.ydata)
@@ -513,7 +513,7 @@ for n in range(4,13):
                     cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
                     ax2.set_xlabel('Time (s)')
                     f0lab = []
-                    ax2.axvline(x=tprime0, c = 'blue', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
+                    ax2.axvline(x=tprime0, c = '#377eb8', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
                     
                     for pp in range(len(peaks)):
                         tprime = freqpeak[pp]
@@ -522,7 +522,7 @@ for n in range(4,13):
                         
                         ft = calc_ft(times, tprime0, f0, v0, l, c)
 
-                        ax2.plot(times, ft, 'blue', ls = (0,(5,20)), linewidth=0.7) #(0,(5,10)),
+                        ax2.plot(times, ft, '#377eb8', ls = (0,(5,20)), linewidth=0.7) #(0,(5,10)),
                         
                         if np.abs(tprime -tprime0) < 1.5:
                             ax2.scatter(tprime0, ft0p, color='black', marker='x', s=30) 
@@ -536,7 +536,7 @@ for n in range(4,13):
                     else:
                         fss = 'small'
                     ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2))+' +/- ' + str(np.round(covm[3],2)) + ' sec, v0 = '+str(np.round(v0,2))+' +/- ' + str(np.round(covm[1],2)) +' m/s, l = '+str(np.round(l,2))+' +/- ' + str(np.round(covm[2],2)) +' m, \n' + 'f0 = '+str(f0lab_sorted)+' +/- ' + str(np.round(covm[0],2)) +' Hz', fontsize=fss)
-                    ax2.axvline(x=tarrive, c = 'red', ls = '--',linewidth=0.5,label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
+                    ax2.axvline(x=tarrive, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
 
                     
                     ax2.legend(loc='upper right',fontsize = 'x-small')
@@ -561,7 +561,7 @@ for n in range(4,13):
 
                     # Create ax4 and plot on the same y-axis as ax2
                     ax4 = fig.add_axes([0.125, 0.11, 0.07, 0.35], sharey=ax2) 
-                    ax4.plot(middle_column2, frequencies, c='orange')  
+                    ax4.plot(middle_column2, frequencies, c='#ff7f00')  
                     ax4.set_ylim(0, int(fs/2))
                     ax4.set_xlim(vmax2*1.1, vmin2) 
                     ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
@@ -575,7 +575,7 @@ for n in range(4,13):
                     fig = plt.figure(figsize=(10,6))
                     plt.grid()
 
-                    plt.plot(frequencies, arrive_time, c='blue')
+                    plt.plot(frequencies, arrive_time, c='#377eb8')
                     if auto_peak_pick == True:
                         peaks, _ = find_peaks(arrive_time, prominence=15)#0, distance = 10, height = 5, width=1) #for later change parameters for jets and permenant stations
                         np.diff(peaks)
