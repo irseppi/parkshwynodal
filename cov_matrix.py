@@ -291,10 +291,10 @@ for n in range(4,5):
                                     plt.axhline(y=gridline,color='k',linewidth=1)
                         
 
-                        sigma = 5
-                        covml2 = (sigma**2)*la.inv(G.T@G)
+                        sigma = 1
+                        covmlsq = (sigma**2)*la.inv(G.T@G)
                         plt.figure()
-                        plot_matrix(np.log(np.abs(covml2)),True,'binary')
+                        plot_matrix(np.log(np.abs(covmlsq)),True,'binary')
                         plt.xlabel('i')
                         plt.ylabel('i')
                         plt.colorbar(norm=LogNorm())

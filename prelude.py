@@ -3,6 +3,7 @@ import fileinput
 import os
 import pandas as pd
 import numpy as np
+import numpy.linalg as la
 
 from datetime import datetime
 from pathlib import Path
@@ -301,7 +302,7 @@ def df(f0,v0,l,tp0,tp):
 
 #####################################################################################################################################################################################################################################################################################################################
 
-def invert_f(m0, coords_array, num_iterations):
+def invert_f(m0, coords_array, num_iterations,sigma = 1):
 	"""
 	Inverts the function f using the given initial parameters and data array.
 
@@ -336,13 +337,14 @@ def invert_f(m0, coords_array, num_iterations):
 			G[i,0:4] = [f_derivef0, f_derivev0, f_derivel, f_derivetprime0]
 
 			fnew.append(ft0p) 
-	
+
+		covmlsq = (sigma**2)*la.inv(G.T@G)
 		m = np.reshape(np.reshape(m0,(4,1))+ np.reshape(inv(G.T@G)@G.T@(np.reshape(fobs, (len(coords_array), 1)) - np.reshape(np.array(fnew), (len(coords_array), 1))), (4,1)), (4,))
 		print(m)
 		m0 = m
 		n += 1
 
-	return m
+	return m, covmlsq
 
 ####################3####################################################################################################################################################################
 

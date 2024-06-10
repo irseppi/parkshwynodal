@@ -18,7 +18,7 @@ sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV",1010,1021,1006
 day = [25,14,14,14,13,11,21,21,18,24,4,4,22,22]#,23]
 month = [2,2,2,2,2,2,2,2,2,2,3,3,2,2]#,2]
 
-for n in range(0,13):
+for n in range(4,13):
     ht = datetime.datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -215,7 +215,7 @@ for n in range(0,13):
 
                     # Convert the list of coordinates to a numpy array
                     coords_array = np.array(coords)
-                
+
                     if n == 0:
                         tprime0 = 112
                         f0 = 115
@@ -276,17 +276,16 @@ for n in range(0,13):
                         v0 = 144
                         l = 1900
                     if n > 9:
+
                         f0 = fs/4
                         tprime0 = tarrive
                         v0 = speed_mps
                         l = np.sqrt(dist_m**2 + alt_m**2)
 
                     c = 343
-                    print(f0, v0, l, tprime0)
-                    print(coords_array)
                     m0 = [f0, v0, l, tprime0]
 
-                    m = invert_f(m0, coords_array, num_iterations=8)
+                    m,covm = invert_f(m0, coords_array, num_iterations=8)
                     f0 = m[0]
                     v0 = m[1]
                     l = m[2]
@@ -329,7 +328,7 @@ for n in range(0,13):
 
                         coord_inv_array = np.array(coord_inv)
 
-                        m = invert_f(m0, coord_inv_array, num_iterations=12)
+                        m,_ = invert_f(m0, coord_inv_array, num_iterations=12)
                         f0 = m[0]
                         v0 = m[1]
                         l = m[2]
@@ -351,7 +350,8 @@ for n in range(0,13):
                             plt.scatter(coord_inv_array[:,0], coord_inv_array[:,1], color='black', marker='x')
                             plt.show()
 
-                        m = invert_f(m0, coord_inv_array, num_iterations=12)
+                        m,covm = invert_f(m0, coord_inv_array, num_iterations=12, sigma=5)
+                        print(covm)
                         f0 = m[0]
                         v0 = m[1]
                         l = m[2]
@@ -499,18 +499,21 @@ for n in range(0,13):
                     vmin = np.min(arrive_time) 
                     vmax = np.max(arrive_time) 
 
-                    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,6))     
+                    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=False, figsize=(8,6))     
 
                     ax1.plot(torg, data, 'k', linewidth=0.5)
                     ax1.set_title(title)
 
                     ax1.margins(x=0)
+                    ax1.set_position([0.125, 0.6, 0.775, 0.3])  # Move ax1 plot upwards
+
+
 
                     # Plot spectrogram
                     cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
                     ax2.set_xlabel('Time (s)')
                     f0lab = []
-                    ax2.axvline(x=tprime0, c = 'blue', ls = '--', linewidth=0.5,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
+                    ax2.axvline(x=tprime0, c = 'blue', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
                     
                     for pp in range(len(peaks)):
                         tprime = freqpeak[pp]
@@ -519,7 +522,7 @@ for n in range(0,13):
                         
                         ft = calc_ft(times, tprime0, f0, v0, l, c)
 
-                        ax2.plot(times, ft, 'blue', ls = '--', linewidth=0.5)
+                        ax2.plot(times, ft, 'blue', ls = (0,(5,20)), linewidth=0.7) #(0,(5,10)),
                         
                         if np.abs(tprime -tprime0) < 1.5:
                             ax2.scatter(tprime0, ft0p, color='black', marker='x', s=30) 
@@ -527,7 +530,12 @@ for n in range(0,13):
                         what_if = calc_ft(times, tarrive, fs/4, speed_mps, np.sqrt(dist_m**2 + alt_m**2), c)
                         #ax2.plot(times, what_if, 'red', ls = '--', linewidth=0.4)
                     f0lab_sorted = sorted(f0lab)
-                    ax2.set_title("Final Model: t'= "+str(np.round(tprime0,0))+' sec, v0 = '+str(int(v0))+' m/s, l = '+str(int(l))+' m, \n' + 'f0 = '+str(f0lab_sorted)+' Hz', fontsize='x-small')
+                    covm = np.sqrt(np.diag(covm))
+                    if len(f0lab_sorted) <+ 17:
+                        fss = 'medium'
+                    else:
+                        fss = 'small'
+                    ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2))+' +/- ' + str(np.round(covm[3],2)) + ' sec, v0 = '+str(np.round(v0,2))+' +/- ' + str(np.round(covm[1],2)) +' m/s, l = '+str(np.round(l,2))+' +/- ' + str(np.round(covm[2],2)) +' m, \n' + 'f0 = '+str(f0lab_sorted)+' +/- ' + str(np.round(covm[0],2)) +' Hz', fontsize=fss)
                     ax2.axvline(x=tarrive, c = 'red', ls = '--',linewidth=0.5,label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
 
                     
@@ -563,11 +571,6 @@ for n in range(0,13):
                     make_base_dir(BASE_DIR)
                     fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
                     plt.close()
-
-                    #make_base_dir('/scratch/irseppi/nodal_data/plane_info/5inv_spec/')
-                    #fig.save('/scratch/irseppi/nodal_data/plane_info/5inv_spec/2019-02-'+str(day[n])+'/'+str(flight_num[n])+'/'+station[y]+'.png')
-                    #plt.close()
-
                     
                     fig = plt.figure(figsize=(10,6))
                     plt.grid()
