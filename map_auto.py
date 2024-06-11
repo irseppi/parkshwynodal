@@ -1,28 +1,12 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from pathlib import Path
-import matplotlib.patches as mpatch
-from matplotlib.patches import Rectangle
-
-from obspy.geodetics import gps2dist_azimuth
-
 import datetime
+import matplotlib.patches as mpatch
+
+from matplotlib.patches import Rectangle
 from pathlib import Path
-
-def make_base_dir(base_dir):
-    base_dir = Path(base_dir)
-    if not base_dir.exists():
-        current_path = Path("/")
-        for parent in base_dir.parts:
-            current_path = current_path/parent
-            if not current_path.exists():
-                current_path.mkdir()
-
-def distance(lat1, lon1, lat2, lon2):
-	dist = gps2dist_azimuth(lat1, lon1, lat2, lon2)
-	dist_km = dist[0]/1000
-	return dist_km
+from prelude import make_base_dir, distance
 
 sta_f = open('input/all_station_crossing_db.txt','r')
 
