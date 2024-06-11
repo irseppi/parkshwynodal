@@ -64,8 +64,12 @@ for line in sta_f.readlines():
                     axs[1].set_aspect(f)
 
                     axs[0].scatter(seismo_longitudes, seismo_latitudes, c='#e41a1c', s = 3, label='seismometers')
-                    axs[0].plot(flight_longitudes, flight_latitudes, '-o', c='#377eb8', lw=1, ms = 1, label='flight path')
-
+                    axs[0].plot(flight_longitudes, flight_latitudes, '-', c='#377eb8', lw=1, ms = 1, label='flight path')
+                    for i in range(1, len(flight_latitudes)-1, int(len(flight_latitudes)/5)):
+                        direction = np.arctan2(flight_latitudes[i+1] - flight_latitudes[i], flight_longitudes[i+1] - flight_longitudes[i])
+                        m = (flight_latitudes[i+1] - flight_latitudes[i])/(flight_longitudes[i+1] - flight_longitudes[i])
+                        b = flight_latitudes[i] - m*flight_longitudes[i]
+                        axs[0].quiver((flight_latitudes[i]-b)/m, flight_latitudes[i], np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', headwidth = 5)
                     # Set labels and title
                     axs[0].set_xlim(min_lon, max_lon)
                     axs[0].set_ylim(min_lat, max_lat)
@@ -82,7 +86,7 @@ for line in sta_f.readlines():
                     minla = yy - 0.03
                     maxla = yy + 0.03
                     heading = np.deg2rad(head[l])
-                    direction = np.arctan2(flight_latitudes[l+1] - flight_latitudes[l], flight_longitudes[l+1] - flight_longitudes[l])
+                    
                     
                     rect = Rectangle((minl, minla), 0.1, 0.06, ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
                     axs[0].add_patch(rect)
@@ -99,11 +103,14 @@ for line in sta_f.readlines():
                     #axs[1].text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=11, fontweight='bold')
                     m = (flight_latitudes[l+1] - flight_latitudes[l])/(flight_longitudes[l+1] - flight_longitudes[l])
                     b = flight_latitudes[l] - m*flight_longitudes[l]
-                    axs[1].quiver(((flight_latitudes[l]+0.01)-b)/m,flight_latitudes[l]+0.01, np.cos(direction), np.sin(direction),angles='xy', color='#377eb8') 
-                    axs[1].quiver(((flight_latitudes[l]-0.01)-b)/m,flight_latitudes[l]-0.01, np.cos(direction), np.sin(direction),angles='xy', color='#377eb8')
-                    axs[1].quiver(flight_longitudes[l], flight_latitudes[l], np.cos(heading), np.sin(heading), angles='xy', color='#999999')
-                    axs[1].scatter(flight_longitudes[l], flight_latitudes[l], c='#377eb8', zorder=3)
-                    axs[1].scatter(seismo_longitudes[t], seismo_latitudes[t], c='#e41a1c')
+
+                    direction = np.arctan2(flight_latitudes[l+1] - flight_latitudes[l], flight_longitudes[l+1] - flight_longitudes[l])
+                        
+                    axs[1].quiver((flight_latitudes[l]-b)/m, flight_latitudes[l], np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', scale=10)
+
+                    axs[1].quiver(flight_longitudes[l], flight_latitudes[l], np.cos(heading), np.sin(heading), angles='xy', scale = 10)#, color='#999999')
+                    axs[1].scatter(flight_longitudes[l], flight_latitudes[l], c='#377eb8', s=50, zorder=3)
+                    axs[1].scatter(seismo_longitudes[t], seismo_latitudes[t], c='#e41a1c', s=50, zorder=3)
 
                     axs[1].text(xx,yy, str(round(dist, 2))+' km', fontsize=15, fontweight='bold')
 
@@ -112,7 +119,7 @@ for line in sta_f.readlines():
                     fig.add_artist(con)
                     con = mpatch.ConnectionPatch(xyA=(minl, maxla), xyB=(maxl, maxla), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
                     fig.add_artist(con)
-                    plt.show()
+                    
                     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all/' + date + '/'+flight+'/'+station+'/'
                     make_base_dir(BASE_DIR)
                     plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all/'+ date + '/'+flight+'/'+station+'/map_'+flight+'_' + str(time[l]) + '.png')
