@@ -97,10 +97,11 @@ for line in sta_f.readlines():
                     
                     
                     #axs[1].text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=11, fontweight='bold')
-                    
-                    
-                    axs[1].quiver(flight_longitudes[l], flight_latitudes[l], np.cos(direction), np.sin(direction),angles='xy') 
-                    axs[1].quiver(flight_longitudes[l], flight_latitudes[l], np.cos(heading), np.sin(heading), angles='xy')
+                    m = (flight_latitudes[l+1] - flight_latitudes[l])/(flight_longitudes[l+1] - flight_longitudes[l])
+                    b = flight_latitudes[l] - m*flight_longitudes[l]
+                    axs[1].quiver(((flight_latitudes[l]+0.01)-b)/m,flight_latitudes[l]+0.01, np.cos(direction), np.sin(direction),angles='xy', color='#377eb8') 
+                    axs[1].quiver(((flight_latitudes[l]-0.01)-b)/m,flight_latitudes[l]-0.01, np.cos(direction), np.sin(direction),angles='xy', color='#377eb8')
+                    axs[1].quiver(flight_longitudes[l], flight_latitudes[l], np.cos(heading), np.sin(heading), angles='xy', color='#999999')
                     axs[1].scatter(flight_longitudes[l], flight_latitudes[l], c='#377eb8', zorder=3)
                     axs[1].scatter(seismo_longitudes[t], seismo_latitudes[t], c='#e41a1c')
 
