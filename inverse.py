@@ -20,7 +20,7 @@ day = [25,14,14,14,13,11,21,21,18,24,4,4,22,22]#,23]
 month = [2,2,2,2,2,2,2,2,2,2,3,3,2,2]#,2]
 
 for n in range(4,13):
-    ht = datetime.datetime.utcfromtimestamp(time[n])
+    ht = datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
     h = ht.hour
@@ -77,7 +77,7 @@ for n in range(4,13):
                         title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'						
                         torg = tr[2].times()
                       
-                    dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
+                    clat, clon, dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
                     tarrive = tim + (time[n] - calc_time(tmid,dist_m,alt_m))
 
                     # Compute spectrogram

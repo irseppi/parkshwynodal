@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import numpy as np
 import numpy.linalg as la
-
+import matplotlib.pyplot as plt
 from datetime import datetime
 from pathlib import Path
 from numpy.linalg import inv
@@ -108,9 +108,10 @@ def calculate_projection(line_vector, station_vector):
 		float: The projection length ratio.
 
 	"""
+		
 	dot_product = line_vector[0] * station_vector[0] + line_vector[1] * station_vector[1]
-	line_magnitude_squared = line_vector[0] ** 2 + line_vector[1] ** 2
-	projection_length_ratio = dot_product / line_magnitude_squared
+	line_magnitude = line_vector[0] ** 2 + line_vector[1] ** 2
+	projection_length_ratio = dot_product / line_magnitude
 	return projection_length_ratio
 
 #################################################################################################################################
@@ -137,8 +138,6 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 	timestamp1 = timestamp[index]
 
 	timestamp2 = None
-	closest_lat = flight_latitudes[index]
-	closest_lon = flight_longitudes[index]
 	for i in [index-1, index+1]:
 		if i >= 0 and i < len(flight_latitudes):
 			distance = calculate_distance(flight_latitudes[i], flight_longitudes[i], seismo_latitude, seismo_longitude)
@@ -159,12 +158,11 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 
 	closest_point_on_line_lat = closest_lat + projection_length_ratio * line_vector[0]
 	closest_point_on_line_lon = closest_lon + projection_length_ratio * line_vector[1]
-
 	closest_distance = calculate_distance(closest_point_on_line_lat, closest_point_on_line_lon, seismo_latitude, seismo_longitude)
-
+	
 	closest_time = timestamp1 + projection_length_ratio*(timestamp2 - timestamp1)
 	
-	return closest_distance, closest_time
+	return closest_point_on_line_lat, closest_point_on_line_lon, closest_distance, closest_time
 
 ###################################################################################################################################
 
