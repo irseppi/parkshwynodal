@@ -49,11 +49,9 @@ for line in sta_f.readlines():
 
                     axs[0].scatter(seismo_longitudes, seismo_latitudes, c='#e41a1c', s = 3, label='seismometers')
                     axs[0].plot(flight_longitudes, flight_latitudes, '-', c='#377eb8', lw=1, ms = 1, label='flight path')
-                    for i in range(int(len(flight_latitudes)/5), len(flight_latitudes)-1, int(len(flight_latitudes)/5)):
+                    for i in range(int(len(flight_latitudes)/5), len(flight_latitudes)-2, int(len(flight_latitudes)/5)):
                         direction = np.arctan2(flight_latitudes[i+1] - flight_latitudes[i], flight_longitudes[i+1] - flight_longitudes[i])
-                        m = (flight_latitudes[i+1] - flight_latitudes[i])/(flight_longitudes[i+1] - flight_longitudes[i])
-                        b = flight_latitudes[i] - m*flight_longitudes[i]
-                        axs[0].quiver((flight_latitudes[i]-b)/m, flight_latitudes[i], np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', headwidth = 10, headlength = 7)
+                        axs[0].quiver(flight_longitudes[i], flight_latitudes[i], np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', headwidth = 10, headlength = 7)
                     # Set labels and title
                     axs[0].set_xlim(min_lon, max_lon)
                     axs[0].set_ylim(min_lat, max_lat)
