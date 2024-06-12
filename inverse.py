@@ -13,13 +13,13 @@ seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 station = seismo_data['Station']
-flight_num = [530342801,528485724,528473220,528407493,528293430,527937367,529741194,529776675,529179112,530165646,531605202,531715679,529805251,529948401] #,530122923]
-time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,1550773710,1550787637,1550511447,1550974151,1551662362,1551736354,1550803701,1550867033] #,1550950429]
-sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV",1010,1021,1006,1109] #,1298]
-day = [25,14,14,14,13,11,21,21,18,24,4,4,22,22]#,23]
-month = [2,2,2,2,2,2,2,2,2,2,3,3,2,2]#,2]
+flight_num = [530342801,528485724,528473220,528407493,528293430,527937367,529741194,529776675,529179112,530165646,531605202,531715679,529805251,529948401] 
+time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,1550773710,1550787637,1550511447,1550974151,1551662362,1551736354,1550803701,1550867033] 
+sta = [1022,1272,1173,1283,1004,"CCB","F6TP","F4TN","F3TN","F7TV",1010,1021,1006,1109] 
+day = [25,14,14,14,13,11,21,21,18,24,4,4,22,22]
+month = [2,2,2,2,2,2,2,2,2,2,3,3,2,2]
 
-for n in range(4,13):
+for n in range(0,13):
     ht = datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -58,7 +58,7 @@ for n in range(4,13):
                 if str(station[y]) == str(sta[n]):
                     dist = distance(seismo_latitudes[y], seismo_longitudes[y], flight_latitudes[line], flight_longitudes[line])	
                     if isinstance(sta[n], str):
-                        day_of_year = str((ht - datetime.datetime(2019, 1, 1)).days + 1)
+                        day_of_year = str((ht - datetime(2019, 1, 1)).days + 1)
 	
                         p = "/aec/wf/2019/0"+day_of_year+"/"+str(sta[n])+".*Z.20190"+day_of_year+"000000+"
                         tr = obspy.read(p)
@@ -352,7 +352,7 @@ for n in range(4,13):
                             plt.show()
 
                         m,covm = invert_f(m0, coord_inv_array, num_iterations=12, sigma=5)
-                        print(covm)
+                        
                         f0 = m[0]
                         v0 = m[1]
                         l = m[2]
