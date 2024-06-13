@@ -14,7 +14,6 @@ min_lon = -150.7
 max_lon = -147.3
 min_lat = 62.2
 max_lat = 65.3
-f = 1.0/np.cos(62*np.pi/180)
 
 # Load the seismometer location data
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
@@ -39,8 +38,9 @@ for line in sta_f.readlines():
         if str(time[l]) == str(val[2]):
             for t  in range(len(sta)):
                 if sta[t] == station:
-                    clat, clon, dist, ctime = closest_encounter(flight_latitudes, flight_longitudes, l, time, seismo_latitudes[t], seismo_longitudes[t])
 
+                    clat, clon, dist, ctime = closest_encounter(flight_latitudes, flight_longitudes, l, time, seismo_latitudes[t], seismo_longitudes[t])
+                    f = 1.0/np.cos(clat*np.pi/180)
                     ht = datetime.datetime.utcfromtimestamp(time[l])
 
                     # Create a figure with two subplots side by side
@@ -60,7 +60,6 @@ for line in sta_f.readlines():
                     axs[0].set_xlim(min_lon, max_lon)
                     axs[0].set_ylim(min_lat, max_lat)
                     axs[0].tick_params(axis='both', which='major', labelsize=12)
-
 			
                     y =[clat,  seismo_latitudes[t]]
                     x = [clon, seismo_longitudes[t]]
@@ -72,7 +71,6 @@ for line in sta_f.readlines():
                     minla = yy - 0.03
                     maxla = yy + 0.03
                     heading = np.deg2rad(head[l])
-                    
                     
                     rect = Rectangle((minl, minla), 0.1, 0.06, ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
                     axs[0].add_patch(rect)

@@ -95,7 +95,7 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 	return distance
 
 #################################################################################################################################
-
+		
 def calculate_projection(line_vector, station_vector):
 	"""
 	Calculates the projection length ratio of a station vector onto a line vector.
@@ -108,10 +108,11 @@ def calculate_projection(line_vector, station_vector):
 		float: The projection length ratio.
 
 	"""
-		
+
 	dot_product = line_vector[0] * station_vector[0] + line_vector[1] * station_vector[1]
 	line_magnitude = line_vector[0] ** 2 + line_vector[1] ** 2
 	projection_length_ratio = dot_product / line_magnitude
+
 	return projection_length_ratio
 
 #################################################################################################################################
@@ -131,7 +132,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 	Returns:
 		float: The closest distance between the flight point and the seismic station and the time this occurrs.
 	"""
-
+	
 	closest_distance = float('inf')
 	closest_lat = flight_latitudes[index]
 	closest_lon = flight_longitudes[index]
@@ -150,16 +151,22 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 			second_closest_lat = flight_latitudes[index]
 			second_closest_lon = flight_longitudes[index]
 			timestamp2 = timestamp[index]
-			
-	line_vector = (second_closest_lat - closest_lat, second_closest_lon - closest_lon)
-	station_vector = (seismo_latitude - closest_lat, seismo_longitude - closest_lon)
+
+	lat_timestamp_dif_vec = second_closest_lat - closest_lat
+	lon_timestamp_dif_vec = (second_closest_lon - closest_lon)*np.cos((lat_timestamp_dif_vec) * np.pi / 180)
+	lat_seismo_dif_vec = seismo_latitude - closest_lat
+	lon_seismo_dif_vec = (seismo_longitude - closest_lon)*np.cos((lat_seismo_dif_vec) * np.pi / 180)
+
+	line_vector = (lat_timestamp_dif_vec, lon_timestamp_dif_vec)
+	station_vector = (lat_seismo_dif_vec, lon_seismo_dif_vec)
 
 	projection_length_ratio = calculate_projection(line_vector, station_vector)
 
-	closest_point_on_line_lat = closest_lat + projection_length_ratio * line_vector[0]
-	closest_point_on_line_lon = closest_lon + projection_length_ratio * line_vector[1]
+	closest_point_on_line_lat = closest_lat + projection_length_ratio * lat_timestamp_dif_vec
+	closest_point_on_line_lon = closest_lon + projection_length_ratio * lon_timestamp_dif_vec
+
 	closest_distance = calculate_distance(closest_point_on_line_lat, closest_point_on_line_lon, seismo_latitude, seismo_longitude)
-	
+
 	closest_time = timestamp1 + projection_length_ratio*(timestamp2 - timestamp1)
 	
 	return closest_point_on_line_lat, closest_point_on_line_lon, closest_distance, closest_time
