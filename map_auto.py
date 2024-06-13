@@ -79,11 +79,11 @@ for line in sta_f.readlines():
                     axs[1].set_xlim(minl, maxl)
                     axs[1].set_ylim(minla, maxla)
                     axs[1].tick_params(axis='both', which='major', labelsize=10)
-
-                    direction = np.arctan2(flight_latitudes[l+1] - flight_latitudes[l], flight_longitudes[l+1] - flight_longitudes[l])
-
                     axs[1].quiver(flight_longitudes[l], flight_latitudes[l], np.cos(heading), np.sin(heading), angles='xy', color='#999999', scale = 8, headwidth = 5, headlength = 6,label = 'Heading Direction')
-                    axs[1].quiver(flight_longitudes[l], flight_latitudes[l], np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', scale=8, headwidth = 5, headlength = 6, label = 'Direction of Motion')
+                    if l < len(time)-1:
+                        direction = np.arctan2(flight_latitudes[l+1] - flight_latitudes[l], flight_longitudes[l+1] - flight_longitudes[l])
+                        axs[1].quiver(flight_longitudes[l], flight_latitudes[l], np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', scale=8, headwidth = 5, headlength = 6, label = 'Direction of Motion')
+                    
                     axs[1].scatter(flight_longitudes[l], flight_latitudes[l], c='#377eb8', s=50, zorder=3, label='Timestamp: ' + str(ht))
                     axs[1].scatter(seismo_longitudes[t], seismo_latitudes[t], c='#e41a1c', s=50, zorder=3, label='Station '+str(sta[t]))
                     axs[1].legend(loc='lower right', fontsize=8)

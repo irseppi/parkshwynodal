@@ -62,7 +62,6 @@ for n in range(0,13):
 	
                         p = "/aec/wf/2019/0"+day_of_year+"/"+str(sta[n])+".*Z.20190"+day_of_year+"000000+"
                         tr = obspy.read(p)
-						
                         tr[0].trim(tr[0].stats.starttime +(int(h) *60 *60) + (mins * 60) + secs - tim, tr[0].stats.starttime +(int(h) *60 *60) + (mins * 60) + secs + tim)
                         data = tr[0][:]
                         fs = int(tr[0].stats.sampling_rate)
@@ -92,21 +91,19 @@ for n in range(0,13):
                         median = p[int(m/2)]
                         for col in range(m):
                             MDF[row][col] = median
+                    spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
+
                     ty = False
                     if ty == True:
-                        if isinstance(sta[n], str):
-                            spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
-                        else:
+                        if isinstance(sta[n], int):
                             spec = np.zeros((a,b))
                             for col in range(0,b):
                                 p = sorted(Sxx[:, col])
                                 median = p[int(len(p)/2)]
 
                                 for row in range(len(Sxx)):
-
                                     spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
-                    else:
-                        spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))		
+
                     middle_index = len(times) // 2
                     middle_column = spec[:, middle_index]
                     vmin = 0  
@@ -148,7 +145,7 @@ for n in range(0,13):
                             r1.close()
 
                             pick_again = input("Do you want to repick you points? (y or n)")
-                            if pick_again == 'y':
+                            while pick_again == 'y':
                                 r1 = open(output1,'w')
                                 coords = []
                                 plt.figure()
@@ -164,14 +161,13 @@ for n in range(0,13):
 
                                 plt.show(block=True)
                                 r1.close()
-
+                                pick_again = input("Do you want to repick you points? (y or n)")
                         else:
                             coords = []
                             with open(output1, 'r') as file:
                                 for line in file:
                                     # Split the line using commas
                                     pick_data = line.split(',')
-   
                                     coords.append((float(pick_data[0]), float(pick_data[1])))
                             file.close()  # Close the file after reading
 
@@ -197,7 +193,7 @@ for n in range(0,13):
                         r1.close()
 
                         pick_again = input("Do you want to repick you points? (y or n)")
-                        if pick_again == 'y':
+                        while pick_again == 'y':
                             r1 = open(output1,'w')
                             coords = []
                             plt.figure()
@@ -213,7 +209,7 @@ for n in range(0,13):
 
                             plt.show(block=True)
                             r1.close()
-
+                            pick_again = input("Do you want to repick you points? (y or n)")
                     # Convert the list of coordinates to a numpy array
                     coords_array = np.array(coords)
 
@@ -418,7 +414,7 @@ for n in range(0,13):
                                 r2.close()
 
                                 pick_again = input("Do you want to repick you points? (y or n)")
-                                if pick_again == 'y':
+                                while pick_again == 'y':
                                     r2 = open(output2,'w')
                                     peaks = []
                                     freqpeak = []
@@ -437,7 +433,7 @@ for n in range(0,13):
 
                                     plt.show(block=True)
                                     r2.close()
-
+                                    pick_again = input("Do you want to repick you points? (y or n)")
 
                             elif con == 'n':
                                 peaks = []
@@ -472,7 +468,7 @@ for n in range(0,13):
                             plt.show(block=True)
                             r2.close()
                             pick_again = input("Do you want to repick you points? (y or n)")
-                            if pick_again == 'y':
+                            while pick_again == 'y':
                                 r2 = open(output2,'w')
                                 peaks = []
                                 freqpeak = []
@@ -491,7 +487,7 @@ for n in range(0,13):
 
                                 plt.show(block=True)
                                 r2.close()
-
+                                pick_again = input("Do you want to repick you points? (y or n)")
                     closest_index = np.argmin(np.abs(tprime0 - times))
                     arrive_time = spec[:,closest_index]
                     for i in range(len(arrive_time)):
@@ -532,7 +528,7 @@ for n in range(0,13):
                         #ax2.plot(times, what_if, 'red', ls = '--', linewidth=0.4)
                     f0lab_sorted = sorted(f0lab)
                     covm = np.sqrt(np.diag(covm))
-                    if len(f0lab_sorted) <+ 17:
+                    if len(f0lab_sorted) <= 17:
                         fss = 'medium'
                     else:
                         fss = 'small'
