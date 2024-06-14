@@ -172,71 +172,10 @@ for n in range(0,13):
                     # Convert the list of coordinates to a numpy array
                     coords_array = np.array(coords)
 
-                    if n == 0:
-                        tprime0 = 112
-                        f0 = 115
-                        v0 = 68
-                        l = 2135
-
-                    if n == 1:
-                        f0 = 110
-                        tprime0 = 107
-                        v0 = 100
-                        l = 2700
-
-                    if n == 2:
-                        f0 = 131
-                        tprime0 = 93
-                        v0 = 139
-                        l = 4650
-
-                    if n == 3:
-                        f0 = 121
-                        tprime0 = 116
-                        v0 = 142
-                        l = 2450
-
-                    if n == 4:
-                        f0 = 120
-                        tprime0 = 140
-                        v0 = 64
-                        l = 580
-
-                    if n == 5:
-                        f0 = 17.5
-                        tprime0 = 123
-                        v0 = 112
-                        l = 1150
-
-                    if n == 6:
-                        f0 = 36
-                        tprime0 = 133
-                        v0 = 92
-                        l = 2400
-
-                    if n == 7:
-                        f0 = 26		
-                        tprime0 = 122
-                        v0 = 126
-                        l = 3000
-
-                    if n == 8:
-                        f0 = 87.7
-                        tprime0 = 100
-                        v0 = 67
-                        l = 2300
-
-                    if n == 9:
-                        f0 = 26
-                        tprime0 = 114
-                        v0 = 144
-                        l = 1900
-                    if n > 9:
-
-                        f0 = fs/4
-                        tprime0 = tarrive
-                        v0 = speed_mps
-                        l = np.sqrt(dist_m**2 + alt_m**2)
+                    f0 = fs/4
+                    tprime0 = tarrive
+                    v0 = speed_mps
+                    l = np.sqrt(dist_m**2 + alt_m**2)
 
                     c = 343
                     m0 = [f0, v0, l, tprime0]
