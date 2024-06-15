@@ -5,54 +5,7 @@ import obspy
 import datetime
 from prelude import *
 from scipy.signal import find_peaks, spectrogram
-
-def df_mult(f0,v0,l,tp0,tp):   
-    """
-	Calculate the derivatives of f with respect to f0, v0, l, and tp0.
-
-	Parameters:
-	f0 (float): Fundamental frequency produced by the aircraft.
-	v0 (float): Velocity of the aircraft.
-	l (float): Distance of closest approach between the station and the aircraft.
-	tp0 (float): Time of that the central frequency of the overtones occur, when the aircraft is at the closest approach to the station.
-	tp (float): Array of times.
-	Returns:
-	tuple: A tuple containing the derivatives of f with respect to f0, v0, l, and tp0.
-	"""
-
-    c = 343 # m/sec speed of sound
-    for f0 in f0:
-        #derivative with respect to f0
-        f_derivef0 = (1 / (1 - (c * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))) /((c**2 - v0**2) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2))))
-
-
-
-        #derivative of f with respect to v0
-        f_derivev0 = (-f0 * v0 * (-2 * l**4 * v0**4 + l**2 * (tp - tp0)**2 * v0**6 + c**6 * (tp - tp0) * (2 * l**2 + (tp - tp0)**2 * v0**2) * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) + 
-        c**2 * (4 * l**4 * v0**2 - (tp - tp0)**4 * v0**6 + l**2 * (tp - tp0) * v0**4 * (5 * tp - 5 * tp0 - 3 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))) - c**4 * 
-        (2 * l**4 - 3 * (tp - tp0)**3 * v0**4 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4)) - l**2 * (tp - tp0) * v0**2 * (-6 * tp + 6 * tp0 + np.sqrt((-l**2 * v0**2 + c**2 * 
-        (l**2 + (tp - tp0)**2 * v0**2))/c**4)))) / (c * (c - v0) * (c + v0) * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * 
-        (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) * (c * (-tp + tp0) * v0**2 + c * v0**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) - c**2 * np.sqrt(l**2 + (c**4 * v0**2 * 
-        (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) + v0**2 * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2))**2))
-        
-
-        #derivative of f with respect to l
-        f_derivel = ((f0 * l * (tp - tp0) * (c - v0) * v0**2 * (c + v0) * ((-tp + tp0) * v0**2 + c**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))) / 
-        (c * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + 
-        (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2) * (c * (-tp + tp0) * v0**2 + c * v0**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4) - 
-        c**2 * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2) + v0**2 * np.sqrt(l**2 + 
-        (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2))**2))
-
-
-        #derivative of f with respect to tp0
-        f_derivetprime0 = ((f0 * l**2 * (c - v0) * v0**2 * (c + v0) * ((-tp + tp0) * v0**2 + c**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))) / 
-        (c * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * 
-        (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) * (c * (-tp + tp0) * v0**2 + c * v0**2 * np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4) - 
-        c**2 * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2) + v0**2 * np.sqrt(l**2 + 
-        (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2))/c**4))**2)/(c**2 - v0**2)**2))**2))
-
-
-    return f_derivef0, f_derivev0, f_derivel, f_derivetprime0
+import scipy.linalg as la
 
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -147,51 +100,37 @@ for n in range(0,5):
 
                     if n == 0:
                         tprime0 = 112
-                        fnot = [93, 115, 153, 172, 228]
-                        tpr = np.arange(0, 241, 1)
-                        c = 343
+                        f0 = 115
                         v0 = 68
                         l = 2135
 
                     if n == 1:
-                        fnot = [37, 56, 73, 110, 146, 165, 182, 218, 238, 256, 275]
+                        f0 = 110
                         tprime0 = 107
-                        tpr = np.arange(0, 241, 1)
-                        c = 343
                         v0 = 100
                         l = 2700
 
                     if n == 2:
-                        fnot = [79,131,261]
+                        f0 = 131
                         tprime0 = 93
-                        tpr = np.arange(0, 241, 1)
-                        c = 343
                         v0 = 139
                         l = 4650
 
                     if n == 3:
-                        fnot = [36,73,121,136,144]
+                        f0 = 121
                         tprime0 = 116
-                        tpr = np.arange(80, 170, 1)
-                        tpr = np.arange(0, 241, 1)
-                        c = 343
                         v0 = 142
                         l = 2450
 
                     if n == 4:
-                        fnot = [13,27,40,47,54,60,67,74,80,87,90,94,101,108,114,121,127,134,148,160,177,189,202,223,239,247,270]
+                        f0 = 120
                         tprime0 = 140
-                        tpr = np.arange(40, 230, 1)
-                        tpr = np.arange(0, 241, 1)
-                        c = 343
-                        v0 = 67
+                        v0 = 64
                         l = 580
 
                     c = 343
-                    f0 = 120
-                    m0 = [120, v0, l, tprime0]
-
-                    m,covm = invert_f(m0, coords_array, num_iterations=8)
+                    m0 = [f0, v0, l, tprime0]
+                    m,covm = invert_f(m0, coords_array, num_iterations=4)
 
                     f0 = m[0]
                     v0 = m[1]
@@ -200,8 +139,6 @@ for n in range(0,5):
                     
                     ft = calc_ft(times, tprime0, f0, v0, l, c)
 
-                    p, _ = find_peaks(middle_column, distance = 7)
-                    corridor_width = (fs/2) / len(p) 
                     output2 = '/scratch/irseppi/nodal_data/plane_info/overtonepicks/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(time[n])+'_'+str(flight_num[n])+'.csv'
                     peaks = []
                     freqpeak = []
@@ -212,24 +149,25 @@ for n in range(0,5):
                             peaks.append(float(pick_data[1]))
                             freqpeak.append(float(pick_data[0]))
                     file.close()  # Close the file after reading
-
-                    num_iterations = 12
-                    while n < num_iterations:
-                        fnew = []
-
-                        w  = len(peaks)
-                        G = np.zeros((0,w+3))
-                        for i in range(len(peaks)):
-                            maxfreq = []
-                            f00 = calc_f0(freqpeak[i],tprime0, peaks[i], v0, l, c)
-                            v00 = m[1]
-                            l0 = m[2]
-                            tprime00 = m[3]
-                            m0 = [f00, v00, l0, tprime00]
-                            ft = calc_ft(times, tprime00, f00, v00, l0, c)
-                            coord_inv = []
-                            ttt = []
-                            for t_f in range(len(times)):
+                 
+                    p, _ = find_peaks(middle_column, distance = 7)
+                    corridor_width = (fs/2) / len(p)
+                    peaks_assos = []
+                    fobs = []
+                    tobs = []
+                    f0_array = []
+                    plt.figure()
+                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    for i in range(len(peaks)):
+                        maxfreq = []
+                        f0 = calc_f0(freqpeak[i],tprime0, peaks[i], v0, l, c)
+                        f0_array.append(f0)
+                        m0 = [f0, v0, l, tprime0]
+                        ft = calc_ft(times, tprime0, f0, v0, l, c)
+                        coord_inv = []
+                        ttt = []
+                        for t_f in range(len(times)):
+                            if not np.isnan(ft[t_f]) and ft[t_f] != np.inf:
                                 upper = int(ft[t_f] + corridor_width)
                                 lower = int(ft[t_f] - corridor_width)
                                 if lower < 0:
@@ -246,50 +184,104 @@ for n in range(0,5):
                                     ttt.append(times[t_f])
                                 except:
                                     continue
-                            coord_inv_array = np.array(coord_inv)
-                            m,_ = invert_f(m0, coord_inv_array, num_iterations=12)
-                            ft = calc_ft(ttt, tprime00, f00, v00, l0, c)
+                                
+                        coord_inv_array = np.array(coord_inv)
+                        if len(coord_inv_array) == 0:
+                            continue
 
-                            delf = np.array(ft) - np.array(maxfreq)
-                            
-                            new_coord_inv_array = []
-                            for i in range(len(delf)):
-                                if np.abs(delf[i]) <= 3:
-                                    new_coord_inv_array.append(coord_inv_array[i])
-                            coord_inv_array = np.array(new_coord_inv_array)
-                            tobs = coord_inv_array[:,0]
-                            fobs = coord_inv_array[:,1]
-                            for j in range(0,len(coord_inv_array)):
-                                tprime = tobs[j]
-                                new_row = np.zeros(w+3)
-                                new_row[0] = l
-                                new_row[1] = v0
-                                new_row[2] = tprime0
-                                t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-                                ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
-                                for p in range(3,3+w):
-                                    f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(m[0], m[1], m[2], m[3], tobs[j])
-                                    new_row[0] = f_derivel
-                                    new_row[1] = f_derivev0
+                        m,_ = invert_f(m0, coord_inv_array, num_iterations=4)
+                        f0 = m[0]
+                        v0 = m[1]
+                        l = m[2]
+                        tprime0 = m[3]
+                        ft = calc_ft(ttt, tprime0, f0, v0, l, c)
+
+                        delf = np.array(ft) - np.array(maxfreq)
+
+                        new_coord_inv_array = []
+                        for i in range(len(delf)):
+                            if np.abs(delf[i]) <= 2:
+                                new_coord_inv_array.append(coord_inv_array[i])
+                                fobs.append(maxfreq[i])
+                                tobs.append(ttt[i])
+                        coord_inv_array = np.array(new_coord_inv_array)
+                        plt.scatter(coord_inv_array[:,0], coord_inv_array[:,1], color='black', marker='x')
+                        peaks_assos.append(len(coord_inv_array[:,1]))
+                    plt.show()
+                    qv = 0
+                    num_iterations = 8
+                    while qv < num_iterations:
+                        w  = len(peaks)
+                        G = np.zeros((0,w+3))
+                        fnew = []
+                        if qv == 0:
+                            m0 = []
+                            m0.append(v0)
+                            m0.append(l)
+                            m0.append(tprime0)
+
+                            for i in range(w):
+                                m0.append(f0_array[i])
+
+                        for p in range(w):
+                            new_row = np.zeros(w+3)
+                            f0 = f0_array[p]
+                            if p == 0:
+                                for j in range(peaks_assos[p]):
+                                    tprime = tobs[j]
+                                    t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
+                                    ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
+
+                                    f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(f0,v0,l,tprime0, tobs[j])
+                                
+                                    new_row[0] = f_derivev0
+                                    new_row[1] = f_derivel
                                     new_row[2] = f_derivetprime0
-                                    new_row[w] = f_derivef0
-                                G = np.vstack((G, new_row))
+                                    new_row[3+p] = f_derivef0
 
-                                fnew.append(ft0p) 
-                        print(G)
+                                    G = np.vstack((G, new_row))
+
+                                    fnew.append(ft0p)
+                            else:
+                                for j in range(peaks_assos[p-1],peaks_assos[p]+peaks_assos[p-1]):
+                                    tprime = tobs[j]
+                                    t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
+                                    ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
+
+                                    f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(f0,v0,l,tprime0, tobs[j])
+                                
+                                    new_row[0] = f_derivev0
+                                    new_row[1] = f_derivel
+                                    new_row[2] = f_derivetprime0
+                                    new_row[3+p] = f_derivef0
+
+                                    G = np.vstack((G, new_row))
+
+                                    fnew.append(ft0p)
+                            print(new_row)
                         sigma = 5
-                        m0 = []
-                        for i in range(w):
-                            m0.append(peaks[i])
-                            
-                        m0.append(v0)
-                        m0.append(l)
-                        m0.append(tprime0)
-                        m = np.reshape(np.reshape(m0,(3+w,1))+ np.reshape(inv(G.T@G)@G.T@(np.reshape(fobs, (len(coords_array), 1)) - np.reshape(np.array(fnew), (len(coords_array), 1))), (3+w,1)), (3+w,))
-                        covmlsq = (sigma**2)*la.inv(G.T@G)
                         
+                        # Exclude rows with NaN or inf values
+                        valid_rows = np.isfinite(G).all(axis=1)
+                        Gv = G[valid_rows]
+                        
+                        fobs = np.array(fobs)
+                        fnew = np.array(fnew)
+                        fnewv = fnew[valid_rows]
+                        fobsv = fobs[valid_rows]
+
+                        pin = la.pinv(Gv.T@Gv)
+
+                        m = np.reshape(np.reshape(m0,(3+w,1))+ np.reshape(pin@Gv.T@(np.reshape(fobsv, (len(fobsv), 1)) - np.reshape(np.array(fnewv), (len(fobsv), 1))), (3+w,1)), (3+w,))
+                        covmlsq = (sigma**2)*pin
+                        v0 = m[0]
+                        l = m[1]
+                        tprime0 = m[2]
+                        f0_array = m[3:]
+
                         m0 = m
-                        n += 1
+                        print(m)
+                        qv += 1
 
                     closest_index = np.argmin(np.abs(tprime0 - times))
                     arrive_time = spec[:,closest_index]
@@ -299,6 +291,7 @@ for n in range(0,5):
                     vmin = np.min(arrive_time) 
                     vmax = np.max(arrive_time) 
 
+                    #Plot image
                     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=False, figsize=(8,6))     
                     ax1.plot(torg, data, 'k', linewidth=0.5)
                     ax1.set_title(title)
@@ -307,22 +300,21 @@ for n in range(0,5):
 
                     cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
                     ax2.set_xlabel('Time (s)')
-                    f0lab = []
+                    f0lab = f0_array
                     ax2.axvline(x=tprime0, c = '#377eb8', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
                     
                     for pp in range(len(peaks)):
                         tprime = freqpeak[pp]
-                        ft0p = peaks[pp]
-                        f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
+
                         ft = calc_ft(times, tprime0, f0, v0, l, c)
                         ax2.plot(times, ft, '#377eb8', ls = (0,(5,20)), linewidth=0.7) #(0,(5,10)),
                         
                         if np.abs(tprime -tprime0) < 1.5:
                             ax2.scatter(tprime0, ft0p, color='black', marker='x', s=30) 
-                        f0lab.append(int(f0)) 
 
                     f0lab_sorted = sorted(f0lab)
                     covm = np.sqrt(np.diag(covm))
+
                     if len(f0lab_sorted) <= 17:
                         fss = 'medium'
                     else:
@@ -361,32 +353,3 @@ for n in range(0,5):
                     make_base_dir(BASE_DIR)
                     fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spectotal/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
                     plt.close()
-                    
-                    fig = plt.figure(figsize=(10,6))
-                    plt.grid()
-
-                    plt.plot(frequencies, arrive_time, c='#377eb8')
-                   
-                    for pp in range(len(peaks)):
-                        if np.abs(freqpeak[pp] -tprime0) < 1.5:
-                            upper = int(peaks[pp] + 3)
-                            lower = int(peaks[pp] - 3)
-                            tt = spec[lower:upper, closest_index]
-                            ampp = np.max(tt)
-                            freqp = np.argmax(tt)+lower
-                            plt.scatter(freqp, ampp, color='black', marker='x', s=100)
-
-                            plt.text(freqp - 5, ampp + 0.8, freqp, fontsize=17, fontweight='bold')
- 
-                    plt.xlim(0, int(fs/2))
-                    plt.xticks(fontsize=12)
-                    plt.yticks(fontsize=12)
-                    plt.ylim(0,vmax*1.1)
-                    plt.xlabel('Frequency (Hz)', fontsize=17)
-                    plt.ylabel('Relative Amplitude at t = {:.2f} s (dB)'.format(tprime0), fontsize=17)
-
-
-                    make_base_dir('/scratch/irseppi/nodal_data/plane_info/5spectotal/20190'+str(month[n])+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/')
-
-                    fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spectotal/20190'+str(month[n])+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(sta[n])+'_' + str(time[n]) + '.png')
-                    plt.close() 
