@@ -82,6 +82,14 @@ for n in range(0,5):
                         for col in range(m):
                             MDF[row][col] = median
                     spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
+                    if isinstance(sta[n], int):
+                        spec = np.zeros((a,b))
+                        for col in range(0,b):
+                            p = sorted(Sxx[:, col])
+                            median = p[int(len(p)/2)]
+
+                            for row in range(len(Sxx)):
+                                spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
 
                     middle_index = len(times) // 2
                     middle_column = spec[:, middle_index]
