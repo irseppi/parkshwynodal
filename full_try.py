@@ -5,9 +5,6 @@ import obspy
 import datetime
 from prelude import *
 from scipy.signal import find_peaks, spectrogram
-from matplotlib.patches import Rectangle
-from matplotlib.patches import Rectangle
-import scipy.linalg as la
 
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -149,11 +146,13 @@ for n in range(0,5):
                 maxx = np.max(spec)
                 p = sorted(col)
                 median = p[int(len(p)/2)]
-                peaks, _ = find_peaks(col, prominence=15, distance=10, height=median + maxx/5)
+                peaks, _ = find_peaks(col, prominence=15, distance=15, height=median + maxx/5)
 
                 for p in peaks:
                     plt.scatter(times[t], frequencies[p]+50, color='black', marker='x')
                     points.append((times[t], frequencies[p]+50))
+            plt.show()
+            '''
             x = []
             y = []
             def onclick(event):
@@ -166,22 +165,25 @@ for n in range(0,5):
             cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
 
             plt.show(block=True)
-            points = np.array(points)
+            #points = np.array(points)
 
             points_filt = []
             throw_out = []
             plt.figure()
             plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
             for ll in range(0,len(x),2):
+                
                 for p in range(len(points)):
-                    if x[ll] < points[p][0] < x[ll+1] and y[ll+1] <= points[p][1] <= y[ll]:
+                    if x[ll] < points[p][0] < x[ll+1] and y[ll] < points[p][1] < y[ll+1]:
                         throw_out.append(points[p])
+                        print(points[p])
                     else:
                         points_filt.append(points[p])
-                        plt.scatter(points[p][0], points[p][1], color='black', marker='x')
+                       
+            points_filt = np.array(points_filt)
+            plt.scatter(points_filt.T[0], points_filt.T[1], color='black', marker='x')
             plt.show()
 
-            '''
             qv = 0
             num_iterations = 8
             while qv < num_iterations:
