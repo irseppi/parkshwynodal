@@ -105,37 +105,46 @@ for n in range(0,5):
                             coords.append((float(pick_data[0]), float(pick_data[1])))
                     file.close()  # Close the file after reading
                     coords_array = np.array(coords)
-
                     if n == 0:
                         tprime0 = 112
-                        f0 = 115
+                        fnot = [93, 115, 153, 172, 228]
                         v0 = 68
                         l = 2135
-
+                        f0 = 115
                     if n == 1:
-                        f0 = 110
+                        fnot = [37, 56, 73, 110, 146, 165, 182, 218, 238, 256, 275]
                         tprime0 = 107
+
+                        f0 = 110
                         v0 = 100
                         l = 2700
 
                     if n == 2:
-                        f0 = 131
+                        fnot = [79,131,261]
                         tprime0 = 93
+                        f0 = 131
                         v0 = 139
                         l = 4650
 
                     if n == 3:
-                        f0 = 121
+                        fnot = [36,73,121,136,144]
                         tprime0 = 116
+                        f0 = 121
+
                         v0 = 142
                         l = 2450
 
                     if n == 4:
-                        f0 = 120
+                        fnot = [13,27,40,47,54,60,67,74,80,87,90,94,101,108,114,121,127,134,148,160,177,189,202,223,239,247,270]
                         tprime0 = 140
-                        v0 = 64
-                        l = 580
+                        f0 = 120
 
+                        v0 = 67
+                        l = 5800
+
+                    vnot = v0
+                    lnot = l
+                    tprimenot = tprime0
                     c = 343
                     m0 = [f0, v0, l, tprime0]
                     m,covm = invert_f(m0, coords_array, num_iterations=4)
@@ -178,6 +187,7 @@ for n in range(0,5):
                             if not np.isnan(ft[t_f]) and ft[t_f] != np.inf:
                                 upper = int(ft[t_f] + corridor_width)
                                 lower = int(ft[t_f] - corridor_width)
+
                                 if lower < 0:
                                     lower = 0
                                 if upper > len(frequencies):
@@ -196,7 +206,6 @@ for n in range(0,5):
                         coord_inv_array = np.array(coord_inv)
                         if len(coord_inv_array) == 0:
                             continue
-
                         m,_ = invert_f(m0, coord_inv_array, num_iterations=4)
                         f0 = m[0]
                         v0 = m[1]
@@ -208,28 +217,41 @@ for n in range(0,5):
 
                         new_coord_inv_array = []
                         for i in range(len(delf)):
-                            if np.abs(delf[i]) <= 2:
+                            if np.abs(delf[i]) <= (corridor_width/2):
                                 new_coord_inv_array.append(coord_inv_array[i])
                                 fobs.append(maxfreq[i])
                                 tobs.append(ttt[i])
                         coord_inv_array = np.array(new_coord_inv_array)
                         plt.scatter(coord_inv_array[:,0], coord_inv_array[:,1], color='black', marker='x')
                         peaks_assos.append(len(coord_inv_array[:,1]))
-                    plt.show()
+                        
+                    #plt.show()
                     qv = 0
                     num_iterations = 8
+                    cprior = np.zeros((0,4))
+                    w  = len(f0_array)
+                    cprior = np.zeros((w+3,w+3))
+                    m0 = []
+                    m0.append(vnot)
+                    m0.append(lnot)
+                    m0.append(tprimenot)
+                    for i in range(w):
+                        m0.append(f0_array[i])
+                    for row in range(len(cprior)):
+                        if row == 0:
+                            cprior[row][row] = 20**2
+                        elif row == 1:
+                            cprior[row][row] = 500**2
+                        elif row == 2:
+                            cprior[row][row] = 20**2
+                        else:
+                            cprior[row][row] = 1**2
+                    Cd = np.zeros((len(fobs), len(fobs)), int)
+                    np.fill_diagonal(Cd, 5**2)
+
                     while qv < num_iterations:
-                        w  = len(peaks)
                         G = np.zeros((0,w+3))
                         fnew = []
-                        if qv == 0:
-                            m0 = []
-                            m0.append(v0)
-                            m0.append(l)
-                            m0.append(tprime0)
-
-                            for i in range(w):
-                                m0.append(f0_array[i])
 
                         for p in range(w):
                             new_row = np.zeros(w+3)
@@ -251,7 +273,7 @@ for n in range(0,5):
 
                                     fnew.append(ft0p)
                             else:
-                                for j in range(peaks_assos[p-1],peaks_assos[p]+peaks_assos[p-1]):
+                                for j in range(peaks_assos[p-1]+1,peaks_assos[p]+peaks_assos[p+1]):
                                     tprime = tobs[j]
                                     t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
                                     ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
@@ -266,21 +288,24 @@ for n in range(0,5):
                                     G = np.vstack((G, new_row))
 
                                     fnew.append(ft0p)
-                            print(new_row)
+                            
                         sigma = 5
-                        
+                        Cd = np.zeros((len(G), len(G)), int)
+                        np.fill_diagonal(Cd, 5**2)
                         # Exclude rows with NaN or inf values
-                        valid_rows = np.isfinite(G).all(axis=1)
-                        Gv = G[valid_rows]
+                        #valid_rows = np.isfinite(G).all(axis=1)
+                        Gv = G#[valid_rows]
                         
-                        fobs = np.array(fobs)
-                        fnew = np.array(fnew)
-                        fnewv = fnew[valid_rows]
-                        fobsv = fobs[valid_rows]
-
-                        pin = la.pinv(Gv.T@Gv)
-
-                        m = np.reshape(np.reshape(m0,(3+w,1))+ np.reshape(pin@Gv.T@(np.reshape(fobsv, (len(fobsv), 1)) - np.reshape(np.array(fnewv), (len(fobsv), 1))), (3+w,1)), (3+w,))
+                        #fobs = np.array(fobs)
+                        #fnew = np.array(fnew)
+                        #fnewv = fnew[valid_rows]
+                        #fobsv = fobs[valid_rows]
+                        
+                        print((cprior@G.T).shape)
+                        print(len(fobs))
+                        print((cprior@G.T@la.inv(G@cprior@G.T+Cd)).shape)
+                        m = np.array(m0) + cprior@G.T@la.inv(G@cprior@G.T+Cd)@(np.array(fobs)- np.array(fnew))
+                        #m = np.reshape(np.reshape(m0,(3+w,1))+ np.reshape(pin@Gv.T@(np.reshape(fobsv, (len(fobsv), 1)) - np.reshape(np.array(fnewv), (len(fobsv), 1))), (3+w,1)), (3+w,))
                         covmlsq = (sigma**2)*pin
                         v0 = m[0]
                         l = m[1]
