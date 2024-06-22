@@ -17,7 +17,7 @@ sta = [1022,1272,1173,1283,1004]
 day = [25,14,14,14,13]
 month = [2,2,2,2,2]
 
-for n in range(0,5):
+for n in range(0,1):
     ht = datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -82,21 +82,21 @@ for n in range(0,5):
                         for col in range(m):
                             MDF[row][col] = median
                     spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
-                    '''
                     if isinstance(sta[n], int):
-                        spec = np.zeros((a,b))
-                        for col in range(0,b):
-                            p = sorted(Sxx[:, col])
-                            median = p[int(len(p)/2)]
+                            spec = np.zeros((a,b))
+                            for col in range(0,b):
+                                p = sorted(Sxx[:, col])
+                                median = p[int(len(p)/2)]
 
-                            for row in range(len(Sxx)):
-                                spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
-                    '''
+                                for row in range(len(Sxx)):
+                                    spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
+
                     middle_index = len(times) // 2
                     middle_column = spec[:, middle_index]
                     vmin = 0  
                     vmax = np.max(middle_column) 
                     p, _ = find_peaks(middle_column, distance=10)
+
                     output1 = '/scratch/irseppi/nodal_data/plane_info/inversepicks/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(time[n])+'_'+str(flight_num[n])+'.csv'
                     coords = []
                     with open(output1, 'r') as file:
@@ -105,38 +105,39 @@ for n in range(0,5):
                             pick_data = line.split(',')
                             coords.append((float(pick_data[0]), float(pick_data[1])))
                     file.close()  # Close the file after reading
+
                     coords_array = np.array(coords)
 
                     if n == 0:
                         tprime0 = 112
-                        fnot = [93, 115, 153, 172, 228]
+                        fnot = [153, 172, 228, 38, 57, 76, 93, 135]
                         v0 = 68
                         l = 2135
                         f0 = 115
 
                     if n == 1:
-                        fnot = [37, 56, 73, 110, 146, 165, 182, 218, 238, 256, 275]
+                        fnot = [37, 56, 73,  127, 146, 165, 182, 218, 238, 256, 275]
                         tprime0 = 107
                         f0 = 110
                         v0 = 100
                         l = 2700
 
                     if n == 2:
-                        fnot = [79,131,261]
+                        fnot = [79, 120, 261]
                         tprime0 = 93
                         f0 = 131
                         v0 = 139
                         l = 4650
 
                     if n == 3:
-                        fnot = [36,73,121,136,144]
+                        fnot = [36,69,104,136,144]
                         tprime0 = 116
                         f0 = 121
                         v0 = 142
                         l = 2450
 
                     if n == 4:
-                        fnot = [13,27,40,47,54,60,67,74,80,87,90,94,101,108,114,121,127,134,148,160,177,189,202,223,239,247,270]
+                        fnot = [13,27,40,52,67,80,92,108,134,148,160,173,186,202,223,239,247,270]
                         tprime0 = 140
                         f0 = 120
                         v0 = 67
@@ -149,105 +150,71 @@ for n in range(0,5):
                     m0 = [f0, v0, l, tprime0]
                     m,covm = invert_f(m0, coords_array, num_iterations=4)
 
-                    f0 = m[0]
-                    v0 = m[1]
-                    l = m[2]
-                    tprime0 = m[3]
-                    
-                    ft = calc_ft(times, tprime0, f0, v0, l, c)
-                    '''
-                    #here
-                    m0 = [f0, v0, l, tprime0]
-
-                    m,covm = invert_f(m0, coords_array, num_iterations=8)
-                    f0 = m[0]
-                    v0 = m[1]
-                    l = m[2]
-                    tprime0 = m[3]
-                    
-                    ft = calc_ft(times, tprime0, f0, v0, l, c)
-                    if isinstance(sta[n], int):
-                        peaks = []
-                        p, _ = find_peaks(middle_column, distance = 7)
-                        corridor_width = (fs/2) / len(p) 
-                                        
-                        if len(p) == 0:
-                            corridor_width = fs/4
-
-                        coord_inv = []
-
-                        for t_f in range(len(times)):
-                            upper = int(ft[t_f] + corridor_width)
-                            lower = int(ft[t_f] - corridor_width)
-                            if lower < 0:
-                                lower = 0
-                            if upper > len(frequencies):
-                                upper = len(frequencies)
-                            tt = spec[lower:upper, t_f]
-
-                            max_amplitude_index = np.argmax(tt)
-                            
-                            max_amplitude_frequency = frequencies[max_amplitude_index+lower]
-                            peaks.append(max_amplitude_frequency)
-                            coord_inv.append((times[t_f], max_amplitude_frequency))
-        
-
-                        coord_inv_array = np.array(coord_inv)
-
-                        m,_ = invert_f(m0, coord_inv_array, num_iterations=12)
-                        f0 = m[0]
-                        v0 = m[1]
-                        l = m[2]
-                        tprime0 = m[3]
-
-                        ft = calc_ft(times, tprime0, f0, v0, l, c)
-                        
-                        delf = np.array(ft) - np.array(peaks)
-                        
-                        new_coord_inv_array = []
-                        for i in range(len(delf)):
-                            if np.abs(delf[i]) <= 3:
-                                new_coord_inv_array.append(coord_inv_array[i])
-                        coord_inv_array = np.array(new_coord_inv_array)
-
-                        m,covm = invert_f(m0, coord_inv_array, num_iterations=12, sigma=5)
-                        
-                        fnot = m[0]
-                        vnot = m[1]
-                        lnot = m[2]
-                        tprimenot = m[3]
-
-                        ft = calc_ft(times, tprime0, f0, v0, l, c)
-                    '''
-                    #here
-                    output2 = '/scratch/irseppi/nodal_data/plane_info/overtonepicks/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(time[n])+'_'+str(flight_num[n])+'.csv'
-                    peaks = []
-                    freqpeak = []
-                    with open(output2, 'r') as file:
-                        for line in file:
-                            # Split the line using commas
-                            pick_data = line.split(',')
-                            peaks.append(float(pick_data[1]))
-                            freqpeak.append(float(pick_data[0]))
-                            print(float(pick_data[0]), float(pick_data[1]))
-                    file.close()  # Close the file after reading
-                    #peaks = sorted(peaks, reverse=True)
                     p, _ = find_peaks(middle_column, distance = 7)
                     corridor_width = (fs/2) / len(p)
+
                     peaks_assos = []
                     fobs = []
                     tobs = []
                     f0_array = []
-                    
+
+                    f0_array.append(f0)
+                   
+                    ft = calc_ft(times, m[3], m[0], m[1], m[2], c)
+
+                    maxfreq = []
+                    coord_inv = []
+                    ttt = []
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    for i in range(len(peaks)):
-                        maxfreq = []
-                        f0 = calc_f0(freqpeak[i],tprime0, peaks[i], v0, l, c)
+                    for t_f in range(len(times)):
+                        if not np.isnan(ft[t_f]) and ft[t_f] != np.inf:
+                            upper = int(ft[t_f] + corridor_width)
+                            lower = int(ft[t_f] - corridor_width)
+
+                            if lower < 0:
+                                lower = 0
+                            if upper > len(frequencies):
+                                upper = len(frequencies)
+                            try:
+                                tt = spec[lower:upper, t_f]
+
+                                max_amplitude_index = np.argmax(tt)
+                                max_amplitude_frequency = frequencies[max_amplitude_index+lower]
+                                maxfreq.append(max_amplitude_frequency)
+                                coord_inv.append((times[t_f], max_amplitude_frequency))
+                                ttt.append(times[t_f])
+                            except:
+                                continue
+                            
+                    coord_inv_array = np.array(coord_inv)
+                    if len(coord_inv_array) == 0:
+                        continue
+                    m,_ = invert_f(m0, coord_inv_array, num_iterations=4)
+                    f0 = m[0]
+                    v00 = m[1]
+                    l0 = m[2]
+                    tprime00 = m[3]
+                    ft = calc_ft(ttt, tprime00, f0, v00, l0, c)
+
+                    delf = np.array(ft) - np.array(maxfreq)
+
+                    count = 0
+                    for i in range(len(delf)):
+                        if np.abs(delf[i]) <= (3):
+                            fobs.append(maxfreq[i])
+                            tobs.append(ttt[i])
+                            count += 1
+                    
+                    peaks_assos.append(count)
+                    #fnot = sorted(fnot, reverse=False)
+                    for i in range(len(fnot)):
+                        f0 = fnot[i]
                         f0_array.append(f0)
                         m0 = [f0, vnot, lnot, tprimenot]
-                        ft = calc_ft(times, tprime0, f0, v0, l, c)
-                        plt.plot(times, ft, '#377eb8',  linewidth=0.7)  
+                        ft = calc_ft(times,  tprime00, f0, v00, l0, c)
+                        
+                        maxfreq = []
                         coord_inv = []
                         ttt = []
                         for t_f in range(len(times)):
@@ -274,28 +241,25 @@ for n in range(0,5):
                         if len(coord_inv_array) == 0:
                             continue
                         m,_ = invert_f(m0, coord_inv_array, num_iterations=4)
-                        f0 = m[0]
-                        v0 = m[1]
-                        l = m[2]
-                        tprime0 = m[3]
-                        ft = calc_ft(ttt, tprime0, f0, v0, l, c)
+                        
+                        ft = calc_ft(ttt, m[3], m[0], m[1], m[2], c)
 
                         delf = np.array(ft) - np.array(maxfreq)
 
-                        new_coord_inv_array = []
+                        count = 0
                         for i in range(len(delf)):
-                            if np.abs(delf[i]) <= (corridor_width/3):
-                                new_coord_inv_array.append(coord_inv_array[i])
+                            if np.abs(delf[i]) <= (3):
                                 fobs.append(maxfreq[i])
                                 tobs.append(ttt[i])
-                        coord_inv_array = np.array(new_coord_inv_array)
-                        #plt.scatter(coord_inv_array[:,0], coord_inv_array[:,1], color='black', marker='x')
-                        peaks_assos.append(len(coord_inv_array[:,1]))
+                                count += 1
                         
+                        peaks_assos.append(count)
+                    plt.scatter(tobs, fobs, color='black', marker='x')
+
                     plt.show()
                     qv = 0
                     num_iterations = 8
-                    cprior = np.zeros((0,4))
+                    
                     w  = len(f0_array)
                     cprior = np.zeros((w+3,w+3))
                     m0 = []
@@ -306,15 +270,15 @@ for n in range(0,5):
                         m0.append(f0_array[i])
                     for row in range(len(cprior)):
                         if row == 0:
-                            cprior[row][row] = 2**2
+                            cprior[row][row] = 20**2
                         elif row == 1:
-                            cprior[row][row] = 50**2
+                            cprior[row][row] = 500**2
                         elif row == 2:
-                            cprior[row][row] = 2**2
+                            cprior[row][row] = 20**2
                         else:
                             cprior[row][row] = 1**2
                     Cd = np.zeros((len(fobs), len(fobs)), int)
-                    np.fill_diagonal(Cd, 5**2)
+                    np.fill_diagonal(Cd, 3**2)
 
                     while qv < num_iterations:
                         G = np.zeros((0,w+3))
@@ -337,7 +301,7 @@ for n in range(0,5):
                                     new_row[2+p] = f_derivef0
 
                                     G = np.vstack((G, new_row))
-
+                                    
                                     fnew.append(ft0p)
                             else:
                                 for j in range(peaks_assos[p-1],peaks_assos[p]+peaks_assos[p-1]):
@@ -351,15 +315,15 @@ for n in range(0,5):
                                     new_row[1] = f_derivel
                                     new_row[2] = f_derivetprime0
                                     new_row[2+p] = f_derivef0
-
+                                    
                                     G = np.vstack((G, new_row))
 
                                     fnew.append(ft0p)
-   
 
                         m = np.array(m0) + cprior@G.T@la.inv(G@cprior@G.T+Cd)@(np.array(fobs)- np.array(fnew))
-                        
+                                    
                         covmlsq = la.inv(G.T@la.inv(Cd)@G + la.inv(cprior))
+                        
                         v0 = m[0]
                         l = m[1]
                         tprime0 = m[2]
@@ -377,26 +341,20 @@ for n in range(0,5):
                     vmin = np.min(arrive_time) 
                     vmax = np.max(arrive_time) 
 
-                    #Plot image
-                    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=False, figsize=(8,6))     
-                    ax1.plot(torg, data, 'k', linewidth=0.5)
-                    ax1.set_title(title)
-                    ax1.margins(x=0)
-                    ax1.set_position([0.125, 0.6, 0.775, 0.3])  
-
-                    cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
-                    ax2.set_xlabel('Time (s)')
+                    plt.figure()
+                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
                     f0lab = f0_array
-                    ax2.axvline(x=tprime0, c = '#377eb8', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
-                    
-                    for pp in range(len(peaks)):
-                        tprime = freqpeak[pp]
-
-                        ft = calc_ft(times, tprime0, f0, v0, l, c)
-                        ax2.plot(times, ft, '#377eb8', ls = (0,(5,20)), linewidth=0.7) #(0,(5,10)),
+                    plt.axvline(x=tprime0, c = '#377eb8', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
+                    plt.ylim(0, 250)
+                    plt.xlim(0, 250)
+                    for pp in range(len(f0_array)):
                         
-                        if np.abs(tprime -tprime0) < 1.5:
-                            ax2.scatter(tprime0, ft0p, color='black', marker='x', s=30) 
+                        f0 = f0lab[pp]
+                        ft = calc_ft(times, tprime0, f0, v0, l, c)
+                        plt.plot(times, ft, '#377eb8', ls = (0,(5,20)), linewidth=0.7) #(0,(5,10)),
+                        
+                        
+                        plt.scatter(tprime0, ft0p, color='black', marker='x', s=30) 
 
                     f0lab_sorted = sorted(f0lab)
                     covm = np.sqrt(np.diag(covm))
@@ -405,37 +363,9 @@ for n in range(0,5):
                         fss = 'medium'
                     else:
                         fss = 'small'
-                    ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2))+' +/- ' + str(np.round(covm[3],2)) + ' sec, v0 = '+str(np.round(v0,2))+' +/- ' + str(np.round(covm[1],2)) +' m/s, l = '+str(np.round(l,2))+' +/- ' + str(np.round(covm[2],2)) +' m, \n' + 'f0 = '+str(f0lab_sorted)+' +/- ' + str(np.round(covm[0],2)) +' Hz', fontsize=fss)
-                    ax2.axvline(x=tarrive, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
                     
-                    ax2.legend(loc='upper right',fontsize = 'x-small')
-                    ax2.set_ylabel('Frequency (Hz)')
+                    plt.axvline(x=tarrive, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
+                  
 
-                    ax2.margins(x=0)
-                    ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
-
-                    plt.colorbar(mappable=cax, cax=ax3)
-                    ax3.set_ylabel('Relative Amplitude (dB)')
-
-                    ax2.margins(x=0)
-                    ax2.set_xlim(0, 240)
-                    ax2.set_ylim(0, int(fs/2))
-
-                    # Plot overlay
-                    spec2 = 10 * np.log10(MDF)
-                    middle_column2 = spec2[:, middle_index]
-                    vmin2 = np.min(middle_column2)
-                    vmax2 = np.max(middle_column2)
-
-                    # Create ax4 and plot on the same y-axis as ax2
-                    ax4 = fig.add_axes([0.125, 0.11, 0.07, 0.35], sharey=ax2) 
-                    ax4.plot(middle_column2, frequencies, c='#ff7f00')  
-                    ax4.set_ylim(0, int(fs/2))
-                    ax4.set_xlim(vmax2*1.1, vmin2) 
-                    ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
-                    ax4.grid(axis='y')
                     plt.show()
-                    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5plane_spectotal/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'
-                    make_base_dir(BASE_DIR)
-                    fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spectotal/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
-                    plt.close()
+
