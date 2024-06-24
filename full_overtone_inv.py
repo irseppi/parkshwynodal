@@ -16,7 +16,19 @@ time = [1551066051,1550172833,1550168070,1550165577,1550089044]
 sta = [1022,1272,1173,1283,1004]
 day = [25,14,14,14,13]
 month = [2,2,2,2,2]
-
+def plot_matrix(M,gridlines=False,colormap='gray'):
+    
+    plt.imshow(M,cmap=colormap)
+    plt.xticks(ticks=range(np.shape(M)[1]),labels=[str(val) for val in range(1,np.shape(M)[1]+1)])
+    plt.yticks(ticks=range(np.shape(M)[0]),labels=[str(val) for val in range(1,np.shape(M)[0]+1)])
+    if gridlines:
+        xgrid = np.array(range(np.shape(M)[1] + 1)) - 0.5
+        ygrid = np.array(range(np.shape(M)[0] + 1)) - 0.5
+        for gridline in xgrid:
+            plt.axvline(x=gridline,color='k',linewidth=1)
+        for gridline in ygrid:
+            plt.axhline(y=gridline,color='k',linewidth=1)
+    plt.show()
 for n in range(0,1):
     ht = datetime.utcfromtimestamp(time[n])
     mins = ht.minute
@@ -142,7 +154,19 @@ for n in range(0,1):
                         f0 = 120
                         v0 = 67
                         l = 5800
-
+                   
+                    w  = len(fnot)
+                    
+                    mprior = []
+                    mprior.append(v0)
+                    mprior.append(l)
+                    mprior.append(tprime0)
+                    for i in range(w+1):
+                        if i == 0:
+                            mprior.append(f0)
+                        else:
+                            mprior.append(fnot[i-1])
+                    mprior = np.array(mprior)
                     vnot = v0
                     lnot = l
                     tprimenot = tprime0
@@ -165,8 +189,8 @@ for n in range(0,1):
                     maxfreq = []
                     coord_inv = []
                     ttt = []
-                    plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    #plt.figure()
+                    #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                     for t_f in range(len(times)):
                         if not np.isnan(ft[t_f]) and ft[t_f] != np.inf:
                             upper = int(ft[t_f] + corridor_width)
@@ -207,7 +231,7 @@ for n in range(0,1):
                             count += 1
                     
                     peaks_assos.append(count)
-                    #fnot = sorted(fnot, reverse=False)
+                    
                     for i in range(len(fnot)):
                         f0 = fnot[i]
                         f0_array.append(f0)
@@ -254,9 +278,9 @@ for n in range(0,1):
                                 count += 1
                         
                         peaks_assos.append(count)
-                    plt.scatter(tobs, fobs, color='black', marker='x')
+                    #plt.scatter(tobs, fobs, color='black', marker='x')
 
-                    plt.show()
+                    #plt.show()
                     qv = 0
                     num_iterations = 8
                     
@@ -272,18 +296,19 @@ for n in range(0,1):
                         if row == 0:
                             cprior[row][row] = 20**2
                         elif row == 1:
-                            cprior[row][row] = 500**2
+                            cprior[row][row] = 300**2
                         elif row == 2:
                             cprior[row][row] = 20**2
                         else:
                             cprior[row][row] = 1**2
+                    
                     Cd = np.zeros((len(fobs), len(fobs)), int)
                     np.fill_diagonal(Cd, 3**2)
-
+                    mnew = np.array(m0)
                     while qv < num_iterations:
                         G = np.zeros((0,w+3))
                         fnew = []
-
+                        #m = mnew
                         for p in range(w):
                             new_row = np.zeros(w+3)
                             f0 = f0_array[p]
@@ -298,7 +323,7 @@ for n in range(0,1):
                                     new_row[0] = f_derivev0
                                     new_row[1] = f_derivel
                                     new_row[2] = f_derivetprime0
-                                    new_row[2+p] = f_derivef0
+                                    new_row[3+p] = f_derivef0
 
                                     G = np.vstack((G, new_row))
                                     
@@ -314,22 +339,54 @@ for n in range(0,1):
                                     new_row[0] = f_derivev0
                                     new_row[1] = f_derivel
                                     new_row[2] = f_derivetprime0
-                                    new_row[2+p] = f_derivef0
+                                    new_row[3+p] = f_derivef0
                                     
                                     G = np.vstack((G, new_row))
-
-                                    fnew.append(ft0p)
-
-                        m = np.array(m0) + cprior@G.T@la.inv(G@cprior@G.T+Cd)@(np.array(fobs)- np.array(fnew))
                                     
-                        covmlsq = la.inv(G.T@la.inv(Cd)@G + la.inv(cprior))
+                                    fnew.append(ft0p)
+                        #plot_matrix(G,gridlines=True)
+                        
+                        #m = np.array(m0) + cprior@G.T@la.inv(G@cprior@G.T+Cd)@(np.array(fobs)- np.array(fnew))
+                        print('iteration %i out of %i' % (qv,num_iterations))
+                        m      = mnew
+                        dpred  = np.array(fnew)
+                        Gm     = G
+                        icobs  = la.inv(Cd)
+                        dobs   = np.array(fobs)
+                        
+                        
+                        # steepest ascent vector (Eq. 6.307 or 6.312)
+                        gamma = cprior @ Gm.T @ icobs @ (dpred - dobs) + (m - mprior)  # steepest ascent vector
+
+                        #===================================================
+                        # QUASI-NEWTON ALGORITHM (Eq. 6.319, nu=1)
+                        
+                        # approximate curvature
+                        H = np.identity((w+3)) + cprior @ Gm.T @ icobs @ Gm
+
+                        dm   = -inv(H) @ gamma
+                        mnew = m + dm
+                        #===================================================
+                        
+                        # alternative: use hat-notation
+                        #gammahat = Gm.T@icobs@(dpred-dobs) + icprior@(m-mprior)     # gradient
+                        #Hhat = icprior + Gm.T@icobs@Gm                          # approximate Hessian  
+                        #dm   = -inv(Hhat) @ gammahat
+                        
+                        # misfit function for new model
+                        # note: bookkeeping only -- not used within the algorithm above
+                        #Sd_vec[nn] = Sd(mnew,dobs,icobs)
+                        #Sm_vec[nn] = Sm(mnew,mprior,icprior)
+                        #S_vec[nn]  = S(mnew,dobs,mprior,icobs,icprior)
+                        #printm(nn,niter,mprior,mnew,mtarget)         
+                        #covmlsq = la.inv(G.T@la.inv(Cd)@G + la.inv(cprior))
                         
                         v0 = m[0]
                         l = m[1]
                         tprime0 = m[2]
                         f0_array = m[3:]
 
-                        m0 = m
+                        
                         print(m)
                         qv += 1
 
@@ -346,7 +403,7 @@ for n in range(0,1):
                     f0lab = f0_array
                     plt.axvline(x=tprime0, c = '#377eb8', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
                     plt.ylim(0, 250)
-                    plt.xlim(0, 250)
+                    plt.xlim(0, 240)
                     for pp in range(len(f0_array)):
                         
                         f0 = f0lab[pp]
@@ -354,7 +411,7 @@ for n in range(0,1):
                         plt.plot(times, ft, '#377eb8', ls = (0,(5,20)), linewidth=0.7) #(0,(5,10)),
                         
                         
-                        plt.scatter(tprime0, ft0p, color='black', marker='x', s=30) 
+                        plt.scatter(tprime0,  calc_ft(np.array([tprime0]), tprime0, f0, v0, l, c), color='black', marker='x', s=30) 
 
                     f0lab_sorted = sorted(f0lab)
                     covm = np.sqrt(np.diag(covm))
