@@ -342,9 +342,14 @@ def invert_f(m0, coords_array, num_iterations,sigma = 1):
 			G[i,0:4] = [f_derivef0, f_derivev0, f_derivel, f_derivetprime0]
 
 			fnew.append(ft0p) 
-
-		covmlsq = (sigma**2)*la.inv(G.T@G)
-		m = np.reshape(np.reshape(m0,(4,1))+ np.reshape(inv(G.T@G)@G.T@(np.reshape(fobs, (len(coords_array), 1)) - np.reshape(np.array(fnew), (len(coords_array), 1))), (4,1)), (4,))
+		try:
+			covmlsq = (sigma**2)*la.inv(G.T@G)
+		except:
+			covmlsq = (sigma**2)*la.pinv(G.T@G)
+		try:
+			m = np.reshape(np.reshape(m0,(4,1))+ np.reshape(la.inv(G.T@G)@G.T@(np.reshape(fobs, (len(coords_array), 1)) - np.reshape(np.array(fnew), (len(coords_array), 1))), (4,1)), (4,))
+		except:
+			m = np.reshape(np.reshape(m0,(4,1))+ np.reshape(la.pinv(G.T@G)@G.T@(np.reshape(fobs, (len(coords_array), 1)) - np.reshape(np.array(fnew), (len(coords_array), 1))), (4,1)), (4,))
 		print(m)
 		m0 = m
 		n += 1

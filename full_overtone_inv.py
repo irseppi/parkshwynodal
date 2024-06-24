@@ -7,6 +7,7 @@ from prelude import *
 from scipy.signal import find_peaks, spectrogram
 import scipy.linalg as la
 
+
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
@@ -29,7 +30,19 @@ def plot_matrix(M,gridlines=False,colormap='gray'):
         for gridline in ygrid:
             plt.axhline(y=gridline,color='k',linewidth=1)
     plt.show()
-for n in range(0,1):
+def Sd(m,dobs,dpred,icobs):
+    sd = 0.5 * (dpred-dobs).T @ icobs @ (dpred-dobs)
+    return sd
+# model misfit (related to regularization)
+def Sm(m,mprior,icprior):
+    sm = 0.5 * (m-mprior).T @ icprior @ (m-mprior)
+    return sm
+# total misfit
+def S(m,dobs,dpred,mprior,icobs,icprior):
+    s = Sd(m,dobs,dpred,icobs) + Sm(m,mprior,icprior)
+    return s
+
+for n in range(0,5):
     ht = datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -122,7 +135,7 @@ for n in range(0,1):
 
                     if n == 0:
                         tprime0 = 112
-                        fnot = [153, 172, 228, 38, 57, 76, 93, 135]
+                        fnot = [153, 172] #, 228, 38, 57, 76, 93, 135]
                         v0 = 68
                         l = 2135
                         f0 = 115
@@ -189,8 +202,8 @@ for n in range(0,1):
                     maxfreq = []
                     coord_inv = []
                     ttt = []
-                    #plt.figure()
-                    #plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    plt.figure()
+                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                     for t_f in range(len(times)):
                         if not np.isnan(ft[t_f]) and ft[t_f] != np.inf:
                             upper = int(ft[t_f] + corridor_width)
@@ -278,11 +291,11 @@ for n in range(0,1):
                                 count += 1
                         
                         peaks_assos.append(count)
-                    #plt.scatter(tobs, fobs, color='black', marker='x')
+                    plt.scatter(tobs, fobs, color='black', marker='x')
 
-                    #plt.show()
+                    plt.show()
                     qv = 0
-                    num_iterations = 8
+                    num_iterations = 20
                     
                     w  = len(f0_array)
                     cprior = np.zeros((w+3,w+3))
@@ -305,6 +318,11 @@ for n in range(0,1):
                     Cd = np.zeros((len(fobs), len(fobs)), int)
                     np.fill_diagonal(Cd, 3**2)
                     mnew = np.array(m0)
+                    Sd_vec = np.zeros(num_iterations)
+                    Sm_vec = np.zeros(num_iterations)
+                    S_vec = np.zeros(num_iterations)
+                    iter_vec = np.transpose(np.arange(0,num_iterations))
+                    plt.figure()
                     while qv < num_iterations:
                         G = np.zeros((0,w+3))
                         fnew = []
@@ -354,7 +372,7 @@ for n in range(0,1):
                         icobs  = la.inv(Cd)
                         dobs   = np.array(fobs)
                         
-                        
+                        icprior = la.inv(cprior)
                         # steepest ascent vector (Eq. 6.307 or 6.312)
                         gamma = cprior @ Gm.T @ icobs @ (dpred - dobs) + (m - mprior)  # steepest ascent vector
 
@@ -363,8 +381,42 @@ for n in range(0,1):
                         
                         # approximate curvature
                         H = np.identity((w+3)) + cprior @ Gm.T @ icobs @ Gm
-
+                        #step_size = 1
                         dm   = -inv(H) @ gamma
+                        '''
+                        # After calculating the gradient descent direction dm
+                        # Apply non-negativity constraints for each parameter
+
+                        # Non-negativity constraint for v0
+                        v0 = max(0, m[0] + step_size*dm[0])
+
+                        # Non-negativity constraint for l
+                        l = max(0, m[1] + step_size*dm[1])
+
+                        # Non-negativity constraint for tprime0
+                        tprime0 = max(0, m[2] + step_size*dm[2])
+
+                        # After calculating the gradient descent direction dm
+                        # Apply non-negativity constraint for each element of f0_array
+
+                        for i in range(len(f0_array)):
+                            f0_array[i] = max(0, m[3 + i] + step_size*dm[3 + i])
+                        # After calculating the gradient descent direction dm
+                        # Apply non-negativity constraints for each parameter in mnew
+
+                        # Non-negativity constraint for v0
+                        mnew[0] = max(0, m[0] + step_size*dm[0])
+
+                        # Non-negativity constraint for l
+                        mnew[1] = max(0, m[1] + step_size*dm[1])
+
+                        # Non-negativity constraint for tprime0
+                        mnew[2] = max(0, m[2] + step_size*dm[2])
+
+                        # Non-negativity constraint for f0_array elements
+                        for i in range(len(f0_array)):
+                            mnew[3 + i] = max(0, m[3 + i] + step_size*dm[3 + i])
+                        '''
                         mnew = m + dm
                         #===================================================
                         
@@ -375,54 +427,106 @@ for n in range(0,1):
                         
                         # misfit function for new model
                         # note: bookkeeping only -- not used within the algorithm above
-                        #Sd_vec[nn] = Sd(mnew,dobs,icobs)
-                        #Sm_vec[nn] = Sm(mnew,mprior,icprior)
-                        #S_vec[nn]  = S(mnew,dobs,mprior,icobs,icprior)
+                        Sd_vec[qv] = Sd(mnew,dobs,dpred,icobs)
+                        Sm_vec[qv] = Sm(mnew,mprior,icprior)
+                        S_vec[qv]  = S(mnew,dobs,dpred,mprior,icobs,icprior)
+                        print(Sd_vec[qv],Sm_vec[qv],S_vec[qv])
                         #printm(nn,niter,mprior,mnew,mtarget)         
                         #covmlsq = la.inv(G.T@la.inv(Cd)@G + la.inv(cprior))
                         
-                        v0 = m[0]
-                        l = m[1]
-                        tprime0 = m[2]
-                        f0_array = m[3:]
-
+                        v0 = mnew[0]
+                        l = mnew[1]
+                        tprime0 = mnew[2]
+                        f0_array = mnew[3:]
+                        plt.scatter(v0,l)
                         
-                        print(m)
+                        print(mnew)
                         qv += 1
+                    plt.show()
+                    plt.figure()
+                    plt.plot(iter_vec,np.log10(S_vec),'k.-',iter_vec,np.log10(Sm_vec),'b.-',iter_vec,np.log10(Sd_vec),'r.-',
+                        linewidth=2,markersize=20)
+                    plt.legend(('S(mⁿ) = Sd + Sm','Sm(mⁿ)','Sd(mⁿ)'),fontsize=14)
+                    plt.xlim([-0.5, num_iterations+0.5])
+                    #plt.ylim([np.log10(ylims[0]),np.log10(ylims[0])])
 
+                    plt.locator_params(axis="x", integer=True, tight=True)
+                    plt.xlabel('n, iteration')
+                    plt.ylabel(' log10[ S(mⁿ) ], misfit function')
+                    plt.title(str(num_iterations) + ' iterations')
+                    plt.show()
                     closest_index = np.argmin(np.abs(tprime0 - times))
                     arrive_time = spec[:,closest_index]
                     for i in range(len(arrive_time)):
                         if arrive_time[i] < 0:
                             arrive_time[i] = 0
                     vmin = np.min(arrive_time) 
-                    vmax = np.max(arrive_time) 
+                    vmax = np.max(arrive_time)
 
-                    plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
-                    f0lab = f0_array
-                    plt.axvline(x=tprime0, c = '#377eb8', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
-                    plt.ylim(0, 250)
-                    plt.xlim(0, 240)
+                    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=False, figsize=(8,6))     
+
+                    ax1.plot(torg, data, 'k', linewidth=0.5)
+                    ax1.set_title(title)
+
+                    ax1.margins(x=0)
+                    ax1.set_position([0.125, 0.6, 0.775, 0.3])  # Move ax1 plot upwards
+
+
+                    # Plot spectrogram
+                    cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
+                    ax2.set_xlabel('Time (s)')
+                    f0lab = []
+                    ax2.axvline(x=tprime0, c = '#377eb8', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
+                    
                     for pp in range(len(f0_array)):
+                        f0 = f0_array[pp]
                         
-                        f0 = f0lab[pp]
                         ft = calc_ft(times, tprime0, f0, v0, l, c)
-                        plt.plot(times, ft, '#377eb8', ls = (0,(5,20)), linewidth=0.7) #(0,(5,10)),
-                        
-                        
-                        plt.scatter(tprime0,  calc_ft(np.array([tprime0]), tprime0, f0, v0, l, c), color='black', marker='x', s=30) 
 
+                        ax2.plot(times, ft, '#377eb8', ls = (0,(5,20)), linewidth=0.7) #(0,(5,10)),
+                        
+                        if np.abs(tprime -tprime0) < 1.5:
+                            ax2.scatter(tprime0, ft0p, color='black', marker='x', s=30) 
+                        f0lab.append(int(f0)) 
+                        what_if = calc_ft(times, tarrive, fs/4, speed_mps, np.sqrt(dist_m**2 + alt_m**2), c)
+                        #ax2.plot(times, what_if, 'red', ls = '--', linewidth=0.4)
                     f0lab_sorted = sorted(f0lab)
                     covm = np.sqrt(np.diag(covm))
-
                     if len(f0lab_sorted) <= 17:
                         fss = 'medium'
                     else:
                         fss = 'small'
+                    ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2))+' +/- ' + str(np.round(covm[3],2)) + ' sec, v0 = '+str(np.round(v0,2))+' +/- ' + str(np.round(covm[1],2)) +' m/s, l = '+str(np.round(l,2))+' +/- ' + str(np.round(covm[2],2)) +' m, \n' + 'f0 = '+str(f0lab_sorted)+' +/- ' + str(np.round(covm[0],2)) +' Hz', fontsize=fss)
+                    ax2.axvline(x=tarrive, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
+
                     
-                    plt.axvline(x=tarrive, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
-                  
+                    ax2.legend(loc='upper right',fontsize = 'x-small')
+                    ax2.set_ylabel('Frequency (Hz)')
+
+
+                    ax2.margins(x=0)
+                    ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
+
+                    plt.colorbar(mappable=cax, cax=ax3)
+                    ax3.set_ylabel('Relative Amplitude (dB)')
+
+                    ax2.margins(x=0)
+                    ax2.set_xlim(0, 240)
+                    ax2.set_ylim(0, int(fs/2))
+
+                    # Plot overlay
+                    spec2 = 10 * np.log10(MDF)
+                    middle_column2 = spec2[:, middle_index]
+                    vmin2 = np.min(middle_column2)
+                    vmax2 = np.max(middle_column2)
+
+                    # Create ax4 and plot on the same y-axis as ax2
+                    ax4 = fig.add_axes([0.125, 0.11, 0.07, 0.35], sharey=ax2) 
+                    ax4.plot(middle_column2, frequencies, c='#ff7f00')  
+                    ax4.set_ylim(0, int(fs/2))
+                    ax4.set_xlim(vmax2*1.1, vmin2) 
+                    ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
+                    ax4.grid(axis='y')
 
                     plt.show()
 
