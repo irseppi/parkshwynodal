@@ -317,19 +317,7 @@ for n in range(0,5):
                         
                         print(mnew)
                         qv += 1
-                    plt.show()
-                    plt.figure()
-                    plt.plot(iter_vec,np.log10(S_vec),'k.-',iter_vec,np.log10(Sm_vec),'b.-',iter_vec,np.log10(Sd_vec),'r.-',
-                        linewidth=2,markersize=20)
-                    plt.legend(('S(mⁿ) = Sd + Sm','Sm(mⁿ)','Sd(mⁿ)'),fontsize=14)
-                    plt.xlim([-0.5, num_iterations+0.5])
-                    
 
-                    plt.locator_params(axis="x", integer=True, tight=True)
-                    plt.xlabel('n, iteration')
-                    plt.ylabel(' log10[ S(mⁿ) ], misfit function')
-                    plt.title(str(num_iterations) + ' iterations')
-                    plt.show()
                     closest_index = np.argmin(np.abs(tprime0 - times))
                     arrive_time = spec[:,closest_index]
                     for i in range(len(arrive_time)):
