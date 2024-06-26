@@ -317,6 +317,7 @@ for n in range(0,5):
                         
                         print(mnew)
                         qv += 1
+                    covm = la.inv(G.T@la.inv(Cd)@G + la.inv(cprior))
 
                     closest_index = np.argmin(np.abs(tprime0 - times))
                     arrive_time = spec[:,closest_index]
