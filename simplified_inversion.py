@@ -112,13 +112,13 @@ for n in range(0,5):
                     coords_array = np.array(coords)
                     if n == 0:
                         tprime0 = 116
-                        f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 231]
+                        f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 228] #[116,154,230] 
                         v0 = 63
                         l = 1645
                         f0 = 116
 
                     if n == 1:
-                        f0_array = [36, 55, 73, 146, 164, 183, 218, 236, 254, 273]
+                        f0_array = [36, 55, 73, 109, 146, 164, 183, 218, 236, 254, 273]
                         tprime0 = 106
                         f0 = 109
                         v0 = 106
@@ -198,8 +198,8 @@ for n in range(0,5):
 
                                 if lower < 0:
                                     lower = 0
-                                if upper > len(frequencies):
-                                    upper = len(frequencies)
+                                if upper > 250:
+                                    upper = 250
                                 try:
                                     tt = spec[lower:upper, t_f]
 
@@ -226,7 +226,7 @@ for n in range(0,5):
                     
                     
                     qv = 0
-                    num_iterations = 10
+                    num_iterations = 4
 
                     cprior = np.zeros((w+3,w+3))
 
@@ -314,7 +314,12 @@ for n in range(0,5):
                         dm   = -inv(H) @ gamma
 
                         mnew = m + dm
-                        
+                        m = mnew
+                        v0 = mnew[0]
+                        l = mnew[1]
+                        tprime0 = mnew[2]
+                        f0_array = mnew[3:]
+
                         print(mnew)
                         qv += 1
                     covm = la.inv(G.T@la.inv(Cd)@G + la.inv(cprior))
@@ -348,7 +353,8 @@ for n in range(0,5):
                         ft = calc_ft(times, tprime0, f0, v0, l, c)
 
                         ax2.plot(times, ft, '#377eb8', ls = (0,(5,20)), linewidth=0.7) #(0,(5,10)),
-                        
+                        t = 0
+                        ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
                         
                         ax2.scatter(tprime0, ft0p, color='black', marker='x', s=30) 
                         f0lab.append(int(f0)) 
