@@ -329,7 +329,7 @@ for n in range(0,5):
                         ax2.scatter(tprime0, ft0p, color='black', marker='x', s=30) 
                         f0lab.append(str(np.round(f0,2)) +'+/-' + str(np.round(covm[3+pp],2))+',') 
  
-                    fss = 'small'
+                    fss = 'x-small'
                     
                     ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2))+' +/- ' + str(np.round(covm[2],2)) + ' sec, v0 = '+str(np.round(v0,2))+' +/- ' + str(np.round(covm[0],2)) +' m/s, l = '+str(np.round(l,2))+' +/- ' + str(np.round(covm[1],2)) +' m, \n' + 'f0 = '+' '.join(f0lab)+' +/- ' + str(np.round(covm[3],2)) +' Hz', fontsize=fss)
                     ax2.axvline(x=tarrive, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
