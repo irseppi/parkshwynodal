@@ -332,12 +332,12 @@ for n in range(4,5): #9):
                         f0lab.append(str(np.round(f0,2)) +'+/-' + str(np.round(covm[3+pp],2))+',') 
 
                         if len(f0_array) > 16:
-                            if pp == int(len(f0_array)/3):
+                            if pp == int(int(len(f0_array))/3):
                                 f0lab.append('\n')
-                            elif pp == int(len((f0_array)/3)+len((f0_array)/3)):
+                            elif pp == int((int(len(f0_array))/3)+(int(len(f0_array))/3)):
                                 f0lab.append('\n')
                         elif len(f0_array) > 8:
-                                if pp == int(len(f0_array)/2):
+                                if pp == int(int(len(f0_array))/2):
                                     f0lab.append('\n')
 
                     fss = 'x-small'
