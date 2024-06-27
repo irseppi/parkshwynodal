@@ -17,19 +17,7 @@ time = [1551066051,1550172833,1550168070,1550165577,1550089044]
 sta = [1022,1272,1173,1283,1004]
 day = [25,14,14,14,13]
 month = [2,2,2,2,2]
-def plot_matrix(M,gridlines=False,colormap='gray'):
-    
-    plt.imshow(M,cmap=colormap)
-    plt.xticks(ticks=range(np.shape(M)[1]),labels=[str(val) for val in range(1,np.shape(M)[1]+1)])
-    plt.yticks(ticks=range(np.shape(M)[0]),labels=[str(val) for val in range(1,np.shape(M)[0]+1)])
-    if gridlines:
-        xgrid = np.array(range(np.shape(M)[1] + 1)) - 0.5
-        ygrid = np.array(range(np.shape(M)[0] + 1)) - 0.5
-        for gridline in xgrid:
-            plt.axvline(x=gridline,color='k',linewidth=1)
-        for gridline in ygrid:
-            plt.axhline(y=gridline,color='k',linewidth=1)
-    plt.show()
+
 def Sd(m,dobs,dpred,icobs):
     sd = 0.5 * (dpred-dobs).T @ icobs @ (dpred-dobs)
     return sd
@@ -135,7 +123,7 @@ for n in range(0,5):
 
                     if n == 0:
                         tprime0 = 112
-                        fnot = [153, 172] #, 228, 38, 57, 76, 93, 135]
+                        fnot = [153, 172, 228, 38, 57, 76, 93, 135]
                         v0 = 68
                         l = 2135
                         f0 = 115
@@ -326,15 +314,17 @@ for n in range(0,5):
                     while qv < num_iterations:
                         G = np.zeros((0,w+3))
                         fnew = []
-                        #m = mnew
+                        cum = 0
                         for p in range(w):
                             new_row = np.zeros(w+3)
                             f0 = f0_array[p]
+                          
                             if p == 0:
-                                for j in range(peaks_assos[p]):
+                                for j in range(cum,peaks_assos[p]):
                                     tprime = tobs[j]
                                     t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
                                     ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
+
 
                                     f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(f0,v0,l,tprime0, tobs[j])
                                 
@@ -346,8 +336,9 @@ for n in range(0,5):
                                     G = np.vstack((G, new_row))
                                     
                                     fnew.append(ft0p)
+
                             else:
-                                for j in range(peaks_assos[p-1],peaks_assos[p]+peaks_assos[p-1]):
+                                for j in range(cum,cum+peaks_assos[p]):
                                     tprime = tobs[j]
                                     t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
                                     ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
@@ -358,15 +349,16 @@ for n in range(0,5):
                                     new_row[1] = f_derivel
                                     new_row[2] = f_derivetprime0
                                     new_row[3+p] = f_derivef0
-                                    
+                                            
                                     G = np.vstack((G, new_row))
-                                    
+                                            
                                     fnew.append(ft0p)
-                        #plot_matrix(G,gridlines=True)
+                        
+                            cum = cum + peaks_assos[p]
                         
                         #m = np.array(m0) + cprior@G.T@la.inv(G@cprior@G.T+Cd)@(np.array(fobs)- np.array(fnew))
                         print('iteration %i out of %i' % (qv,num_iterations))
-                        m      = mnew
+                        
                         dpred  = np.array(fnew)
                         Gm     = G
                         icobs  = la.inv(Cd)
@@ -374,56 +366,18 @@ for n in range(0,5):
                         
                         icprior = la.inv(cprior)
                         # steepest ascent vector (Eq. 6.307 or 6.312)
-                        gamma = cprior @ Gm.T @ icobs @ (dpred - dobs) + (m - mprior)  # steepest ascent vector
+                        gamma = cprior @ Gm.T @ icobs @ (dpred - dobs) + (mnew - mprior)  # steepest ascent vector
 
                         #===================================================
                         # QUASI-NEWTON ALGORITHM (Eq. 6.319, nu=1)
                         
                         # approximate curvature
                         H = np.identity((w+3)) + cprior @ Gm.T @ icobs @ Gm
-                        #step_size = 1
-                        dm   = -inv(H) @ gamma
-                        '''
-                        # After calculating the gradient descent direction dm
-                        # Apply non-negativity constraints for each parameter
-
-                        # Non-negativity constraint for v0
-                        v0 = max(0, m[0] + step_size*dm[0])
-
-                        # Non-negativity constraint for l
-                        l = max(0, m[1] + step_size*dm[1])
-
-                        # Non-negativity constraint for tprime0
-                        tprime0 = max(0, m[2] + step_size*dm[2])
-
-                        # After calculating the gradient descent direction dm
-                        # Apply non-negativity constraint for each element of f0_array
-
-                        for i in range(len(f0_array)):
-                            f0_array[i] = max(0, m[3 + i] + step_size*dm[3 + i])
-                        # After calculating the gradient descent direction dm
-                        # Apply non-negativity constraints for each parameter in mnew
-
-                        # Non-negativity constraint for v0
-                        mnew[0] = max(0, m[0] + step_size*dm[0])
-
-                        # Non-negativity constraint for l
-                        mnew[1] = max(0, m[1] + step_size*dm[1])
-
-                        # Non-negativity constraint for tprime0
-                        mnew[2] = max(0, m[2] + step_size*dm[2])
-
-                        # Non-negativity constraint for f0_array elements
-                        for i in range(len(f0_array)):
-                            mnew[3 + i] = max(0, m[3 + i] + step_size*dm[3 + i])
-                        '''
-                        mnew = m + dm
-                        #===================================================
                         
-                        # alternative: use hat-notation
-                        #gammahat = Gm.T@icobs@(dpred-dobs) + icprior@(m-mprior)     # gradient
-                        #Hhat = icprior + Gm.T@icobs@Gm                          # approximate Hessian  
-                        #dm   = -inv(Hhat) @ gammahat
+                        dm   = -inv(H) @ gamma
+                        
+                        m = m + dm
+                        #===================================================
                         
                         # misfit function for new model
                         # note: bookkeeping only -- not used within the algorithm above
@@ -431,9 +385,9 @@ for n in range(0,5):
                         Sm_vec[qv] = Sm(mnew,mprior,icprior)
                         S_vec[qv]  = S(mnew,dobs,dpred,mprior,icobs,icprior)
                         print(Sd_vec[qv],Sm_vec[qv],S_vec[qv])
-                        #printm(nn,niter,mprior,mnew,mtarget)         
+                                
                         #covmlsq = la.inv(G.T@la.inv(Cd)@G + la.inv(cprior))
-                        
+                        mnew = m
                         v0 = mnew[0]
                         l = mnew[1]
                         tprime0 = mnew[2]
@@ -448,7 +402,6 @@ for n in range(0,5):
                         linewidth=2,markersize=20)
                     plt.legend(('S(mⁿ) = Sd + Sm','Sm(mⁿ)','Sd(mⁿ)'),fontsize=14)
                     plt.xlim([-0.5, num_iterations+0.5])
-                    #plt.ylim([np.log10(ylims[0]),np.log10(ylims[0])])
 
                     plt.locator_params(axis="x", integer=True, tight=True)
                     plt.xlabel('n, iteration')

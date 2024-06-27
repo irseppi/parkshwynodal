@@ -17,32 +17,9 @@ time = [1551066051,1550172833,1550168070,1550165577,1550089044]
 sta = [1022,1272,1173,1283,1004]
 day = [25,14,14,14,13]
 month = [2,2,2,2,2]
-def plot_matrix(M,gridlines=False,colormap='gray'):
-    
-    plt.imshow(M,cmap=colormap)
-    plt.xticks(ticks=range(np.shape(M)[1]),labels=[str(val) for val in range(1,np.shape(M)[1]+1)])
-    plt.yticks(ticks=range(np.shape(M)[0]),labels=[str(val) for val in range(1,np.shape(M)[0]+1)])
-    if gridlines:
-        xgrid = np.array(range(np.shape(M)[1] + 1)) - 0.5
-        ygrid = np.array(range(np.shape(M)[0] + 1)) - 0.5
-        for gridline in xgrid:
-            plt.axvline(x=gridline,color='k',linewidth=1)
-        for gridline in ygrid:
-            plt.axhline(y=gridline,color='k',linewidth=1)
-    plt.show()
-def Sd(m,dobs,dpred,icobs):
-    sd = 0.5 * (dpred-dobs).T @ icobs @ (dpred-dobs)
-    return sd
-# model misfit (related to regularization)
-def Sm(m,mprior,icprior):
-    sm = 0.5 * (m-mprior).T @ icprior @ (m-mprior)
-    return sm
-# total misfit
-def S(m,dobs,dpred,mprior,icobs,icprior):
-    s = Sd(m,dobs,dpred,icobs) + Sm(m,mprior,icprior)
-    return s
 
-for n in range(4,5):
+
+for n in range(0,5):
     ht = datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -189,9 +166,7 @@ for n in range(4,5):
                     m,covm = invert_f(m0, coords_array, num_iterations=4)
 
                     p, _ = find_peaks(middle_column, distance = 7)
-                    corridor_width = 3 #(fs/2) / len(p)
-                    #if n == 3 or n == 4:
-                    #    corridor_width = 2
+                    corridor_width = 3 
                     peaks_assos = []
                     fobs = []
                     tobs = []
