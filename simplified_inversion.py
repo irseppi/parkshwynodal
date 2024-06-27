@@ -7,19 +7,17 @@ from prelude import *
 from scipy.signal import spectrogram
 import scipy.linalg as la
 
-
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 station = seismo_data['Station']
-flight_num = [530342801,528485724,528473220,528407493,528293430] 
-time = [1551066051,1550172833,1550168070,1550165577,1550089044] 
-sta = [1022,1272,1173,1283,1004]
-day = [25,14,14,14,13]
-month = [2,2,2,2,2]
+flight_num = [530342801,528485724,528473220,528407493,528293430,531605202,531715679,529805251,529948401] 
+time = [1551066051,1550172833,1550168070,1550165577,1550089044,1551662362,1551736354,1550803701,1550867033] 
+sta = [1022,1272,1173,1283,1004,1010,1021,1006,1109]
+day = [25,14,14,14,13,4,4,22,22]
+month = [2,2,2,2,2,3,3,2,2]
 
-
-for n in range(0,5):
+for n in range(4,5): #9):
     ht = datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -110,17 +108,21 @@ for n in range(0,5):
                         l = 4992
 
                     if n == 3:
-                        f0_array = [34,69,104,118,134,140]
+                        f0_array = [34,69,104,119,134,139]
                         tprime0 = 115
-                        v0 = 120
-                        l = 2000
+                        v0 = 159
+                        l = 3802
 
                     if n == 4:
-                        f0_array = [13,26,40,53,67,80,93,110,119,135,148,160,174,187,202,226,241,249,272]
-                        tprime0 = 135
-                        v0 = 79
-                        l = 580
-                    
+                        f0_array = [14,28,41,54,68,81,95,109,123,136,148,161,177,189,203,226,241,249,271]
+                        tprime0 = 140
+                        v0 = 62
+                        l = 500
+                    else:
+                        #f0_array =
+                        tprime0 = tarrive
+                        v0 = speed_mps
+                        l = np.sqrt(dist_m**2 + alt_m**2)
                     #Choose start and end time
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
@@ -217,7 +219,7 @@ for n in range(0,5):
                     plt.show()
                     
                     qv = 0
-                    num_iterations = 8
+                    num_iterations = 4
 
                     cprior = np.zeros((w+3,w+3))
 
@@ -328,10 +330,19 @@ for n in range(0,5):
                         
                         ax2.scatter(tprime0, ft0p, color='black', marker='x', s=30) 
                         f0lab.append(str(np.round(f0,2)) +'+/-' + str(np.round(covm[3+pp],2))+',') 
- 
+
+                        if len(f0_array) > 16:
+                            if pp == int(len(f0_array)/3):
+                                f0lab.append('\n')
+                            elif pp == int(len((f0_array)/3)+len((f0_array)/3)):
+                                f0lab.append('\n')
+                        elif len(f0_array) > 8:
+                                if pp == int(len(f0_array)/2):
+                                    f0lab.append('\n')
+
                     fss = 'x-small'
                     
-                    ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2))+' +/- ' + str(np.round(covm[2],2)) + ' sec, v0 = '+str(np.round(v0,2))+' +/- ' + str(np.round(covm[0],2)) +' m/s, l = '+str(np.round(l,2))+' +/- ' + str(np.round(covm[1],2)) +' m, \n' + 'f0 = '+' '.join(f0lab)+' +/- ' + str(np.round(covm[3],2)) +' Hz', fontsize=fss)
+                    ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2))+' +/- ' + str(np.round(covm[2],2)) + ' sec, v0 = '+str(np.round(v0,2))+' +/- ' + str(np.round(covm[0],2)) +' m/s, l = '+str(np.round(l,2))+' +/- ' + str(np.round(covm[1],2)) +' m, \n' + 'f0 = '+' '.join(f0lab) +' Hz', fontsize=fss)
                     ax2.axvline(x=tarrive, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
 
                     
@@ -375,11 +386,25 @@ for n in range(0,5):
                     plt.plot(frequencies, arrive_time, c='#377eb8')
                        
                     for pp in range(len(f0_array)):
-                        upper = int(f0_array[pp] + 3)
-                        lower = int(f0_array[pp] - 3)
+                        f0 = f0_array[pp]
+                        if fs/2 < f0:
+                            continue
+                        tprime = tprime0
+                        t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
+                        ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
+
+                        upper = int(ft0p + 5)
+                        lower = int(ft0p - 5)
                         tt = spec[lower:upper, closest_index]
-                        ampp = np.max(tt)
-                        freqp = np.argmax(tt)+lower
+                        if upper > 250:
+                            freqp = ft0p
+                            ampp = np.interp(ft0p, frequencies, arrive_time)
+                        elif lower < 0:
+                            freqp = ft0p
+                            ampp = np.interp(ft0p, frequencies, arrive_time)
+                        else:
+                            ampp = np.max(tt)
+                            freqp = np.argmax(tt)+lower
                         plt.scatter(freqp, ampp, color='black', marker='x', s=100)
                         if isinstance(sta[n], int):
                             plt.text(freqp - 5, ampp + 0.8, freqp, fontsize=17, fontweight='bold')
