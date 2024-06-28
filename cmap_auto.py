@@ -40,7 +40,7 @@ for line in sta_f.readlines():
                 if sta[t] == station:
 
                     clat, clon, dist, ctime = closest_encounter(flight_latitudes, flight_longitudes, l, time, seismo_latitudes[t], seismo_longitudes[t])
-                    f = 1.0/np.cos(clat*np.pi/180)
+                    f = 1.0/np.cos((clat+(seismo_latitudes[t]-clat)/2)*np.pi/180)
                     ht = datetime.datetime.utcfromtimestamp(time[l])
 
                     # Create a figure with two subplots side by side
@@ -70,6 +70,7 @@ for line in sta_f.readlines():
                     maxl = xx + 0.05
                     minla = yy - 0.03
                     maxla = yy + 0.03
+
                     heading = np.deg2rad(head[l])
                     
                     rect = Rectangle((minl, minla), 0.1, 0.06, ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
@@ -80,11 +81,9 @@ for line in sta_f.readlines():
                     axs[1].plot(flight_longitudes, flight_latitudes, c='#377eb8',linestyle ='dotted')
                     axs[1].set_xlim(minl, maxl)
                     axs[1].set_ylim(minla, maxla)
-                    #axs[1].text(seismo_longitudes[t], seismo_latitudes[t], sta[t], fontsize=11, fontweight='bold')
                     axs[1].tick_params(axis='both', which='major', labelsize=10)
                     
-                    
-                    #axs[1].text(flight_longitudes[l], flight_latitudes[l], ht, fontsize=11, fontweight='bold')
+                     
                     m = (flight_latitudes[l+1] - flight_latitudes[l])/(flight_longitudes[l+1] - flight_longitudes[l])
                     b = flight_latitudes[l] - m*flight_longitudes[l]
 

@@ -12,6 +12,7 @@ auto_peak_pick = False
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
+elevations = seismo_data['Elevation']
 station = seismo_data['Station']
 flight_num = [530342801,528485724,528473220,528407493,528293430,527937367,529741194,529776675,529179112,530165646,531605202,531715679,529805251,529948401] 
 time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,1550773710,1550787637,1550511447,1550974151,1551662362,1551736354,1550803701,1550867033] 
@@ -277,7 +278,7 @@ for n in range(0,13):
                         f0 = fs/4
                         tprime0 = tarrive
                         v0 = speed_mps
-                        l = np.sqrt(dist_m**2 + alt_m**2)
+                        l = np.sqrt(dist_m**2 + (alt_m-elevations[y])**2)
 
                     c = 343
                     m0 = [f0, v0, l, tprime0]
