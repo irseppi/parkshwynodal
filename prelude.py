@@ -152,9 +152,9 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 			timestamp2 = timestamp[index]
 
 	lat_timestamp_dif_vec = second_closest_lat - closest_lat
-	lon_timestamp_dif_vec = (second_closest_lon - closest_lon)#*np.cos((closest_lat+(second_closest_lat - closest_lat)/2) * np.pi / 180)
+	lon_timestamp_dif_vec = (second_closest_lon - closest_lon)
 	lat_seismo_dif_vec = seismo_latitude - closest_lat
-	lon_seismo_dif_vec = (seismo_longitude - closest_lon)#*np.cos((closest_lat+(seismo_latitude - closest_lat)/2) * np.pi / 180)
+	lon_seismo_dif_vec = (seismo_longitude - closest_lon)
 
 	line_vector = (lat_timestamp_dif_vec, lon_timestamp_dif_vec)
 	station_vector = (lat_seismo_dif_vec, lon_seismo_dif_vec)
@@ -162,30 +162,11 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 	projection_length_ratio = calculate_projection(line_vector, station_vector)
 
 	closest_point_on_line_lat = closest_lat + projection_length_ratio * lat_timestamp_dif_vec
-	closest_point_on_line_lon = closest_lon + projection_length_ratio * lon_timestamp_dif_vec#*np.cos(closest_point_on_line_lat* np.pi/180)
-
+	closest_point_on_line_lon = closest_lon + projection_length_ratio * lon_timestamp_dif_vec
 	closest_distance = calculate_distance(closest_point_on_line_lat, closest_point_on_line_lon, seismo_latitude, seismo_longitude)
 
 	closest_time = timestamp1 + projection_length_ratio*(timestamp2 - timestamp1)
-	'''
-	_, ax = plt.subplots()
-	
-	f = 1.0/np.cos((closest_point_on_line_lat+(seismo_latitude-closest_point_on_line_lat)/2)*np.pi/180)
-	ax.set_aspect(f)
-	plt.plot(flight_longitudes, flight_latitudes, 'b--', label='Flight Points')
-	plt.plot([closest_lon, seismo_longitude], [closest_lat, seismo_latitude], 'r-', label='Line Vector')
-	plt.plot([closest_lon, second_closest_lon], [closest_lat, second_closest_lat], 'g-', label='Line Vector')
-	plt.plot([closest_lon, closest_point_on_line_lon], [closest_lat, closest_point_on_line_lat], 'r-', label='Line Vector')
-	plt.plot(closest_point_on_line_lon, closest_point_on_line_lat, 'go', label='Closest Point on Line')
-	plt.plot(seismo_longitude, seismo_latitude, 'ro', label='Seismic Station')
-	plt.scatter(second_closest_lon, second_closest_lat, c = 'pink')
-	plt.xlabel('Longitude')
-	plt.ylabel('Latitude')
-	plt.title('Flight Points, Line Vector, and Closest Point on Line')
-	
-	plt.grid(True)
-	plt.show()
-	'''
+
 	return closest_point_on_line_lat, closest_point_on_line_lon, closest_distance, closest_time
 
 ###################################################################################################################################
