@@ -19,7 +19,7 @@ day = [25,14,14,14,13]
 month = [2,2,2,2,2]
 
 
-for n in range(0,5):
+for n in range(1,5):
     ht = datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -160,7 +160,7 @@ for n in range(0,5):
                             try:      
                                 tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
 
-                                max_amplitude_index,_ = find_peaks(tt)#, prominence = 5, wlen=5, height=vmax*0.15)
+                                max_amplitude_index,_ = find_peaks(tt, prominence = 5, wlen=5, height=vmax*0.18)
                                 
                                 maxa = np.argmax(tt[max_amplitude_index])
                                 max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
@@ -181,7 +181,7 @@ for n in range(0,5):
 
                         count = 0
                         for i in range(len(delf)):
-                            if np.abs(delf[i]) <= (2):
+                            if np.abs(delf[i]) <= (3):
                                 fobs.append(maxfreq[i])
                                 tobs.append(ttt[i])
                                 count += 1
