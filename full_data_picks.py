@@ -148,7 +148,7 @@ for n in range(0,5):
                     start_time = set_time[0]
                     end_time = set_time[1]
 
-                    corridor_width = 6 # (fs/2) / len(f0_array)
+                    corridor_width = 4 # (fs/2) / len(f0_array)
 
                     peaks_assos = []
                     fobs = []
@@ -171,34 +171,39 @@ for n in range(0,5):
                             maxfreq = []
                             ttt = []
                             coord_inv = []
+                        #for t_f in range(len(new_times)):
+                        #    if not np.isnan(ft[t_f]) and ft[t_f] != np.inf:
+                        f01 = f0 + corridor_width
+                        f02 = f0  - corridor_width
+                        upper = calc_ft(new_times,  tprime0, f01, v0, l, c)
+                        lower = calc_ft(new_times,  tprime0, f02, v0, l, c)
+                        #        if lower < 0:
+                        #            lower = 0
+                        #        if upper > 250:
+                        #            upper = 250
                         for t_f in range(len(new_times)):
-                            if not np.isnan(ft[t_f]) and ft[t_f] != np.inf:
-                                upper = int(np.round(ft[t_f],0)) + corridor_width
-                                lower = int(np.round(ft[t_f],0))  - corridor_width
+                            try:
+                                print(lower[t_f])
+                                tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
 
-                                if lower < 0:
-                                    lower = 0
-                                if upper > 250:
-                                    upper = 250
-                                try:
-                                    tt = spec[lower:upper, t_f]
-
-                                    #max_amplitude_index = np.argmax(tt)
-                                    max_amplitude_index,_ = find_peaks(tt, prominence=10, distance=12)
-                            
-                                    max_amplitude_frequency = frequencies[int(max_amplitude_index)+lower]
-                                    #max_amplitude_frequency = int(max_amplitude_index)+lower
-                                    if option == 1:
-                                        fobs.append(max_amplitude_frequency)
-                                        tobs.append(new_times[t_f])
-                                    
-                                        count += 1
-                                    if option == 2:
-                                        maxfreq.append(max_amplitude_frequency)
-                                        coord_inv.append((new_times[t_f], max_amplitude_frequency))
-                                        ttt.append(new_times[t_f])
-                                except:
-                                    continue
+                                max_amplitude_index = np.argmax(tt)
+                                #max_amplitude_index,_ = find_peaks(tt, prominence=10, distance=12)
+                        
+                                #max_amplitude_frequency = frequencies[int(max_amplitude_index)+lower]
+                                max_amplitude_frequency = max_amplitude_index+lower[t_f]
+                                print(max_amplitude_frequency)
+                                print(new_times[t_f])
+                                if option == 1:
+                                    fobs.append(max_amplitude_frequency)
+                                    tobs.append(new_times[t_f])
+                                
+                                    count += 1
+                                if option == 2:
+                                    maxfreq.append(max_amplitude_frequency)
+                                    coord_inv.append((new_times[t_f], max_amplitude_frequency))
+                                    ttt.append(new_times[t_f])
+                            except:
+                                continue
                         if option == 2:
                             coord_inv_array = np.array(coord_inv)
                             mtest = [f0,v0, l, tprime0]
