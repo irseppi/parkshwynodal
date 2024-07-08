@@ -84,21 +84,15 @@ for n in range(0,5):
                         for col in range(m):
                             MDF[row][col] = median
                     spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
-                    
+
                     if isinstance(sta[n], int):
-                            spec = np.zeros((a,b))
-                            for col in range(0,b):
-                                p = sorted(Sxx[:, col])
-                                median = p[int(len(p)/2)]
+                        spec = np.zeros((a,b))
+                        for col in range(0,b):
+                            p = sorted(Sxx[:, col])
+                            median = p[int(len(p)/2)]
 
-                                for row in range(len(Sxx)):
-                                    spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
-                    
-                    middle_index = len(times) // 2
-                    middle_column = spec[:, middle_index]
-                    vmin = 0  
-                    vmax = np.max(middle_column) 
-
+                            for row in range(len(Sxx)):
+                                spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
 
                     c = 343    
                     if n == 0:
@@ -126,19 +120,81 @@ for n in range(0,5):
                         l = 3802
 
                     if n == 4:
-                        f0_array = [14,28,41,54,68,81,95,109,123,136,148,162,177,189,203,226,241,249,271]
+                        f0_array = [14,28,41,54,68,81,95,109,123,136,148,162,177,189,203,226,241,249,270]
                         tprime0 = 140
                         v0 = 62
                         l = 500
                     c = 343
 
+                    corridor_width = 6 #(fs/2) / len(f0_array)
+                    if n == 5:
+                        corridor_width = (fs/2) / len(f0_array)
+                    middle_index =  len(times) // 2
+                    middle_column = spec[:, middle_index]
+                    vmin = 0  
+                    vmax = np.max(middle_column) 
+
+                    peaks_assos = []
+                    fobs = []
+                    tobs = []
+                    
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                   
+                    for i in range(len(f0_array)):
+                        f0 = f0_array[i]
+
+                        ft = calc_ft(times,  tprime0, f0, v0, l, c)
+                       
+                        maxfreq = []
+                        coord_inv = []
+                        ttt = []
+
+                        f01 = f0 + corridor_width
+                        f02 = f0  - corridor_width
+                        upper = calc_ft(times,  tprime0, f01, v0, l, c)
+                        lower = calc_ft(times,  tprime0, f02, v0, l, c)
+                        
+                        for t_f in range(len(times)):
+
+                            try:      
+                                tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
+
+                                max_amplitude_index,_ = find_peaks(tt)#, prominence = 5, wlen=5, height=vmax*0.15)
+                                
+                                maxa = np.argmax(tt[max_amplitude_index])
+                                max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
+
+                                maxfreq.append(max_amplitude_frequency)
+                                coord_inv.append((times[t_f], max_amplitude_frequency))
+                                ttt.append(times[t_f])
+
+                            except:
+                                continue
+
+                        plt.scatter(ttt,maxfreq, color='red', marker='x')
+                        coord_inv_array = np.array(coord_inv)
+                        mtest = [f0,v0, l, tprime0]
+                        mtest,_ = invert_f(mtest, coord_inv_array, num_iterations=4)
+                        ft = calc_ft(ttt,  mtest[3], mtest[0], mtest[1], mtest[2], c)
+                        delf = np.array(ft) - np.array(maxfreq)
+
+                        count = 0
+                        for i in range(len(delf)):
+                            if np.abs(delf[i]) <= (2):
+                                fobs.append(maxfreq[i])
+                                tobs.append(ttt[i])
+                                count += 1
+
+                        plt.scatter(tobs, fobs, color='black', marker='x')
+
+
+                    
                     set_time = []
                     def onclick(event):
                         global coords
                         set_time.append(event.xdata) 
-                        plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                        plt.scatter(event.xdata, event.ydata, color='red', marker='x')  # Add this line
                         plt.draw() 
                         print('Clicked:', event.xdata, event.ydata)  
 
@@ -148,79 +204,14 @@ for n in range(0,5):
                     start_time = set_time[0]
                     end_time = set_time[1]
 
-                    corridor_width = 4 # (fs/2) / len(f0_array)
-
-                    peaks_assos = []
-                    fobs = []
-                    tobs = []
-
-                    new_times = times[np.where((times >= np.round(start_time,0)) & (times <= np.round(end_time,0)))]
-                    
-                    for i in range(len(f0_array)):
-                        f0 = f0_array[i]
-                        m0 = [f0, v0, l, tprime0]
-                        ft = calc_ft(new_times,  tprime0, f0, v0, l, c)
-                       
-                        maxfreq = []
-                        coord_inv = []
-                        ttt = []
-                        option = 2
-                        if option == 1:
-                            count = 0
-                        if option == 2:
-                            maxfreq = []
-                            ttt = []
-                            coord_inv = []
-                        #for t_f in range(len(new_times)):
-                        #    if not np.isnan(ft[t_f]) and ft[t_f] != np.inf:
-                        f01 = f0 + corridor_width
-                        f02 = f0  - corridor_width
-                        upper = calc_ft(new_times,  tprime0, f01, v0, l, c)
-                        lower = calc_ft(new_times,  tprime0, f02, v0, l, c)
-                        #        if lower < 0:
-                        #            lower = 0
-                        #        if upper > 250:
-                        #            upper = 250
-                        for t_f in range(len(new_times)):
-                            try:
-                                print(lower[t_f])
-                                tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
-
-                                max_amplitude_index = np.argmax(tt)
-                                #max_amplitude_index,_ = find_peaks(tt, prominence=10, distance=12)
-                        
-                                #max_amplitude_frequency = frequencies[int(max_amplitude_index)+lower]
-                                max_amplitude_frequency = max_amplitude_index+lower[t_f]
-                                print(max_amplitude_frequency)
-                                print(new_times[t_f])
-                                if option == 1:
-                                    fobs.append(max_amplitude_frequency)
-                                    tobs.append(new_times[t_f])
-                                
-                                    count += 1
-                                if option == 2:
-                                    maxfreq.append(max_amplitude_frequency)
-                                    coord_inv.append((new_times[t_f], max_amplitude_frequency))
-                                    ttt.append(new_times[t_f])
-                            except:
-                                continue
-                        if option == 2:
-                            coord_inv_array = np.array(coord_inv)
-                            mtest = [f0,v0, l, tprime0]
-                            mtest,_ = invert_f(mtest, coord_inv_array, num_iterations=4)
-                            ft = calc_ft(ttt,  mtest[3], mtest[0], mtest[1], mtest[2], c)
-                            delf = np.array(ft) - np.array(maxfreq)
-
-                            count = 0
-                            for i in range(len(delf)):
-                                if np.abs(delf[i]) <= (2):
-                                    fobs.append(maxfreq[i])
-                                    tobs.append(ttt[i])
-                                    count += 1
-                            peaks_assos.append(count)
-
+                    ftobs = []
+                    ffobs = []
+                    for i in range(len(tobs)):
+                        if tobs[i] >= start_time and tobs[i] <= end_time:
+                            ftobs.append(tobs[i])
+                            ffobs.append(fobs[i])
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    plt.scatter(tobs, fobs, color='black', marker='x')
-
+                    plt.scatter(ftobs,ffobs, color='black', marker='x')
                     plt.show()
+                    
