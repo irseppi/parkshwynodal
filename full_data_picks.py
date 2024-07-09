@@ -120,7 +120,7 @@ for n in range(0,5):
                         l = 3832
 
                     if n == 4:
-                        f0_array = [14,27,40,53,67,80,94,108,122,135,147,161,175,187,202,225,240,248,270]
+                        f0_array = [14,27,40,53,67,80,94,108,122,135,147,161,174,187,202,225,240,248,270]
                         tprime0 = 140
                         v0 = 62
                         l = 504
@@ -156,16 +156,18 @@ for n in range(0,5):
                         lower = calc_ft(times,  tprime0, f02, v0, l, c)
 
                         for t_f in range(len(times)):
-
+                            tt = spec[:, t_f]
+                            med = np.mean(tt)
                             try:      
                                 tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
                                 try:
-                                    max_amplitude_index,_ = find_peaks(tt, prominence = 9, wlen=6, height=vmax*0.15)
+                                    max_amplitude_index,_ = find_peaks(tt, prominence = 20, wlen=10, height=vmax*0.25)
+
                                     maxa = np.argmax(tt[max_amplitude_index])
                                     max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
                                 except:
 
-                                    if np.max(tt) > vmax*0.4:
+                                    if np.max(tt) > vmax*0.26:
                                         max_amplitude_index = np.argmax(tt)
                                         max_amplitude_frequency = max_amplitude_index+int(np.round(lower[t_f],0))
                                     else:
@@ -189,12 +191,12 @@ for n in range(0,5):
 
                         count = 0
                         for i in range(len(delf)):
-                            if np.abs(delf[i]) <= (3):
+                            if np.abs(delf[i]) <= (2):
                                 fobs.append(maxfreq[i])
                                 tobs.append(ttt[i])
                                 count += 1
 
-                    time_pick = True
+                    time_pick = False
                     if time_pick == True:
                         set_time = []
                         plt.figure()
