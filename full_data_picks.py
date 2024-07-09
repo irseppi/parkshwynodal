@@ -186,34 +186,6 @@ for n in range(0,5):
                                 tobs.append(ttt[i])
                                 count += 1
 
-                    time_pick = False
-                    if time_pick == True:
-                        set_time = []
-                        plt.figure()
-                        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                        plt.scatter(tobs,fobs, color='black', marker='x')
-                        def onclick(event):
-                            global coords
-                            set_time.append(event.xdata) 
-                            plt.scatter(event.xdata, event.ydata, color='red', marker='x')  # Add this line
-                            plt.draw() 
-                            print('Clicked:', event.xdata, event.ydata)  
-
-                        cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-                        plt.show(block=True)
-                        
-                        start_time = set_time[0]
-                        end_time = set_time[1]
-
-                        ftobs = []
-                        ffobs = []
-                        for i in range(len(tobs)):
-                            if tobs[i] >= start_time and tobs[i] <= end_time:
-                                ftobs.append(tobs[i])
-                                ffobs.append(fobs[i])
-                        tobs = ftobs
-                        fobs = ffobs
-
                     plt.figure()
                     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                     plt.scatter(tobs,fobs, color='black', marker='x')
