@@ -84,15 +84,6 @@ for n in range(0,5):
                         for col in range(m):
                             MDF[row][col] = median
                     spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
-                    if n != 3:
-                        if isinstance(sta[n], int):
-                            spec = np.zeros((a,b))
-                            for col in range(0,b):
-                                p = sorted(Sxx[:, col])
-                                median = p[int(len(p)/2)]
-
-                                for row in range(len(Sxx)):
-                                    spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
 
                     c = 343    
                     if n == 0:
@@ -156,18 +147,17 @@ for n in range(0,5):
                         lower = calc_ft(times,  tprime0, f02, v0, l, c)
 
                         for t_f in range(len(times)):
-                            tt = spec[:, t_f]
-                            med = np.mean(tt)
+
                             try:      
                                 tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
                                 try:
-                                    max_amplitude_index,_ = find_peaks(tt, prominence = 20, wlen=10, height=vmax*0.25)
+                                    max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.15)
 
                                     maxa = np.argmax(tt[max_amplitude_index])
                                     max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
                                 except:
 
-                                    if np.max(tt) > vmax*0.26:
+                                    if np.max(tt) > vmax*0.5:
                                         max_amplitude_index = np.argmax(tt)
                                         max_amplitude_frequency = max_amplitude_index+int(np.round(lower[t_f],0))
                                     else:
