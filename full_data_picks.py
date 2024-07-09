@@ -118,9 +118,9 @@ for n in range(0,5):
                     c = 343
                     
                     corridor_width = 6 
-                    if n == 3:
+                    if n == 3: #if it is a Boeing Jet
                         corridor_width = 3
-                    elif n == 4:
+                    elif n == 4: # if it is a helicopter
                         corridor_width = 4 
                     middle_index =  len(times) // 2
                     middle_column = spec[:, middle_index]
@@ -157,7 +157,7 @@ for n in range(0,5):
                                     max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
                                 except:
 
-                                    if np.max(tt) > vmax*0.5:
+                                    if np.max(tt) > vmax*0.5: #This is used for the boeing jet
                                         max_amplitude_index = np.argmax(tt)
                                         max_amplitude_frequency = max_amplitude_index+int(np.round(lower[t_f],0))
                                     else:
