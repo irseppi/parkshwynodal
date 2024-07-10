@@ -174,7 +174,7 @@ for n in range(0,8):
                                 try:
                                     if n != 2 or n != 3 or n != 4 or n != 7:
                                         max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
-                                    if n == 7:
+                                    elif n == 7:
                                         max_amplitude_index,_ = find_peaks(tt, prominence = 1, wlen=25, height=vmax*0.2)
                                     else:
                                         max_amplitude_index,_ = find_peaks(tt, prominence = 25, wlen=5, height=vmax*0.5)
@@ -196,7 +196,7 @@ for n in range(0,8):
 
                             except:
                                 continue
-
+                        
                         if f0 < 200:
                             coord_inv_array = np.array(coord_inv)
                             mtest = [f0,v0, l, tprime0]
