@@ -151,15 +151,19 @@ for n in range(0,5):
                             try:      
                                 tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
                                 try:
-                                    max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.15)
-
+                                    if n != 2 or n != 3 or n != 4:
+                                        max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
+                                    else:
+                                        max_amplitude_index,_ = find_peaks(tt, prominence = 30, wlen=10, height=vmax*0.9)
                                     maxa = np.argmax(tt[max_amplitude_index])
                                     max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
                                 except:
-
-                                    if np.max(tt) > vmax*0.5: #This is used for the boeing jet
-                                        max_amplitude_index = np.argmax(tt)
-                                        max_amplitude_frequency = max_amplitude_index+int(np.round(lower[t_f],0))
+                                    if n != 2 or n != 3 or n != 4:
+                                        if np.max(tt) > vmax*0.15: #This is used for the boeing jet
+                                            max_amplitude_index = np.argmax(tt)
+                                            max_amplitude_frequency = max_amplitude_index+int(np.round(lower[t_f],0))
+                                        else:
+                                            continue
                                     else:
                                         continue
                                 maxfreq.append(max_amplitude_frequency)
