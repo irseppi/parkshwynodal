@@ -217,7 +217,28 @@ for n in range(0,15):
 						c = 343
 						v0 = 144
 						l = 1900
-					
+
+					if n == 10:
+						fnot = [38, 57, 76, 96, 116, 135, 154, 173, 192, 211, 231]
+						tprime0 = 112
+						tpr = np.arange(0, 241, 1)
+						v0 = 53 
+						l = 831
+
+					if n == 11:
+						fnot = [19,40,59,79,100,120,140,160,180,200,221,241,261]
+						tprime0 = 118
+						tpr = np.arange(0, 241, 1)
+						v0 = 59
+						l = 479
+
+					if n == 12:
+						fnot = [14,32,43,48,64,80,86,96,112,129,145,158,161,180,194,202,210,227,243,260,277]
+						tprime0 = 110
+						tpr = np.arange(0, 241, 1)
+						v0 = 89
+						l = 1307
+					c = 343
 					# Plot forward model
 					if forward_model == True:
 						for f0 in fnot:
@@ -232,7 +253,7 @@ for n in range(0,15):
 					# Plot spectrogram
 					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
 					ax2.set_xlabel('Time (s)')
-					dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
+					dist_m, tmid,_,_ = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
 					tarrive = tim + (time[n] - calc_time(tmid,dist_m,alt_m))
 					tarrive_est = calc_time(tprime0,dist_m,alt_m)
 					print(tmid, tarrive)

@@ -12,14 +12,14 @@ seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 station = seismo_data['Station']
-flight_num = [530342801,528485724,528473220,528407493,528293430] 
-time = [1551066051,1550172833,1550168070,1550165577,1550089044] 
-sta = [1022,1272,1173,1283,1004]
-day = [25,14,14,14,13]
-month = [2,2,2,2,2]
+flight_num = [530342801,528485724,528473220,528407493,528293430,531605202,531715679,529805251] 
+time = [1551066051,1550172833,1550168070,1550165577,1550089044,1551662362,1551736354,1550803701] 
+sta = [1022,1272,1173,1283,1004,1010,1021,1006]
+day = [25,14,14,14,13,4,4,22]
+month = [2,2,2,2,2,3,3,2]
 
 
-for n in range(0,5):
+for n in range(7,8):
     ht = datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -115,13 +115,34 @@ for n in range(0,5):
                         tprime0 = 140
                         v0 = 62
                         l = 504
+
+                    if n == 5:
+                        f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 192, 211, 231]
+                        tprime0 = 112
+                        v0 = 53 
+                        l = 831
+
+                    if n == 6:
+                        f0_array = [19,40,59,79,100,120,140,160,180,200,221,241,261]
+                        tprime0 = 118
+                        v0 = 59
+                        l = 479
+
+                    if n == 7:
+                        f0_array = [14,32,43,48,64,80,86,96,112,129,145,158,161,180,194,202,210,227,243,260,277]
+                        tprime0 = 110
+                        v0 = 89
+                        l = 1307
+                        
                     c = 343
                     
                     corridor_width = 6 
                     if n == 3: #if it is a Boeing Jet
                         corridor_width = 3
                     elif n == 4: # if it is a helicopter
-                        corridor_width = 4 
+                        corridor_width = 4
+                    elif n == 7: # if it is a C46: CURTISS COMMANDO
+                        corridor_width = 3 
                     middle_index =  len(times) // 2
                     middle_column = spec[:, middle_index]
                     vmin = 0  
@@ -151,19 +172,22 @@ for n in range(0,5):
                             try:      
                                 tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
                                 try:
-                                    if n != 2 or n != 3 or n != 4:
+                                    if n != 2 or n != 3 or n != 4 or n != 7:
                                         max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
+                                    if n == 7:
+                                        max_amplitude_index,_ = find_peaks(tt, prominence = 1, wlen=25, height=vmax*0.2)
                                     else:
-                                        max_amplitude_index,_ = find_peaks(tt, prominence = 30, wlen=10, height=vmax*0.9)
+                                        max_amplitude_index,_ = find_peaks(tt, prominence = 25, wlen=5, height=vmax*0.5)
                                     maxa = np.argmax(tt[max_amplitude_index])
                                     max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
                                 except:
-                                    if n != 2 or n != 3 or n != 4:
-                                        if np.max(tt) > vmax*0.15: #This is used for the boeing jet
+                                    if n >= 3:
+                                        if np.max(tt) > vmax*0.4: #This is used for the boeing jet
                                             max_amplitude_index = np.argmax(tt)
                                             max_amplitude_frequency = max_amplitude_index+int(np.round(lower[t_f],0))
                                         else:
                                             continue
+                                    
                                     else:
                                         continue
                                 maxfreq.append(max_amplitude_frequency)
@@ -185,7 +209,7 @@ for n in range(0,5):
 
                         count = 0
                         for i in range(len(delf)):
-                            if np.abs(delf[i]) <= (2):
+                            if np.abs(delf[i]) <= (3):
                                 fobs.append(maxfreq[i])
                                 tobs.append(ttt[i])
                                 count += 1
