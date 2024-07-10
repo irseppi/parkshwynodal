@@ -19,7 +19,7 @@ day = [25,14,14,14,13,4,4,22]
 month = [2,2,2,2,2,3,3,2]
 
 
-for n in range(7,8):
+for n in range(0,8):
     ht = datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
