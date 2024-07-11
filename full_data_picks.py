@@ -181,8 +181,8 @@ for n in range(0,8):
                                     maxa = np.argmax(tt[max_amplitude_index])
                                     max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
                                 except:
-                                    if n == 3 or len(f0_array) > 11:
-                                        if np.max(tt) > vmax*0.4: #This is used for the boeing jet
+                                    if n == 3 or len(f0_array) > 11: #This is used for the boeing jet and any other flight with more than 11 fundamental frequencies
+                                        if np.max(tt) > vmax*0.4: 
                                             max_amplitude_index = np.argmax(tt)
                                             max_amplitude_frequency = max_amplitude_index+int(np.round(lower[t_f],0))
                                         else:
