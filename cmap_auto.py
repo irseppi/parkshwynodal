@@ -14,13 +14,18 @@ min_lon = -150.7
 max_lon = -147.3
 min_lat = 62.2
 max_lat = 65.3
+cenlat = (min_lat + max_lat)/2
+cenlon = (min_lon + max_lon)/2
 
 # Load the seismometer location data
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 sta = seismo_data['Station']
-
+def f(y):
+    return -1.0/np.cos((y)*np.pi/180)
+def rf(y):
+    return -180/np.pi*np.arccos(1/y)
 # Loop through each station in text file that we already know comes within 2km of the nodes
 for line in sta_f.readlines():
     val = line.split(',')
@@ -40,15 +45,42 @@ for line in sta_f.readlines():
                 if sta[t] == station:
 
                     clat, clon, dist, ctime = closest_encounter(flight_latitudes, flight_longitudes, l, time, seismo_latitudes[t], seismo_longitudes[t])
-                    f = 1.0/np.cos((clat+(seismo_latitudes[t]-clat)/2)*np.pi/180)
-                    ht = datetime.datetime.utcfromtimestamp(time[l])
-
+                    ht = datetime.datetime.fromtimestamp(time[l], datetime.timezone.utc)
+                    print(dist)
                     # Create a figure with two subplots side by side
-                    fig, axs = plt.subplots(1, 2, figsize=(10, 5), constrained_layout=True)
+                    fig, axs = plt.subplots(1, 2,constrained_layout=True)
 
-                    axs[0].set_aspect(f)
-                    axs[1].set_aspect(f)
-
+                    y =[clat,  seismo_latitudes[t]]
+                    x = [clon, seismo_longitudes[t]]
+                    yy = sum(y)/len(y)
+                    xx = sum(x)/len(x)
+                    if dist < 100:
+                        minla = np.round((yy - 0.001),4)
+                        maxla =  np.round((yy + 0.001),4)
+                        minl = np.round((xx - 0.001),4)
+                        maxl = np.round((xx + 0.001),4)
+                        axs[1].set_xticks(np.arange(minl, maxl, 0.0005))
+                        axs[1].set_yticks(np.arange(minla, maxla, 0.0005))
+                    elif dist < 1000:
+                        minl = np.round((xx - 0.01), 2)
+                        maxl = np.round((xx + 0.01), 2)
+                        minla = np.round((yy - 0.01), 2)
+                        maxla =  np.round((yy + 0.01), 2)
+                        axs[1].set_xticks(np.arange(minl, maxl, 0.005))
+                        axs[1].set_yticks(np.arange(minla, maxla, 0.005))
+                    else:
+                        minl = np.round((xx - 0.02), 2)
+                        maxl = np.round((xx + 0.02), 2)
+                        minla = np.round((yy - 0.02), 2)
+                        maxla =  np.round((yy + 0.02), 2)
+                        axs[1].set_xticks(np.arange(minl, maxl, 0.01))
+                        axs[1].set_yticks(np.arange(minla, maxla, 0.01))
+                    axs[0].set_xticks(np.arange(min_lon, max_lon, 1))
+                    axs[0].set_yticks(np.arange(min_lat, max_lat, 1))
+                    axs[0].set_xscale('function', functions=(f,rf))
+                    axs[1].set_xscale('function', functions=(f,rf))
+                    axs[0].grid(True)
+                    axs[1].grid(True)
                     axs[0].scatter(seismo_longitudes, seismo_latitudes, c='#e41a1c', s = 3, label='seismometers')
                     axs[0].plot(flight_longitudes, flight_latitudes, '-', c='#377eb8', lw=1, ms = 1, label='flight path')
                     for i in range(1, len(flight_latitudes)-1, int(len(flight_latitudes)/5)):
@@ -60,16 +92,7 @@ for line in sta_f.readlines():
                     axs[0].set_xlim(min_lon, max_lon)
                     axs[0].set_ylim(min_lat, max_lat)
                     axs[0].tick_params(axis='both', which='major', labelsize=12)
-			
-                    y =[clat,  seismo_latitudes[t]]
-                    x = [clon, seismo_longitudes[t]]
-                    yy = sum(y)/len(y)
-                    xx = sum(x)/len(x)
-
-                    minl = xx - 0.05
-                    maxl = xx + 0.05
-                    minla = yy - 0.03
-                    maxla = yy + 0.03
+                    
 
                     heading = np.deg2rad(head[l])
                     
