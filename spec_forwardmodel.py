@@ -253,7 +253,8 @@ for n in range(0,15):
 					# Plot spectrogram
 					cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
 					ax2.set_xlabel('Time (s)')
-					dist_m, tmid,_,_ = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
+					_,_,dist_km, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
+					dist_m = dist_km * 1000
 					tarrive = tim + (time[n] - calc_time(tmid,dist_m,alt_m))
 					tarrive_est = calc_time(tprime0,dist_m,alt_m)
 					print(tmid, tarrive)

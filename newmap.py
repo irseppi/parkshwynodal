@@ -3,124 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import datetime
 import matplotlib.patches as mpatch
-from obspy.geodetics import gps2dist_azimuth
 from matplotlib.patches import Rectangle
-from pathlib import Path
-from prelude import make_base_dir, calculate_distance, closest_encounter
+from prelude import make_base_dir, closest_encounter
 
 sta_f = open('input/all_station_crossing_db.txt','r')
-
-def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, seismo_latitude, seismo_longitude):
-
-    clat = flight_latitudes[index]
-    clon = flight_longitudes[index]
-        
-    closest_lat = clat
-    closest_lon = clon
-    dist_lim = 2
-    c2lat = flight_latitudes[index+1]
-    c2lon = flight_longitudes[index+1]
-    index2 = index + 1
-    for tr in range(0,2):
-        if  flight_longitudes[index+1] < flight_longitudes[index-1]:
-            if tr == 0:
-                sclat = flight_latitudes[index-1]
-                sclon = flight_longitudes[index-1]  
-
-                x = [clon, sclon]
-                y = [clat, sclat]
-                m = (y[0]-y[1])/(x[0]-x[1])
-                b = y[0] - m*x[0]
-                for point in np.arange(clon, sclon, 0.000001):
-                    lon = point
-                    lat = m*lon + b
-                    dist_km = calculate_distance(lat, lon, seismo_latitude, seismo_longitude)/1000
-
-                    if dist_km < dist_lim:
-                        dist_lim = dist_km
-                        closest_lat = lat
-                        closest_lon = lon
-                        c2lat = flight_latitudes[index-1]
-                        c2lon = flight_longitudes[index-1]
-                        index2 = index - 1
-            if tr == 1:
-                sclat = flight_latitudes[index+1]
-                sclon = flight_longitudes[index+1]
-
-                x = [clon, sclon]
-                y = [clat, sclat]
-                m = (y[1]-y[0])/(x[1]-x[0])
-                b = y[0] - m*x[0]
-
-
-                for point in np.arange(sclon, clon, 0.000001):
-                    lon = point
-                    lat = m*lon + b
-                    dist_km = calculate_distance(lat, lon, seismo_latitude, seismo_longitude)/1000
-
-                    if dist_km < dist_lim:
-                        dist_lim = dist_km
-                        closest_lat = lat
-                        closest_lon = lon
-                        c2lat = flight_latitudes[index+1]
-                        c2lon = flight_longitudes[index+1]
-                        index2 = index + 1
-        else:
-            if tr == 0:
-                sclat = flight_latitudes[index-1]
-                sclon = flight_longitudes[index-1]  
-
-                x = [clon, sclon]
-                y = [clat, sclat]
-                m = (y[0]-y[1])/(x[0]-x[1])
-                b = y[0] - m*x[0]
-                for point in np.arange(sclon, clon, 0.000001):
-                    lon = point
-                    lat = m*lon + b
-                    dist_km = calculate_distance(lat, lon, seismo_latitude, seismo_longitude)/1000
-
-                    if dist_km < dist_lim:
-                        dist_lim = dist_km
-                        closest_lat = lat
-                        closest_lon = lon
-                        c2lat = flight_latitudes[index-1]
-                        c2lon = flight_longitudes[index-1]
-                        index2 = index - 1
-            if tr == 1:
-                sclat = flight_latitudes[index+1]
-                sclon = flight_longitudes[index+1]
-
-                x = [clon, sclon]
-                y = [clat, sclat]
-                m = (y[1]-y[0])/(x[1]-x[0])
-                b = y[0] - m*x[0]
-
-
-                for point in np.arange(clon, sclon, 0.000001):
-                    lon = point
-                    lat = m*lon + b
-                    dist_km = calculate_distance(lat, lon, seismo_latitude, seismo_longitude)/1000
-
-                    if dist_km < dist_lim:
-                        dist_lim = dist_km
-                        closest_lat = lat
-                        closest_lon = lon
-                        c2lat = flight_latitudes[index+1]
-                        c2lon = flight_longitudes[index+1]
-                        index2 = index - 1
-    for location in np.arange((closest_lon-0.000001),(closest_lon+0.000001),0.0000000001):
-        lon = location
-        lat = m*lon + b
-        dist = calculate_distance(lat, lon, seismo_latitude, seismo_longitude)/1000
-        if dist < dist_lim:
-            dist_lim = dist
-            closest_lon = lon
-            closest_lat = lat
-    dist_old_new = calculate_distance(closest_lat, closest_lon, clat, clon)/1000
-    dist_old_old = calculate_distance(c2lat, c2lon, clat, clon)/1000
-    ratio = dist_old_new/dist_old_old
-    timestamp = timestamp[index] + (timestamp[index] - timestamp[index2])*ratio
-    return  closest_lat, closest_lon, dist_lim,timestamp
 
 min_lon = -150.7
 max_lon = -147.3
@@ -158,7 +44,7 @@ for line in sta_f.readlines():
 
                     clat, clon, dist, ctime = closest_encounter(flight_latitudes, flight_longitudes, l, time, seismo_latitudes[t], seismo_longitudes[t])
                     ht = datetime.datetime.fromtimestamp(time[l], datetime.timezone.utc)
-                    print(dist)
+                    
                     dist = dist*1000
                     # Create a figure with two subplots side by side
                     fig, axs = plt.subplots(1, 2) #,constrained_layout=True)
@@ -234,7 +120,13 @@ for line in sta_f.readlines():
                     fig.add_artist(con)
                     con = mpatch.ConnectionPatch(xyA=(minl, maxla), xyB=(maxl, maxla), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
                     fig.add_artist(con)
-                    plt.show()
+
+                                        
+                    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all/' + date + '/'+flight+'/'+station+'/'
+                    make_base_dir(BASE_DIR)
+                    plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all/'+ date + '/'+flight+'/'+station+'/map_'+flight+'_' + str(time[l]) + '.png')
+                    plt.close()
+                   
                
                     
                 else:
