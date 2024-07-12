@@ -6,13 +6,9 @@ import matplotlib.patches as mpatch
 from obspy.geodetics import gps2dist_azimuth
 from matplotlib.patches import Rectangle
 from pathlib import Path
-from prelude import make_base_dir, distance, closest_encounter
+from prelude import make_base_dir, calculate_distance, closest_encounter
 
 sta_f = open('input/all_station_crossing_db.txt','r')
-def calculate_distance(lat1, lon1, lat2, lon2):
-
-	distance, _, _ = gps2dist_azimuth(lat1, lon1, lat2, lon2)  # distance in meters
-	return distance
 
 def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, seismo_latitude, seismo_longitude):
 
@@ -112,7 +108,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
                         c2lat = flight_latitudes[index+1]
                         c2lon = flight_longitudes[index+1]
                         index2 = index - 1
-    for location in np.arange((closest_lon-0.000001),(closest_lon+0.000001),0.000000000000001):
+    for location in np.arange((closest_lon-0.000001),(closest_lon+0.000001),0.0000000001):
         lon = location
         lat = m*lon + b
         dist = calculate_distance(lat, lon, seismo_latitude, seismo_longitude)/1000
@@ -165,7 +161,9 @@ for line in sta_f.readlines():
                     print(dist)
                     dist = dist*1000
                     # Create a figure with two subplots side by side
-                    fig, axs = plt.subplots(1, 2,constrained_layout=True)
+                    fig, axs = plt.subplots(1, 2) #,constrained_layout=True)
+                    fig.subplots_adjust(wspace=0.5)  # Adjust the spacing between subplots
+
 
                     y =[clat,  seismo_latitudes[t]]
                     x = [clon, seismo_longitudes[t]]
@@ -214,9 +212,10 @@ for line in sta_f.readlines():
                     axs[1].plot(flight_longitudes, flight_latitudes, c='#377eb8',linestyle ='dotted')
                     axs[1].set_xlim(minl, maxl)
                     axs[1].set_ylim(minla, maxla)
-                    axs[1].tick_params(axis='both', which='major', labelsize=10)
-                    
-                     
+                    axs[1].tick_params(axis='both', which='major', labelsize=9)
+                    axs[1].ticklabel_format(useOffset=False, style='plain')
+                    if len(axs[1].get_xticklabels()) > 4:
+                        axs[1].set_xticklabels([round(x, 4) for x in axs[1].get_xticks()], rotation=20, fontsize=9)
                     m = (flight_latitudes[l+1] - flight_latitudes[l])/(flight_longitudes[l+1] - flight_longitudes[l])
                     b = flight_latitudes[l] - m*flight_longitudes[l]
 
