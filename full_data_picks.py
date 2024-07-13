@@ -7,7 +7,6 @@ from prelude import *
 from scipy.signal import find_peaks, spectrogram
 import scipy.linalg as la
 
-
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
@@ -30,7 +29,9 @@ for line in sta_f.readlines():
     date = val[0]
     flight = val[1]
     sta = val[5]
-    tm = val[2]
+    equipment = val[6][0:4]
+
+    tm = float(val[2])
 
     ht = datetime.utcfromtimestamp(tm)
     mins = ht.minute
@@ -50,17 +51,16 @@ for line in sta_f.readlines():
     else:
         h_u = '00'
         day2 = str(day+1)
-    if len(str(day[n])) == 1:
+    if len(str(day)) == 1:
         day = '0'+str(day)
         day2 = day
 
-    flight_data = pd.read_csv('/scratch/irseppi/nodal_data/flightradar24/2019'+month+day+'_flights.csv', sep=",")
+    flight_data = pd.read_csv('/scratch/irseppi/nodal_data/flightradar24/20190'+str(month)+str(day)+'_flights.csv', sep=",")
     flight_id = flight_data['flight_id']
-    equipment = flight_data['equip']
     callsign = flight_data['callsign'] 
     fly = flight_data['flight']
 
-    flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + date + '_positions/' + date + '_' + flight + '.csv'
+    flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date) + '_positions/' + str(date) + '_' + str(flight) + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")
     flight_latitudes = flight_data['latitude']
     flight_longitudes = flight_data['longitude']
@@ -68,33 +68,36 @@ for line in sta_f.readlines():
     head = flight_data['heading']
     speed = flight_data['speed']
     altitude = flight_data['altitude']
+    try:
+        p = "/scratch/naalexeev/NODAL/2019-0"+str(month)+"-"+str(day)+"T"+str(h)+":00:00.000000Z.2019-0"+str(month)+"-"+str(day2)+"T"+str(h_u)+":00:00.000000Z."+str(sta)+".mseed"
+        tr = obspy.read(p)
+    except:
+        continue
 
-    for p in range(0,len(flight_id)):
-        if str(flight_id[line]) == str(flight):
-            equip = equipment[p]
-        else:
-            continue
-    for n in range(len(time)):           
-        if str(tm) == str(time[n]):
-            spd = speed[n]
-            speed_mps = speed * 0.514444
-            alt = altitude[n]
-            alt_m = alt * 0.3048
-
-    for y in range(len(station)):
-        if station[y] == sta:
-            elevation = elevations[y]
-
-    p = "/scratch/naalexeev/NODAL/2019-0"+str(month[n])+"-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-0"+str(month[n])+"-"+str(day2)+"T"+str(h_u)+":00:00.000000Z."+str(station[y])+".mseed"
-    tr = obspy.read(p)
     tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - tim, tr[2].stats.starttime + (mins * 60) + secs + tim)
     data = tr[2][:]
     fs = int(tr[2].stats.sampling_rate)
     title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'						
     torg = tr[2].times()
-        
-    clat, clon, dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
-    tarrive = 120+ (time[n] - calc_time(tmid,dist_m,alt_m))
+
+    for n in range(len(time)):         
+        if str(tm) == str(time[n])+'.0':
+            spd = speed[n]
+            speed_mps = speed * 0.514444
+            alt = altitude[n]
+            alt_m = alt * 0.3048
+            index = n
+
+            for e in range(len(station)):
+                if station[e] == sta:
+                    elevation = elevations[e]
+                    clat, clon, dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes, index, time, seismo_latitudes[e], seismo_longitudes[e])
+                else:
+                    continue
+        else:
+            continue
+    height_m = alt_m - elevation 
+    tarrive = 120+ (time[n] - calc_time(tmid,dist_m,height_m))
 
     # Compute spectrogram
     frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9, detrend = 'constant') 
@@ -111,53 +114,56 @@ for line in sta_f.readlines():
     spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
 
     c = 343    
-
+    
     tprime0 = tarrive
     v0 = speed_mps
-    l = np.sqrt(dist_m**2 + (alt_m-elevations[y])**2)
+    l = np.sqrt(dist_m**2 + (alt_m-elevation)**2)
+
     if equipment == 'C185':
         f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 231] 
 
 
-    if equipment == 'PA31':
+    elif equipment == 'PA31':
         f0_array = [36, 55, 73, 109, 146, 164, 183, 218, 236, 254, 273]
 
 
-    if equipment == 'SW4':
+    elif equipment == 'SW4':
         f0_array = [78,119,130, 258]
 
 
-    if equipment == 'B736':
+    elif equipment == 'B736':
         f0_array = [35,70,103,119,133,139]
 
 
-    if equipment == 'R44':
+    elif equipment == 'R44':
         f0_array = [14,27,40,53,67,80,94,108,122,135,147,161,174,187,202,225,240,248,270]
 
 
-    if equipment == 'C185':
+    elif equipment == 'C185':
         f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 192, 211, 231]
 
 
-    if equipment == 'GA8':
+    elif equipment == 'GA8':
         f0_array = [19,40,59,79,100,120,140,160,180,200,221,241,261]
 
 
-    if equipment == 'C46':
+    elif equipment == 'C46':
         f0_array = [14,32,43,48,64,80,86,96,112,129,145,158,161,180,194,202,210,227,243,260,277]
 
+    else:
+        continue
+
     corridor_width = 6 
-    if n == 3: #if it is a Boeing Jet
+    if equipment == 'B736': #if it is a Boeing Jet
         corridor_width = 3
-    elif n == 4: # if it is a helicopter
+    elif equipment == 'R44': # if it is a helicopter
         corridor_width = 4
-    elif n == 7: # if it is a C46: CURTISS COMMANDO
+    elif equipment == 'C46': # if it is a C46: CURTISS COMMANDO
         corridor_width = 3 
     middle_index =  len(times) // 2
     middle_column = spec[:, middle_index]
     vmin = 0  
     vmax = np.max(middle_column) 
-
 
     peaks_assos = []
     fobs = []
@@ -182,16 +188,16 @@ for line in sta_f.readlines():
             try:      
                 tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
                 try:
-                    if n != 2 or n != 3 or n != 4 or n != 7:
+                    if equipment == 'SW4' or equipment == 'B736' or equipment == 'R44' or equipment == 'C46':
                         max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
-                    elif n == 7:
+                    elif equipment == 'C46':
                         max_amplitude_index,_ = find_peaks(tt, prominence = 1, wlen=25, height=vmax*0.2)
                     else:
                         max_amplitude_index,_ = find_peaks(tt, prominence = 25, wlen=5, height=vmax*0.5)
                     maxa = np.argmax(tt[max_amplitude_index])
                     max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
                 except:
-                    if n == 3 or len(f0_array) > 11: #This is used for the boeing jet and any other flight with more than 11 fundamental frequencies
+                    if equipment == 'B736' or len(f0_array) > 11: #This is used for the boeing jet and any other flight with more than 11 fundamental frequencies
                         if np.max(tt) > vmax*0.4: 
                             max_amplitude_index = np.argmax(tt)
                             max_amplitude_frequency = max_amplitude_index+int(np.round(lower[t_f],0))
@@ -207,7 +213,7 @@ for line in sta_f.readlines():
             except:
                 continue
         
-        if f0 < 200:
+        if f0 < 200 and len(coord_inv) > 1:
             coord_inv_array = np.array(coord_inv)
             mtest = [f0,v0, l, tprime0]
             mtest,_ = invert_f(mtest, coord_inv_array, num_iterations=4)
@@ -223,7 +229,8 @@ for line in sta_f.readlines():
                 fobs.append(maxfreq[i])
                 tobs.append(ttt[i])
                 count += 1
-
+    if len(fobs) == 0:
+        continue
     time_pick = True
     if time_pick == True:
         set_time = []
