@@ -12,6 +12,7 @@ seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 station = seismo_data['Station']
+elevations = seismo_data['Elevation']
 
 sta_f = open('input/all_station_crossing_db.txt','r')
 
@@ -28,7 +29,7 @@ for line in sta_f.readlines():
     val = line.split(',')
     date = val[0]
     flight = val[1]
-    station = val[5]
+    sta = val[5]
     tm = val[2]
 
     ht = datetime.utcfromtimestamp(tm)
@@ -80,6 +81,9 @@ for line in sta_f.readlines():
             alt = altitude[n]
             alt_m = alt * 0.3048
 
+    for y in range(len(station)):
+        if station[y] == sta:
+            elevation = elevations[y]
 
     p = "/scratch/naalexeev/NODAL/2019-0"+str(month[n])+"-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-0"+str(month[n])+"-"+str(day2)+"T"+str(h_u)+":00:00.000000Z."+str(station[y])+".mseed"
     tr = obspy.read(p)
@@ -107,6 +111,10 @@ for line in sta_f.readlines():
     spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
 
     c = 343    
+
+    tprime0 = tarrive
+    v0 = speed_mps
+    l = np.sqrt(dist_m**2 + (alt_m-elevations[y])**2)
     if equipment == 'C185':
         f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 231] 
 
