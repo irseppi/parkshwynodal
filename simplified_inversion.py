@@ -11,6 +11,8 @@ seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 station = seismo_data['Station']
+elevations = seismo_data['Elevation']
+
 flight_num = [530342801,528485724,528473220,528407493,528293430,531605202,531715679,529805251,529948401] 
 time = [1551066051,1550172833,1550168070,1550165577,1550089044,1551662362,1551736354,1550803701,1550867033] 
 sta = [1022,1272,1173,1283,1004,1010,1021,1006,1109]
@@ -56,6 +58,7 @@ for n in range(0,8):
 
             for y in range(len(station)):
                 if str(station[y]) == str(sta[n]):
+                    elevation = elevations[y]
                     dist = distance(seismo_latitudes[y], seismo_longitudes[y], flight_latitudes[line], flight_longitudes[line])	
 
                     p = "/scratch/naalexeev/NODAL/2019-0"+str(month[n])+"-"+str(day[n])+"T"+str(h)+":00:00.000000Z.2019-0"+str(month[n])+"-"+str(day2)+"T"+str(h_u)+":00:00.000000Z."+str(station[y])+".mseed"
@@ -67,8 +70,8 @@ for n in range(0,8):
                     torg = tr[2].times()
                       
                     clat, clon, dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
-                    tarrive = tim + (time[n] - calc_time(tmid,dist_m,alt_m))
-
+                    height_m = alt_m - elevation 
+                    tarrive = 120+ (time[n] - calc_time(tmid,dist_m,height_m))
                     # Compute spectrogram
                     frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9, detrend = 'constant') 
                     
