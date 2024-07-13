@@ -73,7 +73,8 @@ for i in range(len(day)):
 				scale = 70/1280
 				plane = plane_img.resize((int(google_slide_width * 0.26), int(google_slide_height * 0.26)))
 				spec = spec_img.resize((int(google_slide_width * 0.31), int(google_slide_height * 0.35)))  
-				maps = map_img.resize((int(google_slide_width *  0.31), int(google_slide_height * 0.27)))
+				#maps = map_img.resize((int(google_slide_width *  0.31), int(google_slide_height * 0.27)))
+				maps = map_img.resize((int(google_slide_width *  0.25), int(google_slide_width * 0.25 * map_img.height / map_img.width)))
 				spectrogram = spectrogram.resize((int(google_slide_width * 0.75), int(google_slide_height)))
 
 				# Create blank canvas
@@ -81,10 +82,10 @@ for i in range(len(day)):
 
 				# Paste images onto canvas
 				canvas.paste(spec, (google_slide_width - spec.width+ int(spec.width/12), google_slide_height - spec.height))
+				
+				canvas.paste(maps, (google_slide_width - int(maps.width*1.05), int(plane.height)-int(plane.height*0.1)))
 				canvas.paste(plane, (google_slide_width - plane.width, 0))
 				canvas.paste(spectrogram, (-40, 0))
-				canvas.paste(maps, (google_slide_width - int(maps.width), int(plane.height)+int(plane.height*0.05)))
-				
 				# Draw text from files
 				draw = ImageDraw.Draw(canvas)
 				font = ImageFont.truetype('input/Arial.ttf', 15) #load_default()  
@@ -98,8 +99,8 @@ for i in range(len(day)):
 				# Label each image
 				draw.text((15, 35), '(a)', fill='black', font=font2)
 				draw.text((15, 350), '(b)', fill='black', font=font2)
-				draw.text((google_slide_width - int(maps.width), 20), '(c)', fill='black', font=font2)
-				draw.text((google_slide_width - int(maps.width), int(plane.height) + int(plane.height*0.05)), '(d)', fill='black', font=font2)
+				draw.text((google_slide_width - int(plane.width*1.15), 20), '(c)', fill='black', font=font2)
+				draw.text((google_slide_width - int(plane.width*1.15), int(plane.height) + int(plane.height*0.05)), '(d)', fill='black', font=font2)
 				draw.text((google_slide_width - spec.width + int(spec.width/12) - 15, google_slide_height - spec.height + 20), '(e)', fill='black', font=font2)
 
 				for l in range(len(t)):

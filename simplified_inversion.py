@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import obspy
 import datetime
 from prelude import *
-from scipy.signal import spectrogram
+from scipy.signal import find_peaks, spectrogram
 import scipy.linalg as la
 
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
@@ -17,7 +17,7 @@ sta = [1022,1272,1173,1283,1004,1010,1021,1006,1109]
 day = [25,14,14,14,13,4,4,22,22]
 month = [2,2,2,2,2,3,3,2,2]
 
-for n in range(4,5): #9):
+for n in range(0,8):
     ht = datetime.utcfromtimestamp(time[n])
     mins = ht.minute
     secs = ht.second
@@ -66,8 +66,7 @@ for n in range(4,5): #9):
                     title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'						
                     torg = tr[2].times()
                       
-                    clat, clon, dist_km, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
-                    dist_m = dist_km * 1000
+                    clat, clon, dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
                     tarrive = tim + (time[n] - calc_time(tmid,dist_m,alt_m))
 
                     # Compute spectrogram
@@ -84,12 +83,7 @@ for n in range(4,5): #9):
                             MDF[row][col] = median
                     spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
 
-                    middle_index = len(times) // 2
-                    middle_column = spec[:, middle_index]
-                    vmin = 0  
-                    vmax = np.max(middle_column) 
-                    
-
+                    c = 343    
                     if n == 0:
                         f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 231] 
                         tprime0 = 112
@@ -103,47 +97,54 @@ for n in range(4,5): #9):
                         l = 3176
 
                     if n == 2:
-                        f0_array = [78,120,130, 258]
+                        f0_array = [78,119,130, 258]
                         tprime0 = 93
                         v0 = 142
                         l = 4992
 
                     if n == 3:
-                        f0_array = [34,69,104,119,134,139]
+                        f0_array = [35,70,103,119,133,139]
                         tprime0 = 115
-                        v0 = 159
-                        l = 3802
+                        v0 = 160
+                        l = 3832
 
                     if n == 4:
-                        f0_array = [14,28,41,54,68,81,95,109,123,136,148,162,177,189,203,226,241,249,271]
+                        f0_array = [14,27,40,53,67,80,94,108,122,135,147,161,174,187,202,225,240,248,270]
                         tprime0 = 140
                         v0 = 62
-                        l = 500
-                    else:
-                        #f0_array =
-                        tprime0 = tarrive
-                        v0 = speed_mps
-                        l = np.sqrt(dist_m**2 + alt_m**2)
-                    #Choose start and end time
-                    plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                        l = 504
+
+                    if n == 5:
+                        f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 192, 211, 231]
+                        tprime0 = 112
+                        v0 = 53 
+                        l = 831
+
+                    if n == 6:
+                        f0_array = [19,40,59,79,100,120,140,160,180,200,221,241,261]
+                        tprime0 = 118
+                        v0 = 59
+                        l = 479
+
+                    if n == 7:
+                        f0_array = [14,32,43,48,64,80,86,96,112,129,145,158,161,180,194,202,210,227,243,260,277]
+                        tprime0 = 110
+                        v0 = 89
+                        l = 1307
+                        
+                    c = 343
                     
-                    start_time = 0
-                    end_time = 239
-                    set_time = []
-                    def onclick(event):
-                        global coords
-                        set_time.append(event.xdata) 
-                        plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-                        plt.draw() 
-                        print('Clicked:', event.xdata, event.ydata)  
-
-                    cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-                    plt.show(block=True)
-
-                    start_time = set_time[0]
-                    end_time = set_time[1]
-                    new_times = times[np.where((times >= start_time) & (times <= end_time))]
+                    corridor_width = 6 
+                    if n == 3: #if it is a Boeing Jet
+                        corridor_width = 3
+                    elif n == 4: # if it is a helicopter
+                        corridor_width = 4
+                    elif n == 7: # if it is a C46: CURTISS COMMANDO
+                        corridor_width = 3 
+                    middle_index =  len(times) // 2
+                    middle_column = spec[:, middle_index]
+                    vmin = 0  
+                    vmax = np.max(middle_column) 
 
                     w  = len(f0_array)
                     
@@ -154,69 +155,113 @@ for n in range(4,5): #9):
                     for i in range(w):
                         mprior.append(f0_array[i])
                     mprior = np.array(mprior)
-                    c = 343
-                    
+
                     peaks_assos = []
                     fobs = []
                     tobs = []
 
-                    plt.figure()
-                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                    corridor_width = (fs/2)/len(frequencies)
-                    for i in range(w):
+                    for i in range(len(f0_array)):
                         f0 = f0_array[i]
-                        
-                        ft = calc_ft(new_times, tprime0, f0, v0, l, c)
 
-                        option = 2
-                        if option == 1:
-                            count = 0
-                        if option == 2:
-                            maxfreq = []
-                            ttt = []
-                            coord_inv = []
-                        for t_f in range(len(new_times)):
-                            if not np.isnan(ft[t_f]) and ft[t_f] != np.inf:
-                                upper = int(ft[t_f] + corridor_width)
-                                lower = int(ft[t_f] - corridor_width)
+                        ft = calc_ft(times,  tprime0, f0, v0, l, c)
+                       
+                        maxfreq = []
+                        coord_inv = []
+                        ttt = []
 
-                                if lower < 0:
-                                    lower = 0
-                                if upper > 250:
-                                    upper = 250
+                        f01 = f0 + corridor_width
+                        f02 = f0  - corridor_width
+                        upper = calc_ft(times,  tprime0, f01, v0, l, c)
+                        lower = calc_ft(times,  tprime0, f02, v0, l, c)
+
+                        for t_f in range(len(times)):
+
+                            try:      
+                                tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
                                 try:
-                                    tt = spec[lower:upper, t_f]
-                                    if option == 1:
-                                        max_amplitude_index = np.argmax(tt)
-                                        max_amplitude_frequency = frequencies[max_amplitude_index+lower]
-                                        fobs.append(max_amplitude_frequency)
-                                        tobs.append(new_times[t_f])
-                                        count += 1
-                                    if option == 2:
-                                        max_amplitude_index = np.argmax(tt)
-                                        max_amplitude_frequency = frequencies[max_amplitude_index+lower]
-                                        maxfreq.append(max_amplitude_frequency)
-                                        coord_inv.append((new_times[t_f], max_amplitude_frequency))
-                                        ttt.append(new_times[t_f])
+                                    if n != 2 or n != 3 or n != 4 or n != 7:
+                                        max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
+                                    elif n == 7:
+                                        max_amplitude_index,_ = find_peaks(tt, prominence = 1, wlen=25, height=vmax*0.2)
+                                    else:
+                                        max_amplitude_index,_ = find_peaks(tt, prominence = 25, wlen=5, height=vmax*0.5)
+                                    maxa = np.argmax(tt[max_amplitude_index])
+                                    max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
                                 except:
-                                    continue
-                        if option == 2:
+                                    if n == 3 or len(f0_array) > 11: #This is used for the boeing jet and any other flight with more than 11 fundamental frequencies
+                                        if np.max(tt) > vmax*0.4: 
+                                            max_amplitude_index = np.argmax(tt)
+                                            max_amplitude_frequency = max_amplitude_index+int(np.round(lower[t_f],0))
+                                        else:
+                                            continue
+                                    
+                                    else:
+                                        continue
+                                maxfreq.append(max_amplitude_frequency)
+                                coord_inv.append((times[t_f], max_amplitude_frequency))
+                                ttt.append(times[t_f])
+
+                            except:
+                                continue
+                        
+                        if f0 < 200:
                             coord_inv_array = np.array(coord_inv)
                             mtest = [f0,v0, l, tprime0]
-                            mtest,_ = invert_f(mtest, coord_inv_array, num_iterations=12)
+                            mtest,_ = invert_f(mtest, coord_inv_array, num_iterations=4)
                             ft = calc_ft(ttt,  mtest[3], mtest[0], mtest[1], mtest[2], c)
-                            delf = np.array(ft) - np.array(maxfreq)
+                        else:
+                            ft = calc_ft(ttt,  tprime0, f0, v0, l, c)
 
+                        delf = np.array(ft) - np.array(maxfreq)
+
+                        count = 0
+                        for i in range(len(delf)):
+                            if np.abs(delf[i]) <= (3):
+                                fobs.append(maxfreq[i])
+                                tobs.append(ttt[i])
+                                count += 1
+                        peaks_assos.append(count)
+                    time_pick = True
+                    if time_pick == True:
+                        set_time = []
+                        plt.figure()
+                        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                        plt.scatter(tobs,fobs, color='black', marker='x')
+                        def onclick(event):
+                            global coords
+                            set_time.append(event.xdata) 
+                            plt.scatter(event.xdata, event.ydata, color='red', marker='x')  # Add this line
+                            plt.draw() 
+                            print('Clicked:', event.xdata, event.ydata)  
+
+                        cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+                        plt.show(block=True)
+
+                        start_time = set_time[0]
+                        end_time = set_time[1]
+
+                        ftobs = []
+                        ffobs = []
+                        peak_ass = []
+                        cum = 0
+                        for p in range(w):
                             count = 0
-                            for i in range(len(delf)):
-                                if np.abs(delf[i]) <= (2):
-                                    fobs.append(maxfreq[i])
-                                    tobs.append(ttt[i])
-                                    count += 1
-                            peaks_assos.append(count)
-                        
-                    plt.scatter(tobs, fobs, color='black', marker='x')
 
+                            for j in range(cum,cum+peaks_assos[p]):
+                                if tobs[j] >= start_time and tobs[j] <= end_time:
+                                    ftobs.append(tobs[j])
+                                    ffobs.append(fobs[j])
+                                    count += 1
+                            cum = cum + peaks_assos[p]
+                        
+                            peak_ass.append(count)
+                        peaks_assos = peak_ass
+                        tobs = ftobs
+                        fobs = ffobs
+
+                    plt.figure()
+                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                    plt.scatter(tobs,fobs, color='black', marker='x')
                     plt.show()
                     
                     qv = 0
@@ -247,40 +292,21 @@ for n in range(4,5): #9):
                             new_row = np.zeros(w+3)
                             f0 = f0_array[p]
                           
-                            if p == 0:
-                                for j in range(cum,peaks_assos[p]):
-                                    tprime = tobs[j]
-                                    t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-                                    ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
+                            for j in range(cum,cum+peaks_assos[p]):
+                                tprime = tobs[j]
+                                t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
+                                ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
 
-
-                                    f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(f0,v0,l,tprime0, tobs[j])
-                                
-                                    new_row[0] = f_derivev0
-                                    new_row[1] = f_derivel
-                                    new_row[2] = f_derivetprime0
-                                    new_row[3+p] = f_derivef0
-
-                                    G = np.vstack((G, new_row))
-                                    
-                                    fnew.append(ft0p)
-
-                            else:
-                                for j in range(cum,cum+peaks_assos[p]):
-                                    tprime = tobs[j]
-                                    t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-                                    ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
-
-                                    f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(f0,v0,l,tprime0, tobs[j])
-                                
-                                    new_row[0] = f_derivev0
-                                    new_row[1] = f_derivel
-                                    new_row[2] = f_derivetprime0
-                                    new_row[3+p] = f_derivef0
-                                            
-                                    G = np.vstack((G, new_row))
-                                            
-                                    fnew.append(ft0p)
+                                f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(f0,v0,l,tprime0, tobs[j])
+                            
+                                new_row[0] = f_derivev0
+                                new_row[1] = f_derivel
+                                new_row[2] = f_derivetprime0
+                                new_row[3+p] = f_derivef0
+                                        
+                                G = np.vstack((G, new_row))
+                                        
+                                fnew.append(ft0p)
                         
                             cum = cum + peaks_assos[p]
  
