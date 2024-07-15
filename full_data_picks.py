@@ -38,6 +38,7 @@ for line in sta_f.readlines():
     secs = ht.second
     month = ht.month
     day = ht.day
+
     h = ht.hour
     h_u = str(h+1)
     if h < 23:			
@@ -119,147 +120,153 @@ for line in sta_f.readlines():
     v0 = speed_mps
     l = np.sqrt(dist_m**2 + (alt_m-elevation)**2)
 
-    if equipment == 'C185':
-        f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 231] 
+    #if equipment == 'C185':
+    #    f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 192, 211, 231]
 
 
-    elif equipment == 'PA31':
-        f0_array = [36, 55, 73, 109, 146, 164, 183, 218, 236, 254, 273]
+    #elif equipment == 'PA31':
+    #    f0_array = [36, 55, 73, 109, 146, 164, 183, 218, 236, 254, 273]
 
 
-    elif equipment == 'SW4':
-        f0_array = [78,119,130, 258]
+    #elif equipment == 'SW4':
+    #    f0_array = [78,119,130, 258]
 
 
-    elif equipment == 'B736':
-        f0_array = [35,70,103,119,133,139]
+    #elif equipment == 'B736':
+    #    f0_array = [35,70,103,119,133,139]
 
 
-    elif equipment == 'R44':
+    if equipment == 'R44':
         f0_array = [14,27,40,53,67,80,94,108,122,135,147,161,174,187,202,225,240,248,270]
 
-
-    elif equipment == 'C185':
-        f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 192, 211, 231]
-
-
-    elif equipment == 'GA8':
-        f0_array = [19,40,59,79,100,120,140,160,180,200,221,241,261]
+        #elif equipment == 'GA8':
+        #    f0_array = [19,40,59,79,100,120,140,160,180,200,221,241,261]
 
 
-    elif equipment == 'C46':
-        f0_array = [14,32,43,48,64,80,86,96,112,129,145,158,161,180,194,202,210,227,243,260,277]
+        #elif equipment == 'C46':
+        #    f0_array = [14,32,43,48,64,80,86,96,112,129,145,158,161,180,194,202,210,227,243,260,277]
 
     else:
         continue
+    print(equipment)
+    plt.figure()
+    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r') 
 
-    corridor_width = 6 
-    if equipment == 'B736': #if it is a Boeing Jet
-        corridor_width = 3
-    elif equipment == 'R44': # if it is a helicopter
-        corridor_width = 4
-    elif equipment == 'C46': # if it is a C46: CURTISS COMMANDO
-        corridor_width = 3 
-    middle_index =  len(times) // 2
-    middle_column = spec[:, middle_index]
-    vmin = 0  
-    vmax = np.max(middle_column) 
+    plt.show()
+    con = input("Do you want to use this? (y or n)")
+    if con == 'n':
+        continue
+    else:
+        corridor_width = 6 
+        if equipment == 'B736': #if it is a Boeing Jet
+            corridor_width = 3
+        elif equipment == 'R44': # if it is a helicopter
+            corridor_width = 4
+        elif equipment == 'C46': # if it is a C46: CURTISS COMMANDO
+            corridor_width = 3 
+        middle_index =  len(times) // 2
+        middle_column = spec[:, middle_index]
+        vmin = 0  
+        vmax = np.max(middle_column) 
 
-    peaks_assos = []
-    fobs = []
-    tobs = []
+        peaks_assos = []
+        fobs = []
+        tobs = []
 
-    for i in range(len(f0_array)):
-        f0 = f0_array[i]
+        for i in range(len(f0_array)):
+            f0 = f0_array[i]
 
-        ft = calc_ft(times,  tprime0, f0, v0, l, c)
-        
-        maxfreq = []
-        coord_inv = []
-        ttt = []
+            ft = calc_ft(times,  tprime0, f0, v0, l, c)
+            
+            maxfreq = []
+            coord_inv = []
+            ttt = []
 
-        f01 = f0 + corridor_width
-        f02 = f0  - corridor_width
-        upper = calc_ft(times,  tprime0, f01, v0, l, c)
-        lower = calc_ft(times,  tprime0, f02, v0, l, c)
+            f01 = f0 + corridor_width
+            f02 = f0  - corridor_width
+            upper = calc_ft(times,  tprime0, f01, v0, l, c)
+            lower = calc_ft(times,  tprime0, f02, v0, l, c)
 
-        for t_f in range(len(times)):
+            for t_f in range(len(times)):
 
-            try:      
-                tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
-                try:
-                    if equipment == 'SW4' or equipment == 'B736' or equipment == 'R44' or equipment == 'C46':
-                        max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
-                    elif equipment == 'C46':
-                        max_amplitude_index,_ = find_peaks(tt, prominence = 1, wlen=25, height=vmax*0.2)
-                    else:
-                        max_amplitude_index,_ = find_peaks(tt, prominence = 25, wlen=5, height=vmax*0.5)
-                    maxa = np.argmax(tt[max_amplitude_index])
-                    max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
-                except:
-                    if equipment == 'B736' or len(f0_array) > 11: #This is used for the boeing jet and any other flight with more than 11 fundamental frequencies
-                        if np.max(tt) > vmax*0.4: 
-                            max_amplitude_index = np.argmax(tt)
-                            max_amplitude_frequency = max_amplitude_index+int(np.round(lower[t_f],0))
+                try:      
+                    tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
+                    try:
+                        if equipment == 'SW4' or equipment == 'B736' or equipment == 'R44' or equipment == 'C46':
+                            max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
+                        elif equipment == 'C46':
+                            max_amplitude_index,_ = find_peaks(tt, prominence = 1, wlen=25, height=vmax*0.2)
+                        else:
+                            max_amplitude_index,_ = find_peaks(tt, prominence = 25, wlen=5, height=vmax*0.5)
+                        maxa = np.argmax(tt[max_amplitude_index])
+                        max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
+                    except:
+                        if equipment == 'B736' or len(f0_array) > 11: #This is used for the boeing jet and any other flight with more than 11 fundamental frequencies
+                            if np.max(tt) > vmax*0.4: 
+                                max_amplitude_index = np.argmax(tt)
+                                max_amplitude_frequency = max_amplitude_index+int(np.round(lower[t_f],0))
+                            else:
+                                continue
+                        
                         else:
                             continue
-                    
-                    else:
-                        continue
-                maxfreq.append(max_amplitude_frequency)
-                coord_inv.append((times[t_f], max_amplitude_frequency))
-                ttt.append(times[t_f])
+                    maxfreq.append(max_amplitude_frequency)
+                    coord_inv.append((times[t_f], max_amplitude_frequency))
+                    ttt.append(times[t_f])
 
-            except:
+                except:
+                    continue
+            if len(coord_inv) > 1:
+                if f0 < 200:
+                    coord_inv_array = np.array(coord_inv)
+                    mtest = [f0,v0, l, tprime0]
+                    mtest,_ = invert_f(mtest, coord_inv_array, num_iterations=4)
+                    ft = calc_ft(ttt,  mtest[3], mtest[0], mtest[1], mtest[2], c)
+                else:
+                    ft = calc_ft(ttt,  tprime0, f0, v0, l, c)
+
+                delf = np.array(ft) - np.array(maxfreq)
+
+                count = 0
+                for i in range(len(delf)):
+                    if np.abs(delf[i]) <= (3):
+                        fobs.append(maxfreq[i])
+                        tobs.append(ttt[i])
+                        count += 1
+            else:
                 continue
-        
-        if f0 < 200 and len(coord_inv) > 1:
-            coord_inv_array = np.array(coord_inv)
-            mtest = [f0,v0, l, tprime0]
-            mtest,_ = invert_f(mtest, coord_inv_array, num_iterations=4)
-            ft = calc_ft(ttt,  mtest[3], mtest[0], mtest[1], mtest[2], c)
-        else:
-            ft = calc_ft(ttt,  tprime0, f0, v0, l, c)
+        #if len(fobs) == 0:
+        #    print('No picks found')
+        #    continue
+        time_pick = False
+        if time_pick == True:
+            set_time = []
+            plt.figure()
+            plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+            plt.scatter(tobs,fobs, color='black', marker='x')
+            def onclick(event):
+                global coords
+                set_time.append(event.xdata) 
+                plt.scatter(event.xdata, event.ydata, color='red', marker='x')  # Add this line
+                plt.draw() 
+                print('Clicked:', event.xdata, event.ydata)  
 
-        delf = np.array(ft) - np.array(maxfreq)
+            cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+            plt.show(block=True)
 
-        count = 0
-        for i in range(len(delf)):
-            if np.abs(delf[i]) <= (3):
-                fobs.append(maxfreq[i])
-                tobs.append(ttt[i])
-                count += 1
-    if len(fobs) == 0:
-        continue
-    time_pick = True
-    if time_pick == True:
-        set_time = []
+            start_time = set_time[0]
+            end_time = set_time[1]
+
+            ftobs = []
+            ffobs = []
+            for i in range(len(tobs)):
+                if tobs[i] >= start_time and tobs[i] <= end_time:
+                    ftobs.append(tobs[i])
+                    ffobs.append(fobs[i])
+            tobs = ftobs
+            fobs = ffobs
+
         plt.figure()
         plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
         plt.scatter(tobs,fobs, color='black', marker='x')
-        def onclick(event):
-            global coords
-            set_time.append(event.xdata) 
-            plt.scatter(event.xdata, event.ydata, color='red', marker='x')  # Add this line
-            plt.draw() 
-            print('Clicked:', event.xdata, event.ydata)  
-
-        cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-        plt.show(block=True)
-
-        start_time = set_time[0]
-        end_time = set_time[1]
-
-        ftobs = []
-        ffobs = []
-        for i in range(len(tobs)):
-            if tobs[i] >= start_time and tobs[i] <= end_time:
-                ftobs.append(tobs[i])
-                ffobs.append(fobs[i])
-        tobs = ftobs
-        fobs = ffobs
-
-    plt.figure()
-    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-    plt.scatter(tobs,fobs, color='black', marker='x')
-    plt.show()
+        plt.show()
