@@ -27,7 +27,7 @@ for i in range(len(day)):
 	equipment = flight_data['equip']
 	callsign = flight_data['callsign'] 
 	fly = flight_data['flight']
-
+	aircraft_id = flight_data['aircraft_id']
 	for flight in os.listdir(spec_dir):
 		f = os.path.join(spec_dir, flight)
 		for l in range(len(flight_id)):
@@ -35,6 +35,7 @@ for i in range(len(day)):
 
 				#search text files for plane
 				pla = equipment[l]
+				id = aircraft_id[l]
 				for h in range(len(des)):
 					if pla == des[h]:
 						text2 = str(des[h]) + ': ' + str(man[h]) + ', '+ str(model[h]) + ' (' + str(descrip[h]) + ')'
@@ -117,7 +118,7 @@ for i in range(len(day)):
 				
 				BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5fig/'
 				make_base_dir(BASE_DIR)
-				name= BASE_DIR + '2019'+str(month[i])+str(day[i])+'_'+(flight)+'_'+time+'_'+str(station)+'_'+str(pla)+'_'+str(descrip[h])+'_'+str(engine[h])+str(coun[h])+'.png'
+				name= BASE_DIR + '2019'+str(month[i])+str(day[i])+'_'+(flight)+'_'+time+'_'+str(station)+'_'+str(pla)+'_'+str(id)+'_'+str(descrip[h])+'_'+str(engine[h])+str(coun[h])+'.png'
 
 				# Save combined image
 				canvas.save(name)
