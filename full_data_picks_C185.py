@@ -185,9 +185,11 @@ for line in sta_f.readlines():
                         count += 1
             else:
                 continue
+
         if len(fobs) == 0:
             print('No picks found')
             continue
+        
         time_pick = False
         if time_pick == True:
             set_time = []
