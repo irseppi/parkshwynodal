@@ -698,7 +698,32 @@ def rename_file(flight_name):
 			os.rename(collection + filename + '/' + fil, collection + filename +'_'+ fil)
 
 ########################################################################################################
+			
+def extract_flight(equipment):
+	"""
+	Extracts all rows from the 'all_station_crossing_db.txt' file whith the designated equipment type 
+	and prints them into an infividual file labeled with the equipment type.
+	
+	Args:
+		equipment (str): The equipment type to extract from the file.
 
+	Returns:
+		None
+
+	"""
+	input = open('all_station_crossing_db.txt','r')
+	output = open('all_station_crossing_db_'+str(equipment)+'.txt','w')
+
+	for line in input.readlines():
+		val = line.split(',')
+		if str(val[6][0:4]) == str(equipment):
+			output.write(line)
+		
+	input.close()
+	output.close()	
+
+########################################################################################################
+	
 def extract_col(input_file, output_file, col, split_str):
 	"""
 	Extracts a specific column from a text file and writes it to another file.
