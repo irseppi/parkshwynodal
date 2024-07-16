@@ -114,45 +114,50 @@ for line in sta_f.readlines():
             MDF[row][col] = median
     spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
 
+    middle_index =  len(times) // 2
+    middle_column = spec[:, middle_index]
+    vmin = 0  
+    vmax = np.max(middle_column) 
+
     c = 343    
     
     tprime0 = tarrive
     v0 = speed_mps
     l = np.sqrt(dist_m**2 + (alt_m-elevation)**2)
 
-    #if equipment == 'C185':
-    #    f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 192, 211, 231]
+    if equipment == 'C185':
+        f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 192, 211, 231]
 
 
-    #elif equipment == 'PA31':
-    #    f0_array = [36, 55, 73, 109, 146, 164, 183, 218, 236, 254, 273]
+    elif equipment == 'PA31':
+        f0_array = [36, 55, 73, 109, 146, 164, 183, 218, 236, 254, 273]
 
 
-    #elif equipment == 'SW4':
-    #    f0_array = [78,119,130, 258]
+    elif equipment == 'SW4':
+        f0_array = [78,119,130, 258]
 
 
-    #elif equipment == 'B736':
-    #    f0_array = [35,70,103,119,133,139]
+    elif equipment == 'B736':
+        f0_array = [35,70,103,119,133,139]
 
 
     if equipment == 'R44':
         f0_array = [14,27,40,53,67,80,94,108,122,135,147,161,174,187,202,225,240,248,270]
 
-        #elif equipment == 'GA8':
-        #    f0_array = [19,40,59,79,100,120,140,160,180,200,221,241,261]
+    elif equipment == 'GA8':
+        f0_array = [19,40,59,79,100,120,140,160,180,200,221,241,261]
 
 
-        #elif equipment == 'C46':
-        #    f0_array = [14,32,43,48,64,80,86,96,112,129,145,158,161,180,194,202,210,227,243,260,277]
+    elif equipment == 'C46':
+        f0_array = [14,32,43,48,64,80,86,96,112,129,145,158,161,180,194,202,210,227,243,260,277]
 
     else:
         continue
-    print(equipment)
-    plt.figure()
-    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r') 
 
+    plt.figure()
+    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax) 
     plt.show()
+
     con = input("Do you want to use this? (y or n)")
     if con == 'n':
         continue
@@ -164,10 +169,6 @@ for line in sta_f.readlines():
             corridor_width = 4
         elif equipment == 'C46': # if it is a C46: CURTISS COMMANDO
             corridor_width = 3 
-        middle_index =  len(times) // 2
-        middle_column = spec[:, middle_index]
-        vmin = 0  
-        vmax = np.max(middle_column) 
 
         peaks_assos = []
         fobs = []
@@ -188,11 +189,10 @@ for line in sta_f.readlines():
             lower = calc_ft(times,  tprime0, f02, v0, l, c)
 
             for t_f in range(len(times)):
-
                 try:      
                     tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
                     try:
-                        if equipment == 'SW4' or equipment == 'B736' or equipment == 'R44' or equipment == 'C46':
+                        if equipment != 'SW4' or equipment != 'B736' or equipment != 'R44' or equipment != 'C46':
                             max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
                         elif equipment == 'C46':
                             max_amplitude_index,_ = find_peaks(tt, prominence = 1, wlen=25, height=vmax*0.2)
@@ -206,8 +206,7 @@ for line in sta_f.readlines():
                                 max_amplitude_index = np.argmax(tt)
                                 max_amplitude_frequency = max_amplitude_index+int(np.round(lower[t_f],0))
                             else:
-                                continue
-                        
+                                continue          
                         else:
                             continue
                     maxfreq.append(max_amplitude_frequency)
@@ -235,9 +234,9 @@ for line in sta_f.readlines():
                         count += 1
             else:
                 continue
-        #if len(fobs) == 0:
-        #    print('No picks found')
-        #    continue
+        if len(fobs) == 0:
+            print('No picks found')
+            continue
         time_pick = False
         if time_pick == True:
             set_time = []
