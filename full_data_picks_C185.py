@@ -122,6 +122,8 @@ for line in sta_f.readlines():
         l = np.sqrt(dist_m**2 + (height_m)**2)
         
         f0_array = [38, 57, 76, 96, 116, 135, 154, 173, 192, 211, 231]
+        #f0_array = [62,82,105,124,145,167,186,209,250]
+
         tf = np.arange(0, 240, 1)
 
         fig, ax1 = plt.subplots(1, 1)   
@@ -135,8 +137,8 @@ for line in sta_f.readlines():
             f0 = f0_array[pp]
  
             ft = calc_ft(times, tprime0, f0, v0, l, c)
-            pl = np.full((0,len(ft)), 50)
-            ax1.plot(times, ft+pl, '#377eb8', ls = (0,(5,20)), linewidth=0.7) 
+
+            ax1.plot(times, ft, '#377eb8', ls = (0,(5,20)), linewidth=0.7) 
 
         ax1.axvline(x=120, color='black', linestyle='--', linewidth=0.7)
 
