@@ -78,7 +78,6 @@ for i in range(len(day)):
 					time = image[0:10]
 					im = os.path.join(sta, image)
 						
-
 					# Open images
 					spectrogram = Image.open(im)
 					map_img = Image.open('/scratch/irseppi/nodal_data/plane_info/map_all/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/map_'+flight+'_'+time+'.png')
