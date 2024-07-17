@@ -84,7 +84,7 @@ for line in sta_f.readlines():
     for n in range(len(time)):         
         if str(tm) == str(time[n])+'.0':
             spd = speed[n]
-            speed_mps = speed * 0.514444
+            speed_mps = spd * 0.514444
             alt = altitude[n]
             alt_m = alt * 0.3048
             index = n
