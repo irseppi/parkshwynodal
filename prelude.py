@@ -292,7 +292,15 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 			dist_lim = dist
 			closest_lon = lon
 			closest_lat = lat
-
+	if dist_lim < 1:
+		for location in np.arange((closest_lon-0.0000000001),(closest_lon+0.0000000001),0.0000000000001):
+			lon = location
+			lat = m*lon + b
+			dist = calculate_distance(lat, lon, seismo_latitude, seismo_longitude)/1000
+			if dist < dist_lim:
+				dist_lim = dist
+				closest_lon = lon
+				closest_lat = lat
 	dist_old_new = calculate_distance(closest_lat, closest_lon, clat, clon)/1000
 	dist_old_old = calculate_distance(c2lat, c2lon, clat, clon)/1000
 	ratio = dist_old_new/dist_old_old
