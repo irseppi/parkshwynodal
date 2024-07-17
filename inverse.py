@@ -77,8 +77,8 @@ for n in range(0,13):
                         title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'						
                         torg = tr[2].times()
                       
-                    clat, clon, dist_km, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
-                    dist_m = dist_km * 1000
+                    clat, clon, dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
+                    dist_km = dist_m / 1000
                     tarrive = tim + (time[n] - calc_time(tmid,dist_m,alt_m))
                     
                     # Compute spectrogram
