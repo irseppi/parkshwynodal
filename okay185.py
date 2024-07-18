@@ -212,14 +212,61 @@ for line in sta_f.readlines():
         tprime0 = m[3]
         
         ft = calc_ft(times, tprime0, f0, v0, l, c)
-        
+        if isinstance(sta, int):
+            peaks = []
+            p, _ = find_peaks(middle_column, distance = 7)
+            corridor_width = (fs/2) / len(p) 
+                            
+            if len(p) == 0:
+                corridor_width = fs/4
 
+            coord_inv = []
+
+            for t_f in range(len(times)):
+                upper = int(ft[t_f] + corridor_width)
+                lower = int(ft[t_f] - corridor_width)
+                if lower < 0:
+                    lower = 0
+                if upper > len(frequencies):
+                    upper = len(frequencies)
+                tt = spec[lower:upper, t_f]
+
+                max_amplitude_index = np.argmax(tt)
+                
+                max_amplitude_frequency = frequencies[max_amplitude_index+lower]
+                peaks.append(max_amplitude_frequency)
+                coord_inv.append((times[t_f], max_amplitude_frequency))
+
+
+            coord_inv_array = np.array(coord_inv)
+
+            m,_ = invert_f(m0, coord_inv_array, num_iterations=12)
+            f0 = m[0]
+            v0 = m[1]
+            l = m[2]
+            tprime0 = m[3]
+
+            ft = calc_ft(times, tprime0, f0, v0, l, c)
+            
+            delf = np.array(ft) - np.array(peaks)
+            
+            new_coord_inv_array = []
+            for i in range(len(delf)):
+                if np.abs(delf[i]) <= 3:
+                    new_coord_inv_array.append(coord_inv_array[i])
+            coord_inv_array = np.array(new_coord_inv_array)
+
+            m,covm = invert_f(m0, coord_inv_array, num_iterations=12, sigma=5)
+            
+            f0 = m[0]
+            v0 = m[1]
+            l = m[2]
+            tprime0 = m[3]
 
         mprior = []
         mprior.append(v0)
         mprior.append(l)
         mprior.append(tprime0)       
-        
 
         output2 = '/scratch/irseppi/nodal_data/plane_info/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(tm)+'_'+str(flight)+'.csv'
         if Path(output2).exists():
@@ -502,7 +549,7 @@ for line in sta_f.readlines():
             ax2.set_xlabel('Time (s)')
             f0lab = []
             ax2.axvline(x=tprime0, c = '#377eb8', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
-            f0_array = sorted(f0_array)
+            #f0_array = sorted(f0_array)
             covm = np.sqrt(np.diag(covm))
             for pp in range(len(f0_array)):
                 f0 = f0_array[pp]
@@ -604,7 +651,7 @@ for line in sta_f.readlines():
             plt.close() 
 
             print(tprime0,v0,l,f0lab,covm)
-            C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(tm)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+'\n') 
+            C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(tm)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+',\n') 
             sta_2 = sta
 
     else:
