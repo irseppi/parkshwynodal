@@ -132,34 +132,48 @@ for line in sta_f.readlines():
 
     tf = np.arange(0, 240, 1)
 
-    pick_again = 'y'
-    while pick_again == 'y':
+    output1 = '/scratch/irseppi/nodal_data/plane_info/inversepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(tm)+'_'+str(flight)+'.csv'
+        
+    if Path(output1).exists():
+        
         coords = []
-        plt.figure()
-        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-        def onclick(event):
-            global coords
-            coords.append((event.xdata, event.ydata))
-            plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-            plt.draw() 
-            print('Clicked:', event.xdata, event.ydata)  
-        cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+        with open(output1, 'r') as file:
+            for line in file:
+                # Split the line using commas
+                pick_data = line.split(',')
+                coords.append((float(pick_data[0]), float(pick_data[1])))
+        file.close()  # Close the file after reading
 
-        plt.show(block=True)
-        pick_again = input("Do you want to repick you points? (y or n)")
-    # if f0 is closer to a number in Mode_A vs closer to a number in Mode_B, then we use Mode_A
-    tprime0 = coords[0][0]   
-    f0 = calc_f0(tprime, tprime0, coords[0][1], v0, l, c)
-    if np.abs(f0 - Mode_A[5]) < np.abs(f0 - Mode_B[4]):
-        f0_array = Mode_A
     else:
-        f0_array = Mode_B
+        BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/inversepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+        make_base_dir(BASE_DIR)
+        pick_again = 'y'
+        while pick_again == 'y':
+            r1 = open(output1,'w')
+            coords = []
+            plt.figure()
+            plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+            def onclick(event):
+                global coords
+                coords.append((event.xdata, event.ydata))
+                plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                plt.draw() 
+                print('Clicked:', event.xdata, event.ydata)  
+                r1.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+            cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+
+            plt.show(block=True)
+            r1.close()
+            pick_again = input("Do you want to repick you points? (y or n)")
+        
+  
     if len(coords) == 0:
         print('No picks')
         continue
     # Convert the list of coordinates to a numpy array
     coords_array = np.array(coords)
 
+    f0 = 116
     c = 343
     m0 = [f0, v0, l, tprime0]
 
@@ -226,10 +240,48 @@ for line in sta_f.readlines():
     mprior.append(l)
     mprior.append(tprime0)       
 
+    output2 = '/scratch/irseppi/nodal_data/plane_info/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(tm)+'_'+str(flight)+'.csv'
+    if Path(output2).exists():
 
-    w  = len(f0_array)
+        peaks = []
+        freqpeak = []
+        with open(output2, 'r') as file:
+            for line in file:
+                # Split the line using commas
+                pick_data = line.split(',')
+                peaks.append(float(pick_data[1]))
+                freqpeak.append(float(pick_data[0]))
+        file.close()  # Close the file after reading
+
+    else:
+        BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+        make_base_dir(BASE_DIR)
+        pick_again = 'y'
+        while pick_again == 'y':
+            r2 = open(output2,'w')
+            peaks = []
+            freqpeak = []
+            plt.figure()
+            plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+            plt.axvline(x=tprime0, c = '#377eb8', ls = '--')
+            def onclick(event):
+                global coords
+                peaks.append(event.ydata)
+                freqpeak.append(event.xdata)
+                plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                plt.draw() 
+                print('Clicked:', event.xdata, event.ydata)  
+                r2.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+            cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+
+            plt.show(block=True)
+            r2.close()
+            pick_again = input("Do you want to repick you points? (y or n)")
+    w  = len(peaks)
     for o in range(w):
-        f0 = f0_array[o]
+        tprime = freqpeak[o]
+        ft0p = peaks[o]
+        f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
         mprior.append(f0)
     mprior = np.array(mprior)
     fig, ax1 = plt.subplots(1, 1)   
@@ -239,9 +291,13 @@ for line in sta_f.readlines():
     
     ax1.set_xlabel('Time (s)')
 
-    for pp in range(w):
-        f0 = f0_array[o]
+    for pp in range(len(peaks)):
+        tprime = freqpeak[pp]
+        ft0p = peaks[pp]
+        f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
+
         ft = calc_ft(times, tprime0, f0, v0, l, c)
+
         ax1.plot(times, ft, '#377eb8', ls = (0,(5,20)), linewidth=0.7) 
                     
     ax1.axvline(x=tprime0, color='red', linestyle='--', linewidth=0.7)
@@ -267,9 +323,12 @@ for line in sta_f.readlines():
         fobs = []
         tobs = []
 
-        for pp in range(len(w)):
-            f0 = f0_array[pp]
+        for pp in range(len(peaks)):
+            tprime = freqpeak[pp]
+            ft0p = peaks[pp]
+            f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
             
+        
             ft = calc_ft(times,  tprime0, f0, v0, l, c)
             
             maxfreq = []
@@ -396,7 +455,10 @@ for line in sta_f.readlines():
             cum = 0
             for p in range(w):
                 new_row = np.zeros(w+3)
-                f0 = f0_array[p]
+                tprime = freqpeak[p]
+                ft0p = peaks[p]
+                f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
+            
          
                 for j in range(cum,cum+peaks_assos[p]):
                     tprime = tobs[j]
