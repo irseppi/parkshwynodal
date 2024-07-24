@@ -21,41 +21,42 @@ for line in sta_f.readlines():
     val = line.split(',')
     date = val[0]
     flight = val[1]
-    sta = val[5]
-    if int(date) > 20190301:
-        equipment = val[6][0:4]
+    try:
+        sta = int(val[6])
+    except:
+        continue
+    equipment = val[7][0:4]
+    tm = float(val[3])
 
-        tm = float(val[2])
+    spec_dir = '/scratch/irseppi/nodal_data/plane_info/5spec/'+str(date)+'/'+str(flight)+'/'+str(sta)+'/'
+    if os.path.exists(spec_dir):
+        continue
 
-        spec_dir = '/scratch/irseppi/nodal_data/plane_info/5spec/'+str(date)+'/'+str(flight)+'/'+str(sta)+'/'
-        if os.path.exists(spec_dir):
+    flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date) + '_positions/' + str(date) + '_' + str(flight) + '.csv'
+    flight_data = pd.read_csv(flight_file, sep=",")
+    flight_latitudes = flight_data['latitude']
+    flight_longitudes = flight_data['longitude']
+    time = flight_data['snapshot_id']
+    speed = flight_data['speed']
+    altitude = flight_data['altitude']
+
+    for n in range(len(time)):         
+        if str(tm) == str(time[n])+'.0':
+            spd = speed[n]
+            speed_mps = spd * 0.514444
+            alt = altitude[n]
+            alt_m = alt * 0.3048
+            index = n
+            tlab = time[n]
+            for e in range(len(station)):
+                if station[e] == str(sta):
+                    elevation = elevations[e]
+                    clat, clon, dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes, index, time, seismo_latitudes[e], seismo_longitudes[e])
+                else:
+                    continue
+        else:
             continue
 
-        flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date) + '_positions/' + str(date) + '_' + str(flight) + '.csv'
-        flight_data = pd.read_csv(flight_file, sep=",")
-        flight_latitudes = flight_data['latitude']
-        flight_longitudes = flight_data['longitude']
-        time = flight_data['snapshot_id']
-
-        speed = flight_data['speed']
-        altitude = flight_data['altitude']
-
-        for n in range(len(time)):         
-            if str(tm) == str(time[n])+'.0':
-                spd = speed[n]
-                speed_mps = spd * 0.514444
-                alt = altitude[n]
-                alt_m = alt * 0.3048
-                index = n
-                tlab = time[n]
-                for e in range(len(station)):
-                    if station[e] == sta:
-                        elevation = elevations[e]
-                        clat, clon, dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes, index, time, seismo_latitudes[e], seismo_longitudes[e])
-                    else:
-                        continue
-            else:
-                continue
         height_m = alt_m - elevation 
         tarrive = calc_time(tmid,dist_m,height_m)
 
@@ -107,16 +108,7 @@ for line in sta_f.readlines():
             for col in range(m):
                 MDF[row][col] = median
         spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
-        try_median = False
-        if try_median == True:
-            if isinstance(sta, int):
-                spec = np.zeros((a,b))
-                for col in range(0,b):
-                    p = sorted(Sxx[:, col])
-                    median = p[int(len(p)/2)]
 
-                    for row in range(len(Sxx)):
-                        spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
         middle_index =  len(times) // 2
         middle_column = spec[:, middle_index]
         vmin = 0  
@@ -129,79 +121,61 @@ for line in sta_f.readlines():
 
         Mode_A = [27.87,39.9,57.24,76.66,95.96,114.74,133.65,152.76,171.99,186.7,207.96,228.57]
         Mode_B = [39.9,62.1,82.9,103.28,124.38,145.87,165.79,186.7,207.96,228.57,248.4]
-        Mode_A = [28,40,57,77,96,115,134,153,172,187,208,229]
-        Mode_B = [40,62,83,103,124,146,166,187,208,229,249]
+        #Mode_A = [28,40,57,77,96,115,134,153,172,187,208,229]
+        #Mode_B = [40,62,83,103,124,146,166,187,208,229,249]
 
-
-        pick_again = 'y'
-        while pick_again == 'y':
-            coords = []
-            plt.figure()
-            plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-            def onclick(event):
-                global coords
-                coords.append((event.xdata, event.ydata))
-                plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-                plt.draw() 
-                print('Clicked:', event.xdata, event.ydata)  
-            cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-
-            plt.show(block=True)
-            pick_again = input("Do you want to repick you points? (y or n)")
         # if f0 is closer to a number in Mode_A vs closer to a number in Mode_B, then we use Mode_A
-        tprime0 = coords[0][0]   
-        f0 = calc_f0(tprime0, tprime0, coords[0][1], v0, l, c)
-        print(f0)
-        if np.abs(f0 - Mode_A[5]) < np.abs(f0 - Mode_B[4]):
-            f0_array = Mode_A
-        else:
-            f0_array = Mode_B
+        try:
+            f0_try = [114.74,124.38]
+            for f00 in f0_try:
+                m0 = [f00, v0, l, tprime0]
+                ft = calc_ft(times, tprime0, f00, v0, l, c)
+                ttt = []
+                corridor_width = 6
+                coord_inv = []
+                f01 = f00 + corridor_width
+                f02 = f00  - corridor_width
+                upper = calc_ft(times,  tprime0, f01, v0, l, c)
+                lower = calc_ft(times,  tprime0, f02, v0, l, c)
+                count = 0
+                for t_f in range(len(times)):
+                    try:      
+                        tt = spec[:, t_f]
+                        try:
+                            max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
+                            maxa = np.argmax(tt[max_amplitude_index])
+                            max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
+                        except:
+                            continue
+                        ttt.append(times[t_f])
+                        coord_inv.append((times[t_f], max_amplitude_frequency))
+                    except:
+                        continue
+                if coord_inv == []:
+                    continue 
+                else:
+                    coord_inv_array = np.array(coord_inv)
 
-        m0 = [v0, l, tprime0]
-        ft = calc_ft(times, tprime0, f0, v0, l, c)
-        if isinstance(sta, int):
-            peaks = []
-            #p, _ = find_peaks(middle_column, distance = 7)
-            corridor_width = 10 #(fs/2) / len(p) 
-                            
-            #if len(p) == 0:
-            #    corridor_width = fs/4
+                m,_ = invert_f(m0, coord_inv_array, num_iterations=12)
 
-            coord_inv = []
-
-            for t_f in range(len(times)):
-                upper = int(ft[t_f] + corridor_width)
-                lower = int(ft[t_f] - corridor_width)
-                if lower < 0:
-                    lower = 0
-                if upper > len(frequencies):
-                    upper = len(frequencies)
-                tt = spec[lower:upper, t_f]
-
-                max_amplitude_index = np.argmax(tt)
+                ft = calc_ft(ttt, m[3], m[0], m[1], m[2], c)
                 
-                max_amplitude_frequency = frequencies[max_amplitude_index+lower]
-                peaks.append(max_amplitude_frequency)
-                coord_inv.append((times[t_f], max_amplitude_frequency))
+                delf = np.array(ft) - np.array(coord_inv_array[:,1])
 
-
-            coord_inv_array = np.array(coord_inv)
-
-            m,_ = invert_f(m0, coord_inv_array, num_iterations=12)
-            f0 = m[0]
-            v0 = m[1]
-            l = m[2]
-            tprime0 = m[3]
-
-            ft = calc_ft(times, tprime0, f0, v0, l, c)
-            
-            delf = np.array(ft) - np.array(peaks)
-            
-            new_coord_inv_array = []
-            for i in range(len(delf)):
-                if np.abs(delf[i]) <= 3:
-                    new_coord_inv_array.append(coord_inv_array[i])
-            coord_inv_array = np.array(new_coord_inv_array)
+                new_coord_inv_array = []
+                for i in range(len(delf)):
+                    if np.abs(delf[i]) <= 3:
+                        new_coord_inv_array.append(coord_inv_array[i])
+                    else:
+                        continue
+                if f00 == 114.74:
+                    coord_inv_array_A = np.array(new_coord_inv_array)
+                elif f00 == 124.38:
+                    coord_inv_array_B = np.array(new_coord_inv_array)
+            if len(coord_inv_array_A) > len(coord_inv_array_B):
+                f0_array = Mode_A
+            else:
+                f0_array = Mode_B
 
             m,covm = invert_f(m0, coord_inv_array, num_iterations=12, sigma=5)
             
@@ -210,11 +184,18 @@ for line in sta_f.readlines():
             l = m[2]
             tprime0 = m[3]
 
-        mprior = []
-        mprior.append(v0)
-        mprior.append(l)
-        mprior.append(tprime0)       
+            mprior = []
+            mprior.append(v0)
+            mprior.append(l)
+            mprior.append(tprime0)       
+        except:
+            continue
 
+        plt.figure()
+        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+        plt.scatter(coord_inv_array_A[:,0],coord_inv_array_A[:,1], color='black', marker='x')
+        plt.scatter(coord_inv_array_B[:,0],coord_inv_array_B[:,1], color='red', marker='x')
+        plt.show()
         fig, ax1 = plt.subplots(1, 1)   
 
         # Plot spectrogram
@@ -539,7 +520,6 @@ for line in sta_f.readlines():
 
             print(tprime0,v0,l,f0lab,covm)
             C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(tm)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+',\n') 
-            sta_2 = sta
-    else:
-        continue
+
+
 C185_output.close()

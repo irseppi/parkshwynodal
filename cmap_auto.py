@@ -30,7 +30,7 @@ for line in sta_f.readlines():
     date = val[0]
 
     flight = val[1]
-    station = val[5]
+    station = val[6]
     flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + date + '_positions/' + date + '_' + flight + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")
     flight_latitudes = flight_data['latitude']
@@ -38,12 +38,11 @@ for line in sta_f.readlines():
     time = flight_data['snapshot_id']
     head = flight_data['heading']
     for l in range(len(time)):
-        if str(time[l]) == str(val[2]):
+        if str(time[l]) == str(val[3]):
             for t  in range(len(sta)):
                 if sta[t] == station:
                     try:
                         clat, clon, dist, ctime = closest_encounter(flight_latitudes, flight_longitudes, l, time, seismo_latitudes[t], seismo_longitudes[t])
-                        ht = datetime.datetime.fromtimestamp(time[l], datetime.timezone.utc)
                         
                         dist = dist*1000
                         # Create a figure with two subplots side by side
@@ -121,7 +120,6 @@ for line in sta_f.readlines():
                         con = mpatch.ConnectionPatch(xyA=(minl, maxla), xyB=(maxl, maxla), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
                         fig.add_artist(con)
 
-                 
                         BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all/' + date + '/'+flight+'/'+station+'/'
                         make_base_dir(BASE_DIR)
                         plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all/'+ date + '/'+flight+'/'+station+'/map_'+flight+'_' + str(time[l]) + '.png')
