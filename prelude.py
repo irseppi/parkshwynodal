@@ -719,12 +719,14 @@ def extract_flight(equipment):
 		None
 
 	"""
-	input = open('all_station_crossing_db.txt','r')
-	output = open('all_station_crossing_db_'+str(equipment)+'.txt','w')
+
+	input = open('input/all_station_crossing_db.txt','r')
+	output = open('input/all_station_crossing_db_'+str(equipment)+'.txt','w')
 
 	for line in input.readlines():
 		val = line.split(',')
-		if str(val[6][0:4]) == str(equipment):
+		if str(val[7][0:4]) == str(equipment):
+			
 			output.write(line)
 		
 	input.close()
