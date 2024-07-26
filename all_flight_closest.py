@@ -204,16 +204,8 @@ for i, flight_file in enumerate(flight_files):
 								l2 = l - 1
 							else:
 								continue
-		for location in np.arange((closest_lon-0.000001),(closest_lon+0.000001),0.0000000001):
-			lon = location
-			lat = m*lon + b
-			dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])
-			if dist_km < dist_lim:
-				dist_lim = dist_km
-				closest_lon = lon
-				closest_lat = lat
-		if dist_lim < 1:
-			for location in np.arange((closest_lon-0.0000000001),(closest_lon+0.0000000001),0.0000000000001):
+		if dist_lim < 2.1:
+			for location in np.arange((closest_lon-0.000001),(closest_lon+0.000001),0.0000000001):
 				lon = location
 				lat = m*lon + b
 				dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])
@@ -221,16 +213,27 @@ for i, flight_file in enumerate(flight_files):
 					dist_lim = dist_km
 					closest_lon = lon
 					closest_lat = lat
-		dist_old_new = distance(closest_lat, closest_lon, clat, clon)
-		dist_old_old = distance(c2lat, c2lon, clat, clon)
-		ratio = dist_old_new/dist_old_old
-		timestamp = timestamp[l] + (timestamp[l] - timestamp[l2])*ratio
+			if dist_lim < 1:
+				for location in np.arange((closest_lon-0.0000000001),(closest_lon+0.0000000001),0.0000000000001):
+					lon = location
+					lat = m*lon + b
+					dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])
+					if dist_km < dist_lim:
+						dist_lim = dist_km
+						closest_lon = lon
+						closest_lat = lat
+			dist_old_new = distance(closest_lat, closest_lon, clat, clon)
+			dist_old_old = distance(c2lat, c2lon, clat, clon)
+			ratio = dist_old_new/dist_old_old
+			timestamp = timestamp[l] + (timestamp[l] - timestamp[l2])*ratio
 
-		timeF = timestamp
-		altF = (alt[l2]+alt[l])/2
-		speedF = (speed[l2]+speed[l])/2
-		seismo_staF = seismo_sta[s]
-		con = True
+			timeF = timestamp
+			altF = (alt[l2]+alt[l])/2
+			speedF = (speed[l2]+speed[l])/2
+			seismo_staF = seismo_sta[s]
+
+		else:
+			continue
 		# Create a figure with two subplots side by side
 		fig, axs = plt.subplots(1, 2) 
 		fig.subplots_adjust(wspace=0.5)  # Adjust the spacing between subplots
@@ -240,7 +243,7 @@ for i, flight_file in enumerate(flight_files):
 		x = [closest_lon, seismo_longitudes[s]]
 		yy = sum(y)/len(y)
 		xx = sum(x)/len(x)
-		if dist_km < 0.1:
+		if dist_lim < 0.1:
 			minl = np.round((xx - 0.001),4)
 			maxl = np.round((xx + 0.001),4)
 			minla = np.round((yy - 0.001),4)
@@ -298,7 +301,7 @@ for i, flight_file in enumerate(flight_files):
 		axs[1].scatter(closest_lon, closest_lat, c='#377eb8', s=50, zorder=3)
 		axs[1].scatter(seismo_longitudes[s], seismo_latitudes[s], c='#e41a1c', s=50, zorder=3)
 
-		axs[1].text(xx,yy, str(round(dist_km, 3))+' km', fontsize=15, fontweight='bold')
+		axs[1].text(xx,yy, str(round(dist_lim, 3))+' km', fontsize=15, fontweight='bold')
 
 		# Draw dashed lines connecting the rectangle on the existing map to the zoomed-in map
 		con = mpatch.ConnectionPatch(xyA=(minl, minla), xyB=(maxl, minla), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
@@ -307,16 +310,11 @@ for i, flight_file in enumerate(flight_files):
 		fig.add_artist(con)
 		plt.show()
 		
-				
-		#if con == True:
-		#	text = open('/scratch/irseppi/nodal_data/flightradar24/'+date+'_flights.csv')
-		#	for line in text.readlines():
-		#		val = line.split(',')
-		#		if val[0] == flight_num:
-		#			print('Found')
-		#			output.write(str(date)+','+ str(flight_num)+','+val[1]+','+str(timeF)+','+str(altF)+','+str(speedF)+','+str(seismo_staF)+','+val[3]+',\n')
-		#else:
-		#	continue
 
+		#text = open('/scratch/irseppi/nodal_data/flightradar24/'+date+'_flights.csv')
+		#for line in text.readlines():
+		#	val = line.split(',')
+		#	if val[0] == flight_num:
+		#		output.write(str(date)+','+ str(flight_num)+','+val[1]+','+str(timeF)+','+str(altF)+','+str(speedF)+','+str(seismo_staF)+','+val[3]+',\n')
 
 #output.close()	
