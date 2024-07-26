@@ -29,7 +29,7 @@ for line in sta_f.readlines():
         continue
     equipment = val[7][0:4]
     tm = float(val[3])
-    for line in output:
+    for line in output.readlines():
         if str(date) in line and str(flight) in line and str(sta) in line:
             continue
 
