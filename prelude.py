@@ -218,7 +218,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 						c2lat = flight_latitudes[index-1]
 						c2lon = flight_longitudes[index-1]
 						index2 = index - 1
-			if tr == 1:
+			elif tr == 1:
 				sclat = flight_latitudes[index+1]
 				sclon = flight_longitudes[index+1]
 
@@ -261,7 +261,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 						c2lat = flight_latitudes[index-1]
 						c2lon = flight_longitudes[index-1]
 						index2 = index - 1
-			if tr == 1:
+			elif tr == 1:
 				sclat = flight_latitudes[index+1]
 				sclon = flight_longitudes[index+1]
 
