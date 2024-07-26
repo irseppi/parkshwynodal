@@ -13,7 +13,7 @@ station = seismo_data['Station']
 elevations = seismo_data['Elevation']
 air_des = 'C185'
 sta_f = open('input/all_station_crossing_db.txt','r')
-output = open('output/'+air_des+'_data', 'a+')
+output = open('output/'+air_des+'_data', 'a+') #read and append correction
 
 # Loop through each station in text file that we already know comes within 2km of the nodes
  
