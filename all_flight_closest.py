@@ -1,24 +1,27 @@
 import pandas as pd
-import os
 from obspy.geodetics import gps2dist_azimuth
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatch
-from matplotlib.patches import Rectangle
 from prelude import load_flights
 
+# Function to calculate distance between two coordinates
 def distance(lat1, lon1, lat2, lon2):
 	dist = gps2dist_azimuth(lat1, lon1, lat2, lon2)
 	dist_km = dist[0]/1000
 	return dist_km
+
+# Function to calculate the reciprocal of cosine
 def func(y):
     return -1.0/np.cos((y)*np.pi/180)
+
+# Function to calculate the reciprocal of cosine in radians
 def rfunc(y):
     return -180/np.pi*np.arccos(1/y)
 
+# Load flight files and filenames
 flight_files = load_flights(2, 4, 11, 27)[0]
 filenames = load_flights(2, 4, 11, 27)[1]
 
+# Define the bounding box coordinates
 min_lon = -150.7
 max_lon = -147.3
 min_lat = 62.2
@@ -26,6 +29,7 @@ max_lat = 65.3
 cenlat = (min_lat + max_lat)/2
 cenlon = (min_lon + max_lon)/2
 
+# Open output file for writing
 output = open('all_station_crossing_db_updated.txt','w')
 
 # Load the seismometer location data
@@ -36,6 +40,7 @@ seismo_sta = seismo_data['Station']
 
 # Iterate over flight files
 for i, flight_file in enumerate(flight_files):
+	
 	print((i/len(flight_files))*100, '%')	
 	flight_data = pd.read_csv(flight_file, sep=",")
 	flight_latitudes = flight_data['latitude']
@@ -117,47 +122,51 @@ for i, flight_file in enumerate(flight_files):
 						else:
 							continue
 
-		if dist_lim < 2.1:
-			for location in np.arange((closest_lon-0.000001),(closest_lon+0.000001),0.0000000001):
-				lon = location
-				lat = m*lon + b
-				dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])
-				if dist_km < dist_lim:
-					dist_lim = dist_km
-					closest_lon = lon
-					closest_lat = lat
+				if dist_lim < 2.1:
+					# Iterate over longitude values within a small range
+					for location in np.arange((closest_lon-0.000001),(closest_lon+0.000001),0.0000000001):
+						lon = location
+						lat = m*lon + b
+						dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])
+						if dist_km < dist_lim:
+							dist_lim = dist_km
+							closest_lon = lon
+							closest_lat = lat
+						else:
+							continue
+					if dist_lim < 1:
+						# Iterate over longitude values within a smaller range
+						for location in np.arange((closest_lon-0.0000000001),(closest_lon+0.0000000001),0.0000000000001):
+							lon = location
+							lat = m*lon + b
+							dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])
+							if dist_km < dist_lim:
+								dist_lim = dist_km
+								closest_lon = lon
+								closest_lat = lat
+							else:
+								continue
+					else:
+						pass
+					dist_old_new = distance(closest_lat, closest_lon, clat, clon)
+					dist_old_old = distance(c2lat, c2lon, clat, clon)
+					ratio = dist_old_new/dist_old_old
+					timestamp = timestamp[l] + (timestamp[l] - timestamp[l2])*ratio
+
+					timeF = timestamp
+					altF = (alt[l2]+alt[l])/2
+					speedF = (speed[l2]+speed[l])/2
+					seismo_staF = seismo_sta[s]
+
 				else:
 					continue
-			if dist_lim < 1:
-				for location in np.arange((closest_lon-0.0000000001),(closest_lon+0.0000000001),0.0000000000001):
-					lon = location
-					lat = m*lon + b
-					dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])
-					if dist_km < dist_lim:
-						dist_lim = dist_km
-						closest_lon = lon
-						closest_lat = lat
-					else:
-						continue
-			else:
-				pass
-			dist_old_new = distance(closest_lat, closest_lon, clat, clon)
-			dist_old_old = distance(c2lat, c2lon, clat, clon)
-			ratio = dist_old_new/dist_old_old
-			timestamp = timestamp[l] + (timestamp[l] - timestamp[l2])*ratio
 
-			timeF = timestamp
-			altF = (alt[l2]+alt[l])/2
-			speedF = (speed[l2]+speed[l])/2
-			seismo_staF = seismo_sta[s]
+				text = open('/scratch/irseppi/nodal_data/flightradar24/'+date+'_flights.csv')
+				# Iterate over lines in the text file
+				for line in text.readlines():
+					val = line.split(',')
+					if val[0] == flight_num:
+						# Write data to the output file
+						output.write(str(date)+','+ str(flight_num)+','+val[1]+','+str(timeF)+','+str(altF)+','+str(speedF)+','+str(seismo_staF)+','+val[3]+',\n')
 
-		else:
-			continue
-
-		text = open('/scratch/irseppi/nodal_data/flightradar24/'+date+'_flights.csv')
-		for line in text.readlines():
-			val = line.split(',')
-			if val[0] == flight_num:
-				output.write(str(date)+','+ str(flight_num)+','+val[1]+','+str(timeF)+','+str(altF)+','+str(speedF)+','+str(seismo_staF)+','+val[3]+',\n')
-
-output.close()	
+		output.close()
