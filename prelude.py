@@ -282,7 +282,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 						closest_lon = lon
 						c2lat = flight_latitudes[index+1]
 						c2lon = flight_longitudes[index+1]
-						index2 = index - 1
+						index2 = index + 1
 
 	for location in np.arange((closest_lon-0.000001),(closest_lon+0.000001),0.0000000001):
 		lon = location
