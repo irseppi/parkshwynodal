@@ -23,7 +23,7 @@ sta = seismo_data['Station']
 def f(y):
     return -1.0/np.cos((y)*np.pi/180)
 def rf(y):
-    return -180/np.pi*np.arccos(1/y)
+    return (-180*np.arccos(-1/y))/np.pi
 # Loop through each station in text file that we already know comes within 2km of the nodes
 for line in sta_f.readlines():
     val = line.split(',')

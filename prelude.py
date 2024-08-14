@@ -204,7 +204,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 
 				x = [clon, sclon]
 				y = [clat, sclat]
-				m = (y[0]-y[1])/(x[0]-x[1])
+				m = (y[1]-y[0])/(x[1]-x[0])
 				b = y[0] - m*x[0]
 				for point in np.arange(clon, sclon, 0.000001):
 					lon = point
@@ -224,7 +224,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 
 				x = [clon, sclon]
 				y = [clat, sclat]
-				m = (y[1]-y[0])/(x[1]-x[0])
+				m = (y[0]-y[1])/(x[0]-x[1])
 				b = y[0] - m*x[0]
 
 
