@@ -4,30 +4,39 @@ import numpy as np
 
 
 # Define the directory where your files are located
-directory = '/scratch/irseppi/nodal_data/plane_info/overtonepicks/' 
-
+file = 'output/C185data.csv'
 
 # Initialize a list to store the data from the files
 data = []
-
-# Iterate over all files in the directory and its subdirectories
-for root, dirs, files in os.walk(directory):
-    for file in files:
-        # Check if the file has the desired format (e.g., .txt, .csv)
-        if file.endswith('.csv'):
-            # Construct the full file path
-            file_path = os.path.join(root, file)
-            f = open(file_path, 'r')
-            # Read the data from the file and append it to the list
-            for line in f.readlines():
-                lines = line.split(',')
-                peak = float(lines[1])
-                data.append(peak)
+with open(file, 'r') as f:
+    x = 0
+    # Read the data from the file and append it to the list
+    for line in f.readlines():
+        lines = line.split(',')
+        try:
+            if x <= 28:
+                peaks = np.array(lines[6])
+            else:
+                peaks = np.array(lines[7])
+            
+            
+        except:
+            continue
+        peaks = str(peaks)  # Replace "string" with "str"
+        peaks = np.array(peaks.split(' '))
+        for peak in peaks:
+            try:
+                peak = float(peak)
+            except:
+                continue
+            print(peak)
+            data.append(peak)
+        x += 1
 plt.figure()
 # Plot the histogram
-plt.hist(np.round(data,1),125)
+plt.hist(np.round(data,1),250)
 
 # Add tick marks at every value of 5
-plt.xticks(np.arange(15, max(data)+1, 5))
+plt.xticks(np.arange(15, 250, 5))
 
 plt.show()
