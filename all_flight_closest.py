@@ -39,24 +39,30 @@ for i, flight_file in enumerate(flight_files):
 			elif l >= len(flight_data)-1:
 				continue
 			else:
+				
 				clat, clon, dist, ctime = closest_encounter(flight_latitudes, flight_longitudes, l, time, seismo_latitudes[s], seismo_longitudes[s])
-				if dist <= dist_lim:
-						timeF = ctime
-						altF = alt[l]
-						speedF = speed[l]
-						seismo_staF = seismo_sta[s]
-						headF = head[l]
-						con = True
-						closest_lat = clat
-						closest_lon = clon
-						dist_lim = dist
+				if clat != None:
+					# Check if the distance is less than the current minimum distance
+					if dist <= dist_lim:
+							timeF = ctime
+							print(timeF)
+							altF = alt[l]
+							speedF = speed[l]
+							seismo_staF = seismo_sta[s]
+							headF = head[l]
+							con = True
+							closest_lat = clat
+							closest_lon = clon
+							dist_lim = dist
 
+					else:
+						continue
 				else:
 					continue
 		if con == True:
 			# Write data to the output file
-			output.write(str(date)+','+ str(flight_num)+','+(clat)+','+str(clon)+','+str(timeF)+','+str(altF)+','+str(speedF)+','+str(seismo_staF)+','+str(headF)+',\n')
-
+			output.write(str(date)+','+ str(flight_num)+','+str(clat)+','+str(clon)+','+str(timeF)+','+str(altF)+','+str(speedF)+','+str(seismo_staF)+','+str(headF)+',\n')
+			print('Flight:', flight_num, 'Station:', seismo_staF, 'Distance:', dist_lim)
 		else:
 			continue
 	print((i/len(flight_files))*100, '%')

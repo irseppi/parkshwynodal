@@ -248,8 +248,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 				y = [clat, sclat]
 				m = (y[0]-y[1])/(x[0]-x[1])
 				b = y[0] - m*x[0]
-				print(m,b)
-				print(sclon, clon)
+
 				for point in np.arange(sclat, clat, 0.000001):
 					lat = point
 					lon = (lat - b)/m
@@ -270,8 +269,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 				y = [clat, sclat]
 				m = (y[1]-y[0])/(x[1]-x[0])
 				b = y[0] - m*x[0]
-				print(m,b)
-				print(clon, sclon)
+
 				for point in np.arange(clat, sclat, 0.000001):
 					lat = point
 					lon = (lat - b)/m
@@ -286,7 +284,9 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 						index2 = index + 1
 		else:
 			continue
+	
 	if dist_lim < 2.01:
+		'''
 		for location in np.arange((closest_lon-0.000001),(closest_lon+0.000001),0.0000000001):
 			lon = location
 			lat = m*lon + b
@@ -304,13 +304,15 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 					dist_lim = dist
 					closest_lon = lon
 					closest_lat = lat
-	
+		'''
 		dist_old_new = calculate_distance(closest_lat, closest_lon, clat, clon)/1000
 		dist_old_old = calculate_distance(c2lat, c2lon, clat, clon)/1000
 		ratio = dist_old_new/dist_old_old
 		timestamp = timestamp[index] + (timestamp[index] - timestamp[index2])*ratio
-	
-	return  closest_lat, closest_lon, dist_lim, timestamp
+		
+		return  closest_lat, closest_lon, dist_lim, timestamp
+	else:
+		return None, None, None, None
 ###################################################################################################################################
 
 def calc_time(t0,dist,alt):
