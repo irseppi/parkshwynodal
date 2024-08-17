@@ -1,7 +1,7 @@
 import pandas as pd
 from obspy.geodetics import gps2dist_azimuth
 import numpy as np
-from prelude import load_flights, closest_encounter
+from prelude import load_flights, closest_encounter, distance
 
 # Load flight files and filenames
 flight_files,filenames = load_flights(2, 4, 11, 27)
@@ -16,7 +16,8 @@ seismo_longitudes = seismo_data['Longitude']
 seismo_sta = seismo_data['Station']
 
 # Iterate over flight files
-for i, flight_file in enumerate(flight_files):	
+for i, flight_file in enumerate(flight_files):
+	print((i/len(flight_files))*100, '%')	
 	flight_data = pd.read_csv(flight_file, sep=",")
 	flight_latitudes = flight_data['latitude']
 	flight_longitudes = flight_data['longitude']
@@ -39,12 +40,13 @@ for i, flight_file in enumerate(flight_files):
 			elif l >= len(flight_data)-1:
 				continue
 			else:
-				clat, clon, dist, ctime = closest_encounter(flight_latitudes, flight_longitudes, l, time, seismo_latitudes[s], seismo_longitudes[s])
-				if clat != None:
-					# Check if the distance is less than the current minimum distance
-					if dist <= dist_lim:
+				dist = distance(flight_latitudes[l], flight_longitudes[l], seismo_latitudes[s], seismo_longitudes[s])
+				if dist < 2.01:
+					clat, clon, dist, ctime = closest_encounter(flight_latitudes, flight_longitudes, l, time, seismo_latitudes[s], seismo_longitudes[s])
+					if clat != None:
+						# Check if the distance is less than the current minimum distance
+						if dist <= dist_lim:
 							timeF = ctime
-							print(timeF)
 							altF = alt[l]
 							speedF = speed[l]
 							seismo_staF = seismo_sta[s]
@@ -54,6 +56,8 @@ for i, flight_file in enumerate(flight_files):
 							closest_lon = clon
 							dist_lim = dist
 
+						else:
+							continue
 					else:
 						continue
 				else:
@@ -64,6 +68,6 @@ for i, flight_file in enumerate(flight_files):
 			print('Flight:', flight_num, 'Station:', seismo_staF, 'Distance:', dist_lim)
 		else:
 			continue
-	print((i/len(flight_files))*100, '%')
+
 output.close()
 
