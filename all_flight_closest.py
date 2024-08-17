@@ -39,7 +39,6 @@ for i, flight_file in enumerate(flight_files):
 			elif l >= len(flight_data)-1:
 				continue
 			else:
-				
 				clat, clon, dist, ctime = closest_encounter(flight_latitudes, flight_longitudes, l, time, seismo_latitudes[s], seismo_longitudes[s])
 				if clat != None:
 					# Check if the distance is less than the current minimum distance
