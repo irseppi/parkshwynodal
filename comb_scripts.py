@@ -213,7 +213,7 @@ for i, flight_file in enumerate(flight_files):
 			x = [clon, seismo_longitudes[s]]
 			yy = sum(y)/len(y)
 			xx = sum(x)/len(x)
-			if dist_final < 0.1:
+			if dist_final < 0.01:
 				minl = np.round((xx - 0.001),4)
 				maxl = np.round((xx + 0.001),4)
 				minla = np.round((yy - 0.001),4)
