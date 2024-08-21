@@ -14,6 +14,7 @@ seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
 seismo_sta = seismo_data['Station']
 
+#Assign the boundries for the full nodal array map
 min_lon = -150.7
 max_lon = -147.3
 min_lat = 62.2
@@ -21,6 +22,7 @@ max_lat = 65.3
 cenlat = (min_lat + max_lat)/2
 cenlon = (min_lon + max_lon)/2
 
+#Define functions for lat and lon scaling at higher latitudes
 def f(y):
     return -1.0/np.cos((y)*np.pi/180)
 def rf(y):
@@ -28,8 +30,10 @@ def rf(y):
 
 # Iterate over flight files
 for i, flight_file in enumerate(flight_files):
-	print((i/len(flight_files))*100, '%')	
-	flight_data = pd.read_csv(flight_file, sep=",")
+	print((i/len(flight_files))*100, '%')	# Print progress
+
+	# Load flight data and extract relevant columns
+	flight_data = pd.read_csv(flight_file, sep=",") 
 	flight_latitudes = flight_data['latitude']
 	flight_longitudes = flight_data['longitude']
 	timestamps = flight_data['snapshot_id']
@@ -52,8 +56,10 @@ for i, flight_file in enumerate(flight_files):
 			elif index >= len(flight_data)-1:
 				continue
 			else:
+				# Check if the distance between the initial flight timestamp and seismometer is less than 2km
 				dist = distance(flight_latitudes[index], flight_longitudes[index], seismo_latitudes[s], seismo_longitudes[s])
 				if dist < 2.01:
+					#
 					clat = flight_latitudes[index]
 					clon = flight_longitudes[index]
 						
@@ -158,7 +164,7 @@ for i, flight_file in enumerate(flight_files):
 						else:
 							continue
 					
-					if c2lat != clat:
+					if closest_lat != clat:
 						for location in np.arange((closest_lon-0.000001),(closest_lon+0.000001),0.0000000001):
 							lon = location
 							lat = m*lon + b
@@ -196,6 +202,8 @@ for i, flight_file in enumerate(flight_files):
 			else:
 				continue
 		if con == True:             
+			clat = closest_lat
+			clon = closest_lon
 			fig, axs = plt.subplots(1, 2) 
 			fig.subplots_adjust(wspace=0.5)  
 
