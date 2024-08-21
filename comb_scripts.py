@@ -195,10 +195,12 @@ for i, flight_file in enumerate(flight_files):
 						continue
 				else:
 					continue
-			if dist_final < dist_lim:
+			if dist_final > dist_lim:
 				con = True
 				dist_final = dist_lim
 				print(dist_final)
+				print(seismo_sta[s])
+				print(flight_num)
 			else:
 				continue
 		if con == True:             
