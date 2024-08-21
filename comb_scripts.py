@@ -47,7 +47,7 @@ for i, flight_file in enumerate(flight_files):
 	# Iterate over seismometer data
 	for s in range(len(seismo_data)):
 		dist_lim = 2.01
-		dist_final = float('inf')
+		dist_final = 2.01
 		con = False
 		# Iterate over flight data
 		for index in range(len(flight_data)):
