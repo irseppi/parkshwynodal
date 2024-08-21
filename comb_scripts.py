@@ -52,143 +52,147 @@ for i, flight_file in enumerate(flight_files):
 			elif index >= len(flight_data)-1:
 				continue
 			else:
-				clat = flight_latitudes[index]
-				clon = flight_longitudes[index]
-					
-				closest_lat = clat
-				closest_lon = clon
+				dist = distance(flight_latitudes[index], flight_longitudes[index], seismo_latitudes[s], seismo_longitudes[s])
+				if dist < 2.01:
+					clat = flight_latitudes[index]
+					clon = flight_longitudes[index]
+						
+					closest_lat = clat
+					closest_lon = clon
 
-				for tr in range(0,2):
-					if  flight_latitudes[index+1] < flight_latitudes[index-1]:
-						if tr == 0:
-							sclat = flight_latitudes[index-1]
-							sclon = flight_longitudes[index-1]  
+					for tr in range(0,2):
+						if  flight_latitudes[index+1] < flight_latitudes[index-1]:
+							if tr == 0:
+								sclat = flight_latitudes[index-1]
+								sclon = flight_longitudes[index-1]  
 
-							x = [clon, sclon]
-							y = [clat, sclat]
-							m = (y[1]-y[0])/(x[1]-x[0])
-							b = y[0] - m*x[0]
-							
-							for point in np.arange(clat, sclat, 0.000001):
-								lat = point
-								lon = (lat - b)/m
-								dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])/1000
+								x = [clon, sclon]
+								y = [clat, sclat]
+								m = (y[1]-y[0])/(x[1]-x[0])
+								b = y[0] - m*x[0]
+								
+								for point in np.arange(clat, sclat, 0.000001):
+									lat = point
+									lon = (lat - b)/m
+									dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])
 
-								if dist_km < dist_lim:
-									dist_lim = dist_km
-									closest_lat = lat
-									closest_lon = lon
-									c2lat = flight_latitudes[index-1]
-									c2lon = flight_longitudes[index-1]
-									index2 = index - 1
-								else:
-									continue
-						elif tr == 1:
-							sclat = flight_latitudes[index+1]
-							sclon = flight_longitudes[index+1]
+									if dist_km < dist_lim:
+										dist_lim = dist_km
+										closest_lat = lat
+										closest_lon = lon
+										c2lat = flight_latitudes[index-1]
+										c2lon = flight_longitudes[index-1]
+										index2 = index - 1
+									else:
+										continue
+							elif tr == 1:
+								sclat = flight_latitudes[index+1]
+								sclon = flight_longitudes[index+1]
 
-							x = [clon, sclon]
-							y = [clat, sclat]
-							m = (y[0]-y[1])/(x[0]-x[1])
-							b = y[0] - m*x[0]
-							
-							for point in np.arange(sclat, clat, 0.000001):
-								lat = point
-								lon = (lat - b)/m
-								dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])/1000
+								x = [clon, sclon]
+								y = [clat, sclat]
+								m = (y[0]-y[1])/(x[0]-x[1])
+								b = y[0] - m*x[0]
+								
+								for point in np.arange(sclat, clat, 0.000001):
+									lat = point
+									lon = (lat - b)/m
+									dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])
 
-								if dist_km < dist_lim:
-									dist_lim = dist_km
-									closest_lat = lat
-									closest_lon = lon
-									c2lat = flight_latitudes[index+1]
-									c2lon = flight_longitudes[index+1]
-									index2 = index + 1
-								else:
-									continue
-					elif flight_latitudes[index+1] > flight_latitudes[index-1]:
-						if tr == 0:
-							sclat = flight_latitudes[index-1]
-							sclon = flight_longitudes[index-1]  
+									if dist_km < dist_lim:
+										dist_lim = dist_km
+										closest_lat = lat
+										closest_lon = lon
+										c2lat = flight_latitudes[index+1]
+										c2lon = flight_longitudes[index+1]
+										index2 = index + 1
+									else:
+										continue
+						elif flight_latitudes[index+1] > flight_latitudes[index-1]:
+							if tr == 0:
+								sclat = flight_latitudes[index-1]
+								sclon = flight_longitudes[index-1]  
 
-							x = [clon, sclon]
-							y = [clat, sclat]
-							m = (y[0]-y[1])/(x[0]-x[1])
-							b = y[0] - m*x[0]
+								x = [clon, sclon]
+								y = [clat, sclat]
+								m = (y[0]-y[1])/(x[0]-x[1])
+								b = y[0] - m*x[0]
 
-							for point in np.arange(sclat, clat, 0.000001):
-								lat = point
-								lon = (lat - b)/m
-								dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])/1000
+								for point in np.arange(sclat, clat, 0.000001):
+									lat = point
+									lon = (lat - b)/m
+									dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])
 
-								if dist_km < dist_lim:
-									dist_lim = dist_km
-									closest_lat = lat
-									closest_lon = lon
-									c2lat = flight_latitudes[index-1]
-									c2lon = flight_longitudes[index-1]
-									index2 = index - 1
-								else:
-									continue
-						elif tr == 1:
-							sclat = flight_latitudes[index+1]
-							sclon = flight_longitudes[index+1]
+									if dist_km < dist_lim:
+										dist_lim = dist_km
+										closest_lat = lat
+										closest_lon = lon
+										c2lat = flight_latitudes[index-1]
+										c2lon = flight_longitudes[index-1]
+										index2 = index - 1
+									else:
+										continue
+							elif tr == 1:
+								sclat = flight_latitudes[index+1]
+								sclon = flight_longitudes[index+1]
 
-							x = [clon, sclon]
-							y = [clat, sclat]
-							m = (y[1]-y[0])/(x[1]-x[0])
-							b = y[0] - m*x[0]
+								x = [clon, sclon]
+								y = [clat, sclat]
+								m = (y[1]-y[0])/(x[1]-x[0])
+								b = y[0] - m*x[0]
 
-							for point in np.arange(clat, sclat, 0.000001):
-								lat = point
-								lon = (lat - b)/m
-								dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])/1000
+								for point in np.arange(clat, sclat, 0.000001):
+									lat = point
+									lon = (lat - b)/m
+									dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])
 
-								if dist_km < dist_lim:
-									dist_lim = dist_km
-									closest_lat = lat
-									closest_lon = lon
-									c2lat = flight_latitudes[index+1]
-									c2lon = flight_longitudes[index+1]
-									index2 = index + 1
-								else:
-									continue
-					else:
-						continue
-				
-			if dist_lim < 2.01 and c2lat != clat:
-				
-				for location in np.arange((closest_lon-0.000001),(closest_lon+0.000001),0.0000000001):
-					lon = location
-					lat = m*lon + b
-					dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])/1000
-					if dist_km < dist_lim:
-						dist_lim = dist_km
-						closest_lon = lon
-						closest_lat = lat
-					else:
-						continue
-				if dist_lim < 1:
-					for location in np.arange((closest_lon-0.0000000001),(closest_lon+0.0000000001),0.0000000000001):
-						lon = location
-						lat = m*lon + b
-						dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])/1000
-						if dist_km < dist_lim:
-							dist_lim = dist_km
-							closest_lon = lon
-							closest_lat = lat
+									if dist_km < dist_lim:
+										dist_lim = dist_km
+										closest_lat = lat
+										closest_lon = lon
+										c2lat = flight_latitudes[index+1]
+										c2lon = flight_longitudes[index+1]
+										index2 = index + 1
+									else:
+										continue
 						else:
 							continue
-				dist_old_new = distance(closest_lat, closest_lon, clat, clon)
-				dist_old_old = distance(c2lat, c2lon, clat, clon)
-				ratio = dist_old_new/dist_old_old
-				timestamp = timestamps[index] + (timestamps[index] - timestamps[index2])*ratio
-				index_final = index
-			else:
-				continue
+					
+					if c2lat != clat:
+						for location in np.arange((closest_lon-0.000001),(closest_lon+0.000001),0.0000000001):
+							lon = location
+							lat = m*lon + b
+							dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])
+							if dist_km < dist_lim:
+								dist_lim = dist_km
+								closest_lon = lon
+								closest_lat = lat
+							else:
+								continue
+						if dist_lim < 1:
+							for location in np.arange((closest_lon-0.0000000001),(closest_lon+0.0000000001),0.0000000000001):
+								lon = location
+								lat = m*lon + b
+								dist_km = distance(lat, lon, seismo_latitudes[s], seismo_longitudes[s])
+								if dist_km < dist_lim:
+									dist_lim = dist_km
+									closest_lon = lon
+									closest_lat = lat
+								else:
+									continue
+						dist_old_new = distance(closest_lat, closest_lon, clat, clon)
+						dist_old_old = distance(c2lat, c2lon, clat, clon)
+						ratio = dist_old_new/dist_old_old
+						timestamp = timestamps[index] + (timestamps[index] - timestamps[index2])*ratio
+						index_final = index
+					else:
+						continue
+				else:
+					continue
 			if dist_final < dist_lim:
 				con = True
 				dist_final = dist_lim
+				print(dist_final)
 			else:
 				continue
 		if con == True:             
