@@ -25,8 +25,8 @@ cenlon = (min_lon + max_lon)/2
 #Define functions for lat and lon scaling at higher latitudes
 def f(y):
     return -1.0/np.cos((y)*np.pi/180)
-def rf(y):
-    return (-180*np.arccos(-1/y))/np.pi
+def rf(x):
+    return (-180*np.arccos(-1/x))/np.pi
 
 # Iterate over flight files
 for i, flight_file in enumerate(flight_files):
@@ -165,6 +165,7 @@ for i, flight_file in enumerate(flight_files):
 							continue
 					
 					if closest_lat != clat:
+						'''
 						for location in np.arange((closest_lon-0.000001),(closest_lon+0.000001),0.0000000001):
 							lon = location
 							lat = m*lon + b
@@ -186,6 +187,7 @@ for i, flight_file in enumerate(flight_files):
 									closest_lat = lat
 								else:
 									continue
+							'''
 						dist_old_new = distance(closest_lat, closest_lon, clat, clon)
 						dist_old_old = distance(c2lat, c2lon, clat, clon)
 						ratio = dist_old_new/dist_old_old
@@ -253,7 +255,9 @@ for i, flight_file in enumerate(flight_files):
 			axs[1].plot(x,y, '--', c='#ff7f00')
 
 			# Draw the zoomed in map on the second subplot
-			axs[1].plot(flight_longitudes, flight_latitudes, c='#377eb8',linestyle ='dotted')
+			axs[1].plot(flight_longitudes, flight_latitudes, c='#377eb8',linestyle ='--')
+			axs[1].scatter(flight_longitudes, flight_latitudes, c='green')
+			axs[1].scatter(flight_longitudes[index_final], flight_latitudes[index_final], c='pink')
 			axs[1].set_xlim(minl, maxl)
 			axs[1].set_ylim(minla, maxla)
 			axs[1].tick_params(axis='both', which='major', labelsize=9)
