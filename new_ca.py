@@ -124,10 +124,15 @@ for i, flight_file in enumerate(flight_files):
                 min_y = int(yy - 2)
                 max_y = int(yy + 2)
                 if d < 0.5:
-                    min_x = int(xx - 1)
-                    max_x = int(xx + 1)
-                    min_y = int(yy - 1)
-                    max_y = int(yy + 1)
+                    min_x = (xx - 1)
+                    max_x = (xx + 1)
+                    min_y = (yy - 1)
+                    max_y = (yy + 1)
+                if d < 0.1:
+                    min_x = (xx - 0.1)
+                    max_x = (xx + 0.1)
+                    min_y = (yy - 0.1)
+                    max_y = (yy + 0.1)
                 # Create a figure with two subplots side by side
                 fig, axs = plt.subplots(1, 2, gridspec_kw={'width_ratios': [1, 2]}) 
                 fig.subplots_adjust(wspace=0.5)  # Adjust the spacing between subplots
