@@ -125,7 +125,7 @@ for i, flight_file in enumerate(flight_files):
                 max_y = int(yy + 2)
 
                 # Create a figure with two subplots side by side
-                fig, axs = plt.subplots(1, 2, gridspec_kw={'height_ratios': [1, 1]}) 
+                fig, axs = plt.subplots(1, 2, gridspec_kw={'width_ratios': [1, 2]}) 
                 fig.subplots_adjust(wspace=0.5)  # Adjust the spacing between subplots
 
 
