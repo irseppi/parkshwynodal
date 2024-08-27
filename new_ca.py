@@ -14,7 +14,10 @@ min_lon = -150.7
 max_lon = -147.3
 min_lat = 62.2
 max_lat = 65.3
-
+def f(y):
+    return -1.0/np.cos((y)*np.pi/180)
+def rf(y):
+    return (-180*np.arccos(-1/y))/np.pi
 # Load the seismometer location data
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -112,82 +115,162 @@ for i, flight_file in enumerate(flight_files):
             yy = sum(y) / len(y)
             xx = sum(x) / len(x)
 
-            plt.figure()
-            plt.plot(flight_utm_x_km, flight_utm_y_km)
-            plt.scatter(flight_utm_x_km, flight_utm_y_km)
-            plt.scatter(seismometer[0], seismometer[1], c='red')
-            plt.scatter(closest_x, closest_y, c = 'green')
-            plt.plot(x, y, 'b--')
-            plt.axis('equal')
-            plt.xlim(xx-(x[1]-x[0])/1.5, xx+(x[1]-x[0])/1.5)  
-            plt.ylim(yy-(y[1]-y[0])/1.5, yy+(y[1]-y[0])/1.5)  
-            
-            plt.show()
-            break
-            # Create a figure with two subplots side by side
-            fig, axs = plt.subplots(1, 2) 
-            fig.subplots_adjust(wspace=0.5)  # Adjust the spacing between subplots
+            #plt.figure()
+            #plt.plot(flight_utm_x_km, flight_utm_y_km)
+            #plt.scatter(flight_utm_x_km, flight_utm_y_km)
+            #plt.scatter(seismometer[0], seismometer[1], c='red')
+            #plt.scatter(closest_x, closest_y, c='green')
+            #plt.plot(x, y, 'b--')
+            #plt.axis('equal')
+            #plt.xlim(xx - (x[1] - x[0]) / 1.5, xx + (x[1] - x[0]) / 1.5)
+            #plt.ylim(yy - (y[1] - y[0]) / 1.5, yy + (y[1] - y[0]) / 1.5)
+            #plt.title('Distance: ' + str(d) + ' km')
+            #plt.grid(True, linestyle='dotted', color='gray')
+            #plt.show()
+            largm = 2
+            if d <= 5:
+                if largm == 1:
+                    # Create a figure with two subplots side by side
+                    fig, axs = plt.subplots(1, 2, gridspec_kw={'width_ratios': [1, 2]})
+                    fig.subplots_adjust(wspace=0.5)  # Adjust the spacing between subplots
 
-            minl = (xx -(x[1]-x[0])/1.5)
-            maxl = (xx + (x[1]-x[0])/1.5)
-            minla = (yy-(y[1]-y[0])/1.5)
-            maxla =  (yy+(y[1]-y[0])/1.5)
-            axs[1].set_xticks(np.arange(minl, maxl, 0.01))
-            axs[1].set_yticks(np.arange(minla, maxla, 0.01))
-            axs[0].set_xticks(np.arange(min_lon, max_lon, 1))
-            axs[0].set_yticks(np.arange(min_lat, max_lat, 1))
+                    minl = (xx - (x[1] - x[0]) / 1.5)
+                    maxl = (xx + (x[1] - x[0]) / 1.5)
+                    minla = (yy - (y[1] - y[0]) * 2)
+                    maxla = (yy + (y[1] - y[0]) * 2)
+                    axs[1].set_xticks(np.arange(minl, maxl, (x[1] - x[0]) / 2))
+                    axs[1].set_yticks(np.arange(minla, maxla, (y[1] - y[0]) / 2))
+                    axs[0].set_xticks(np.arange(min_lon, max_lon, 1))
+                    axs[0].set_yticks(np.arange(min_lat, max_lat, 1))
 
-            axs[0].set_aspect('equal')
-            axs[1].set_aspect('equal')
-            axs[0].grid(True,linestyle='dotted',color='gray')
-            axs[1].grid(True,linestyle='dotted',color='gray')
-            axs[0].scatter(seismo_longitudes, seismo_latitudes, c='#e41a1c', s = 3, label='seismometers')
-            axs[0].plot(flight_longitudes, flight_latitudes, '-', c='#377eb8', lw=1, ms = 1, label='flight path')
-            for i in range(1, len(flight_latitudes)-1, int(len(flight_latitudes)/5)):
-                direction = np.arctan2(flight_latitudes[i+1] - flight_latitudes[i], flight_longitudes[i+1] - flight_longitudes[i])
-                m = (flight_latitudes[i+1] - flight_latitudes[i])/(flight_longitudes[i+1] - flight_longitudes[i])
-                b = flight_latitudes[i] - m*flight_longitudes[i]
-                axs[0].quiver((flight_latitudes[i]-b)/m, flight_latitudes[i], np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', headwidth = 5)
-            # Set labels and title
-            axs[0].set_xlim(min_lon, max_lon)
-            axs[0].set_ylim(min_lat, max_lat)
-            axs[0].tick_params(axis='both', which='major', labelsize=12)
-            
+                    axs[0].set_xscale('function', functions=(f, rf))
+                    axs[1].set_aspect('equal')
+                    axs[0].grid(True, linestyle='dotted', color='gray')
+                    axs[1].grid(True, linestyle='dotted', color='gray')
+                    axs[0].scatter(seismo_longitudes, seismo_latitudes, c='#e41a1c', s = 3, label='seismometers')
+                    axs[0].plot(flight_longitudes, flight_latitudes, '-', c='#377eb8', lw=1, ms = 1, label='flight path')
+                    for i in range(1, len(flight_latitudes)-1, int(len(flight_latitudes)/5)):
+                        direction = np.arctan2(flight_latitudes[i+1] - flight_latitudes[i], flight_longitudes[i+1] - flight_longitudes[i])
+                        m = (flight_latitudes[i+1] - flight_latitudes[i])/(flight_longitudes[i+1] - flight_longitudes[i])
+                        b = flight_latitudes[i] - m*flight_longitudes[i]
+                        axs[0].quiver((flight_latitudes[i]-b)/m, flight_latitudes[i], np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', headwidth = 5)
+                    # Set labels and title
+                    axs[0].set_xlim(min_lon, max_lon)
+                    axs[0].set_ylim(min_lat, max_lat)
+                    axs[0].tick_params(axis='both', which='major', labelsize=12)
+                    
 
-            heading = np.deg2rad(head[index])
-            
-            rect = Rectangle((minl, minla), 0.1, 0.06, ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
-            axs[0].add_patch(rect)
-            axs[1].plot(x,y, '--', c='#ff7f00')
+                    heading = np.deg2rad(head[index])
+                    # Define the UTM and latitude/longitude coordinate systems
 
-            # Draw the zoomed in map on the second subplot
-            axs[1].plot(flight_utm_x_km, flight_utm_y_km, c='#377eb8',linestyle ='dotted')
-            axs[1].set_xlim(minl, maxl)
-            axs[1].set_ylim(minla, maxla)
-            axs[1].tick_params(axis='both', which='major', labelsize=9)
-            axs[1].ticklabel_format(useOffset=False, style='plain')
-            if len(axs[1].get_xticklabels()) > 4:
-                axs[1].set_xticklabels([round(x, 4) for x in axs[1].get_xticks()], rotation=20, fontsize=9)
-            m = (flight_latitudes[index+1] - flight_latitudes[index])/(flight_longitudes[index+1] - flight_longitudes[index])
-            b = flight_latitudes[index] - m*flight_longitudes[index]
+                    minlon, minlat = utm_proj(minl*1000, minla*1000, inverse=True)
+                    maxlon, maxlat = utm_proj(maxl*1000, maxla*1000, inverse=True)
+                    rect = Rectangle((minlon, minlat), (maxlon-minlon), (maxlat-minlat), ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
+                    axs[0].add_patch(rect)
+                    axs[1].plot(x,y, '--', c='#ff7f00')
 
-            direction = np.arctan2(flight_latitudes[index+1] - flight_latitudes[index], flight_longitudes[index+1] - flight_longitudes[index])
-                
-            axs[1].quiver(closest_x, closest_y, np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', scale=7)
+                    # Draw the zoomed in map on the second subplot
+                    axs[1].plot(flight_utm_x_km, flight_utm_y_km, c='#377eb8',linestyle ='dotted')
+                    axs[1].set_xlim(minl, maxl)
+                    axs[1].set_ylim(minla, maxla)
+                    axs[1].tick_params(axis='both', which='major', labelsize=9)
+                    axs[1].ticklabel_format(useOffset=False, style='plain')
+                    if len(axs[1].get_xticklabels()) > 4:
+                        axs[1].set_xticklabels([round(x, 4) for x in axs[1].get_xticks()], rotation=20, fontsize=9)
+                    m = (flight_latitudes[index+1] - flight_latitudes[index])/(flight_longitudes[index+1] - flight_longitudes[index])
+                    b = flight_latitudes[index] - m*flight_longitudes[index]
 
-            axs[1].quiver(closest_x, closest_y, np.cos(heading), np.sin(heading), angles='xy', scale = 7, color='#999999')
-            axs[1].scatter(closest_x, closest_y, c='#377eb8', s=50, zorder=3)
-            axs[1].scatter(seismometer[0], seismometer[1], c='#e41a1c', s=50, zorder=3)
+                    direction = np.arctan2(flight_latitudes[index+1] - flight_latitudes[index], flight_longitudes[index+1] - flight_longitudes[index])
+                        
+                    axs[1].quiver(closest_x, closest_y, np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', scale=7)
 
-            axs[1].text(xx,yy, str(round(d, 3))+' km', fontsize=15, fontweight='bold')
+                    axs[1].quiver(closest_x, closest_y, np.cos(heading), np.sin(heading), angles='xy', scale = 7, color='#999999')
+                    axs[1].scatter(closest_x, closest_y, c='#377eb8', s=50, zorder=3)
+                    axs[1].scatter(seismometer[0], seismometer[1], c='#e41a1c', s=50, zorder=3)
 
-            # Draw dashed lines connecting the rectangle on the existing map to the zoomed-in map
-            con = mpatch.ConnectionPatch(xyA=(minl, minla), xyB=(maxl, minla), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
-            fig.add_artist(con)
-            con = mpatch.ConnectionPatch(xyA=(minl, maxla), xyB=(maxl, maxla), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
-            fig.add_artist(con)
-            plt.show()
-            #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all/' + date + '/'+flight+'/'+station+'/'
-            #make_base_dir(BASE_DIR)
-            #plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all/'+ date + '/'+flight+'/'+station+'/map_'+flight+'_' + str(time[l]) + '.png')
-            plt.close()
+                    axs[1].text(xx,yy, str(round(d, 3))+' km', fontsize=15, fontweight='bold')
+
+                    # Draw dashed lines connecting the rectangle on the existing map to the zoomed-in map
+                    con = mpatch.ConnectionPatch(xyA=(minl, minla), xyB=(maxlon, minlat), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
+                    fig.add_artist(con)
+                    con = mpatch.ConnectionPatch(xyA=(minl, maxla), xyB=(maxlon, maxlat), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
+                    fig.add_artist(con)
+                    plt.show()
+                    #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all/' + date + '/'+flight+'/'+station+'/'
+                    #make_base_dir(BASE_DIR)
+                    #plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all/'+ date + '/'+flight+'/'+station+'/map_'+flight+'_' + str(time[l]) + '.png')
+                    plt.close()
+
+                elif largm == 2:
+                    # Create a figure with two subplots side by side
+                    fig, axs = plt.subplots(1, 2) 
+                    fig.subplots_adjust(wspace=0.5)  # Adjust the spacing between subplots
+
+                    lxmin,lymin = utm_proj(min_lon, min_lat)
+                    lxmax, lymax = utm_proj(max_lon, max_lat)
+
+                    min_x = (xx - (x[1] - x[0]) / 1.5)
+                    max_x = (xx + (x[1] - x[0]) / 1.5)
+                    min_y = (yy - (y[1] - y[0]) * 4)
+                    max_y = (yy + (y[1] - y[0]) * 4)
+
+                    axs[1].set_xticks(np.arange(min_x, max_x, (x[1] - x[0]) / 2))
+                    axs[1].set_yticks(np.arange(min_y, max_y, (y[1] - y[0]) / 2))
+
+                    axs[0].set_xticks(np.arange(lxmin/1000, lxmax/1000, 50))
+                    axs[0].set_yticks(np.arange(lymin/1000, lymax/1000, 50))
+
+                    axs[0].set_aspect('equal')
+                    axs[1].set_aspect('equal')
+                    axs[0].grid(True, linestyle='dotted', color='gray')
+                    axs[1].grid(True, linestyle='dotted', color='gray')
+                    axs[0].scatter(seismo_utm_x_km, seismo_utm_y_km, c='#e41a1c', s = 3, label='seismometers')
+                    axs[0].plot(flight_utm_x_km, flight_utm_y_km, '-', c='#377eb8', lw=1, ms = 1, label='flight path')
+                    for i in range(1, len(flight_utm_y_km)-1, int(len(flight_utm_y_km)/5)):
+                        direction = np.arctan2(flight_utm_y_km[i+1] - flight_utm_y_km[i], flight_utm_x_km[i+1] - flight_utm_x_km[i])
+                        m = (flight_utm_y_km[i+1] - flight_utm_y_km[i])/(flight_utm_x_km[i+1] - flight_utm_x_km[i])
+                        b = flight_utm_y_km[i] - m*flight_utm_x_km[i]
+                        axs[0].quiver((flight_utm_y_km[i]-b)/m, flight_utm_y_km[i], np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', headwidth = 5)
+                    # Set labels and title
+                    axs[0].set_xlim(lxmin/1000, lxmax/1000)
+                    axs[0].set_ylim(lymin/1000, lymax/1000)
+                    axs[0].tick_params(axis='both', which='major', labelsize=12)
+                    
+                    heading = np.deg2rad(head[index])
+                    # Define the UTM and latitude/longitude coordinate systems
+
+                    rect = Rectangle((min_x, min_y), (max_x-min_x), (max_y-min_y), ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
+                    axs[0].add_patch(rect)
+                    axs[1].plot(x,y, '--', c='#ff7f00')
+
+                    # Draw the zoomed in map on the second subplot
+                    axs[1].plot(flight_utm_x_km, flight_utm_y_km, c='#377eb8',linestyle ='dotted')
+                    axs[1].set_xlim(min_x, max_x)
+                    axs[1].set_ylim(min_y, max_y)
+                    axs[1].tick_params(axis='both', which='major', labelsize=9)
+                    axs[1].ticklabel_format(useOffset=False, style='plain')
+                    if len(axs[1].get_xticklabels()) > 4:
+                        axs[1].set_xticklabels([round(x, 4) for x in axs[1].get_xticks()], rotation=20, fontsize=9)
+                    m = (flight_utm_y_km[index+1] - flight_utm_y_km[index])/(flight_utm_x_km[index+1] - flight_utm_x_km[index])
+                    b = flight_utm_y_km[index] - m*flight_utm_x_km[index]
+
+                    direction = np.arctan2(flight_utm_y_km[index+1] - flight_utm_y_km[index], flight_utm_x_km[index+1] - flight_utm_x_km[index])
+                        
+                    axs[1].quiver(closest_x, closest_y, np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', scale=7)
+
+                    axs[1].quiver(closest_x, closest_y, np.cos(heading), np.sin(heading), angles='xy', scale = 7, color='#999999')
+                    axs[1].scatter(closest_x, closest_y, c='#377eb8', s=50, zorder=3)
+                    axs[1].scatter(seismometer[0], seismometer[1], c='#e41a1c', s=50, zorder=3)
+
+                    axs[1].text(xx,yy, str(round(d, 3))+' km', fontsize=15, fontweight='bold')
+
+                    # Draw dashed lines connecting the rectangle on the existing map to the zoomed-in map
+                    con = mpatch.ConnectionPatch(xyA=(min_x, min_y), xyB=(min_x, min_y), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
+                    fig.add_artist(con)
+                    con = mpatch.ConnectionPatch(xyA=(min_x, max_y), xyB=(min_x, max_y), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
+                    fig.add_artist(con)
+                    plt.show()
+                    #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all/' + date + '/'+flight+'/'+station+'/'
+                    #make_base_dir(BASE_DIR)
+                    #plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all/'+ date + '/'+flight+'/'+station+'/map_'+flight+'_' + str(time[l]) + '.png')
+                    plt.close()
