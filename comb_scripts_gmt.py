@@ -227,7 +227,7 @@ for i, flight_file in enumerate(flight_files):
 
 
 			fig = pygmt.Figure()
-			fig.basemap(region=[minl, maxl, minla, maxla], projection="U5W/12c", frame=True)
+			fig.basemap(region=[minl, maxl, minla, maxla], projection="U5W/10c", frame=True)
 			fig.coast(
 				region=[minl, maxl, minla, maxla],
 				shorelines=True,
