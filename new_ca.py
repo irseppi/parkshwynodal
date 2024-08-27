@@ -118,12 +118,16 @@ for i, flight_file in enumerate(flight_files):
                 x = [closest_x, seismometer[0]]
                 yy = sum(y) / len(y)
                 xx = sum(x) / len(x)
-
+                
                 min_x = int(xx - 2)
                 max_x = int(xx + 2)
                 min_y = int(yy - 2)
                 max_y = int(yy + 2)
-
+                if d < 0.5:
+                    min_x = int(xx - 1)
+                    max_x = int(xx + 1)
+                    min_y = int(yy - 1)
+                    max_y = int(yy + 1)
                 # Create a figure with two subplots side by side
                 fig, axs = plt.subplots(1, 2, gridspec_kw={'width_ratios': [1, 2]}) 
                 fig.subplots_adjust(wspace=0.5)  # Adjust the spacing between subplots
