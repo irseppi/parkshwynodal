@@ -10,6 +10,9 @@ from prelude import load_flights, dist_less, make_base_dir
 # Load flight files and filenames
 flight_files,filenames = load_flights(2, 4, 11, 27)
 
+# Open output file for writing
+output = open('all_station_crossing_db_updated111.txt','w')
+
 utm_proj = pyproj.Proj(proj='utm', zone='6', ellps='WGS84')
 
 min_lon = -150.7
@@ -79,7 +82,7 @@ def find_closest_point(flight_path, seismo_utm):
             index = i
         else:
             continue
-
+   
     return closest_point, min_distance, index
 
 # Iterate over flight files
@@ -91,7 +94,13 @@ for i, flight_file in enumerate(flight_files):
     flight_latitudes = flight_data['latitude']
     flight_longitudes = flight_data['longitude']
     head = flight_data['heading']
-
+    timestamp = flight_data['snapshot_id']
+    alt = flight_data['altitude']
+    speed = flight_data['speed']
+    head = flight_data['heading']
+    fname = filenames[i]	
+    flight_num = fname[9:18]
+    date = fname[0:8]
     if dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes) == False:
         continue
 
@@ -114,6 +123,25 @@ for i, flight_file in enumerate(flight_files):
             
             if d <= 2:
                 closest_x, closest_y = closest_p
+                #Calculate the time of the closest point
+                flight_utm_x1, flight_utm_y1 = flight_path[index]
+                flight_utm_x2, flight_utm_y2 = flight_path[index + 1]
+
+                x_timestamp_dif_vec = flight_utm_x2 - flight_utm_x1
+                y_timestamp_dif_vec = flight_utm_y2 - flight_utm_y1
+
+                cx_timestamp_dif_vec =  closest_x - flight_utm_x1
+                cy_timestamp_dif_vec = closest_y - flight_utm_y1
+
+                line_vector = (x_timestamp_dif_vec, y_timestamp_dif_vec)
+                cline_vector = (cx_timestamp_dif_vec, cy_timestamp_dif_vec)
+
+                line_magnitude = np.sqrt(line_vector[0] ** 2 + line_vector[1] ** 2)
+                cline_magnitude = np.sqrt(cline_vector[0] ** 2 + cline_vector[1] ** 2)
+
+                length_ratio = cline_magnitude / line_magnitude
+                closest_time = timestamp[index] + length_ratio*(timestamp[index+1] - timestamp[index])
+
                 y = [closest_y, seismometer[1]]
                 x = [closest_x, seismometer[0]]
                 yy = sum(y) / len(y)
@@ -161,8 +189,9 @@ for i, flight_file in enumerate(flight_files):
                 axs[0].set_xlim(int(lxmin/1000), int(lxmax/1000))
                 axs[0].set_ylim(int(lymin/1000), int(lymax/1000))
                 axs[0].tick_params(axis='both', which='major', labelsize=9)
-                
-                heading = np.deg2rad(head[index])
+
+                head_avg = (head[index]+head[index+1])/2
+                heading = np.deg2rad(head_avg)
                 # Define the UTM and latitude/longitude coordinate systems
 
                 rect = Rectangle((min_x, min_y), (max_x-min_x), (max_y-min_y), ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
@@ -200,10 +229,17 @@ for i, flight_file in enumerate(flight_files):
                 fig.add_artist(con)
                 con = mpatch.ConnectionPatch(xyA=(max_x, max_y), xyB=(min_x, max_y), coordsA="data", coordsB="data", axesA=axs[0], axesB=axs[1], color="black", linestyle="--")
                 fig.add_artist(con)
-                plt.show()
-                #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all_UTM/' + date + '/'+flight+'/'+station+'/'
-                #make_base_dir(BASE_DIR)
-                #plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all_UTM/'+ date + '/'+flight+'/'+station+'/map_'+flight+'_' + str(time[l]) + '.png')
+                
+                BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all_UTM/' + date + '/'+flight_num + '/' + station + '/'
+                make_base_dir(BASE_DIR)
+                plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all_UTM/' + date + '/' + flight_num + '/' + station + '/map_' + flight_num + '_' + str(closest_time) + '.png')
+
+                alt_avg = (alt[index]+alt[index+1])/2
+                speed_avg = (speed[index]+speed[index+1])/2
+                
+                # Write data to the output file
+                output.write(str(date )+ ',' + str(flight_num) + ',' + str(closest_x) + ',' + str(closest_y) + ','+str(closest_time) + ',' + str(alt_avg) + ',' + str(speed_avg) + ',' + str(head_avg) + ',' + str(station) + ',\n')
 
             else:
                 continue
+output.close()
