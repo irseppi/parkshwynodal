@@ -42,24 +42,43 @@ def closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight
     dist_lim = np.Infinity
 
     x = [flight_utm_x1, flight_utm_x2]
-    y = [flight_utm_y1, flight_utm_y2]  
-    m = (y[1]-y[0])/(x[1]-x[0])
-    b = y[0] - m*x[0]
+    y = [flight_utm_y1, flight_utm_y2]
 
-    if (x[1]-x[0]) <= 0:
-        ggg = -0.001
-    else:
-        ggg = 0.001
-    for point in np.arange(x[0], x[1], ggg):
-        xx = point
-        yy = m*xx + b
-        dist_km = np.sqrt((seismo_utm_y-yy)**2 +(seismo_utm_x-xx)**2)
-        
-        if dist_km < dist_lim:
-            dist_lim = dist_km
-            closest_point = (xx,yy)
+    if (x[1] - x[0]) == 0:
+        if (y[1]-y[0]) <= 0:
+            ggg = -0.001
         else:
-            continue
+            ggg = 0.001
+        for point in np.arange(y[0], y[1], ggg):
+            xx = x[0]
+            yy = point
+            dist_km = np.sqrt((seismo_utm_y-yy)**2 +(seismo_utm_x-xx)**2)
+            
+            if dist_km < dist_lim:
+                dist_lim = dist_km
+                closest_point = (xx,yy)
+            else:
+                continue
+
+    else: 
+        m = (y[1]-y[0])/(x[1]-x[0])
+        b = y[0] - m*x[0]
+
+        if (x[1] - x[0]) <= 0:
+            ggg = -0.001
+        else:
+            ggg = 0.001
+        for point in np.arange(x[0], x[1], ggg):
+            xx = point
+        
+            yy = m*xx + b
+            dist_km = np.sqrt((seismo_utm_y-yy)**2 +(seismo_utm_x-xx)**2)
+            
+            if dist_km < dist_lim:
+                dist_lim = dist_km
+                closest_point = (xx,yy)
+            else:
+                continue
 
     return closest_point, dist_lim
 
@@ -234,7 +253,7 @@ for i, flight_file in enumerate(flight_files):
                 make_base_dir(BASE_DIR)
                 plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all_UTM/' + date + '/' + flight_num + '/' + station + '/map_' + flight_num + '_' + str(closest_time) + '.png')
                 plt.close()
-                
+
                 alt_avg = (alt[index]+alt[index+1])/2
                 speed_avg = (speed[index]+speed[index+1])/2
                 
