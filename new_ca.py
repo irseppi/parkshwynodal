@@ -233,7 +233,8 @@ for i, flight_file in enumerate(flight_files):
                 BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all_UTM/' + date + '/'+flight_num + '/' + station + '/'
                 make_base_dir(BASE_DIR)
                 plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all_UTM/' + date + '/' + flight_num + '/' + station + '/map_' + flight_num + '_' + str(closest_time) + '.png')
-
+                plt.close()
+                
                 alt_avg = (alt[index]+alt[index+1])/2
                 speed_avg = (speed[index]+speed[index+1])/2
                 
