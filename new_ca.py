@@ -155,7 +155,7 @@ for i, flight_file in enumerate(flight_files):
                     direction = np.arctan2(flight_utm_y_km[i+1] - flight_utm_y_km[i], flight_utm_x_km[i+1] - flight_utm_x_km[i])
                     m = (flight_utm_y_km[i+1] - flight_utm_y_km[i])/(flight_utm_x_km[i+1] - flight_utm_x_km[i])
                     b = flight_utm_y_km[i] - m*flight_utm_x_km[i]
-                    axs[0].quiver((flight_utm_y_km[i]-b)/m, flight_utm_y_km[i], np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', headwidth = 5)
+                    axs[0].quiver((flight_utm_y_km[i]-b)/m, flight_utm_y_km[i], np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', headwidth = 10)
 
                 # Set labels and title
                 axs[0].set_xlim(int(lxmin/1000), int(lxmax/1000))
@@ -178,8 +178,6 @@ for i, flight_file in enumerate(flight_files):
 
                 axs[1].set_xlim(min_x, max_x)
                 axs[1].set_ylim(min_y, max_y)
-                axs[1].set_xlabel('UTM Easting (km)')
-                axs[1].set_ylabel('UTM Northing (km)')
 
                 axs[1].tick_params(axis='both', which='major', labelsize=9)
                 axs[1].ticklabel_format(useOffset=False, style='plain')
@@ -198,14 +196,14 @@ for i, flight_file in enumerate(flight_files):
                 axs[1].text(xx,yy, str(round(d, 2))+' km', fontsize=12, fontweight='bold')
 
                 # Draw dashed lines connecting the rectangle on the existing map to the zoomed-in map
-                con = mpatch.ConnectionPatch(xyA=(min_x, min_y), xyB=(max_x, max_y), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
+                con = mpatch.ConnectionPatch(xyA=(max_x, min_y), xyB=(min_x, min_y), coordsA="data", coordsB="data", axesA=axs[0], axesB=axs[1], color="black", linestyle="--")
                 fig.add_artist(con)
-                con = mpatch.ConnectionPatch(xyA=(min_x, max_y), xyB=(max_x, min_y), coordsA="data", coordsB="data", axesA=axs[1], axesB=axs[0], color="black", linestyle="--")
+                con = mpatch.ConnectionPatch(xyA=(max_x, max_y), xyB=(min_x, max_y), coordsA="data", coordsB="data", axesA=axs[0], axesB=axs[1], color="black", linestyle="--")
                 fig.add_artist(con)
                 plt.show()
-                #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all/' + date + '/'+flight+'/'+station+'/'
+                #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all_UTM/' + date + '/'+flight+'/'+station+'/'
                 #make_base_dir(BASE_DIR)
-                #plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all/'+ date + '/'+flight+'/'+station+'/map_'+flight+'_' + str(time[l]) + '.png')
+                #plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all_UTM/'+ date + '/'+flight+'/'+station+'/map_'+flight+'_' + str(time[l]) + '.png')
 
             else:
                 continue
