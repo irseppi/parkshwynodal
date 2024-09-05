@@ -112,7 +112,6 @@ for i, flight_file in enumerate(flight_files):
     flight_data = pd.read_csv(flight_file, sep=",") 
     flight_latitudes = flight_data['latitude']
     flight_longitudes = flight_data['longitude']
-    head = flight_data['heading']
     timestamp = flight_data['snapshot_id']
     alt = flight_data['altitude']
     speed = flight_data['speed']
@@ -256,10 +255,15 @@ for i, flight_file in enumerate(flight_files):
                 plt.close()
 
                 alt_avg = (alt[index]+alt[index+1])/2
+                alt_avg_m = alt_avg * 0.3048 #convert from feet to meters
+
                 speed_avg = (speed[index]+speed[index+1])/2
-                
+                speed_avg_mps = speed_avg * 0.514444 #convert from knots to meters/sec
+                dist_m = d * 1000
+                closest_x_m = closest_x * 1000
+                closest_y_m = closest_y * 1000
                 # Write data to the output file
-                output.write(str(date )+ ',' + str(flight_num) + ',' + str(closest_x) + ',' + str(closest_y) + ','+str(closest_time) + ',' + str(alt_avg) + ',' + str(speed_avg) + ',' + str(head_avg) + ',' + str(station) + ',\n')
+                output.write(str(date)+ ',' + str(flight_num) + ',' + str(closest_x_m) + ',' + str(closest_y_m) + ',' + str(dist_m) + ',' +str(closest_time) + ',' + str(alt_avg_m) + ',' + str(speed_avg_mps) + ',' + str(head_avg) + ',' + str(station) + ',\n')
 
             else:
                 continue
