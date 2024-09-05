@@ -83,13 +83,13 @@ def closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight
     return closest_point, dist_lim
 
 
-def find_closest_point(flight_path, seismo_utm):
+def find_closest_point(flight_utm, seismo_utm):
     min_distance = np.Infinity
     closest_point = None
 
     for i in range(len(flight_utm) - 1):
-        flight_utm_x1, flight_utm_y1 = flight_path[i]
-        flight_utm_x2, flight_utm_y2 = flight_path[i + 1]
+        flight_utm_x1, flight_utm_y1 = flight_utm[i]
+        flight_utm_x2, flight_utm_y2 = flight_utm[i + 1]
         seismo_utm_x, seismo_utm_y = seismo_utm
         point, d = closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight_utm_y2, seismo_utm_x, seismo_utm_y)
         
