@@ -200,7 +200,11 @@ for i, flight_file in enumerate(flight_files):
 
                 for i in range(1, len(flight_utm_y_km)-1, int(len(flight_utm_y_km)/5)):
                     direction = np.arctan2(flight_utm_y_km[i+1] - flight_utm_y_km[i], flight_utm_x_km[i+1] - flight_utm_x_km[i])
+                    if (flight_utm_x_km[i+1] - flight_utm_x_km[i]) == 0:
+                        continue
                     m = (flight_utm_y_km[i+1] - flight_utm_y_km[i])/(flight_utm_x_km[i+1] - flight_utm_x_km[i])
+                    if m == 0:
+                        continue
                     b = flight_utm_y_km[i] - m*flight_utm_x_km[i]
                     axs[0].quiver((flight_utm_y_km[i]-b)/m, flight_utm_y_km[i], np.cos(direction), np.sin(direction), angles='xy', color='#377eb8', headwidth = 10)
 
@@ -229,9 +233,6 @@ for i, flight_file in enumerate(flight_files):
 
                 axs[1].tick_params(axis='both', which='major', labelsize=9)
                 axs[1].ticklabel_format(useOffset=False, style='plain')
-
-                m = (flight_utm_y_km[index+1] - flight_utm_y_km[index])/(flight_utm_x_km[index+1] - flight_utm_x_km[index])
-                b = flight_utm_y_km[index] - m*flight_utm_x_km[index]
 
                 direction = np.arctan2(flight_utm_y_km[index+1] - flight_utm_y_km[index], flight_utm_x_km[index+1] - flight_utm_x_km[index])
                     
