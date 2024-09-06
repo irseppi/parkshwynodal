@@ -102,7 +102,8 @@ for line in sta_f.readlines():
     flight = val[1]
     sta = val[6]
 
-    spec_dir = '/scratch/irseppi/nodal_data/plane_info/5spec/'+str(date)+'/'+str(flight)+'/'+str(sta)+'/'
+    spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight)+'/'+str(sta)+'/'
+    
     if os.path.exists(spec_dir):
         continue
 
@@ -269,7 +270,7 @@ for line in sta_f.readlines():
                     
             
                 if len(coords) == 0:
-                    print('No picks')
+                    print('No picks for: ', date, flight, sta)
                     continue
                 # Convert the list of coordinates to a numpy array
                 coords_array = np.array(coords)
@@ -479,36 +480,47 @@ for line in sta_f.readlines():
                             continue
 
                     if len(fobs) == 0:
-                        print('No picks found')
+                        print('No picks for: ', date, flight, sta)
                         continue
                     
                     time_pick = True
                     if time_pick == True:
-                        BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/timepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
-                        make_base_dir(BASE_DIR)
                         output3 = '/scratch/irseppi/nodal_data/plane_info/timepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
-                        pick_again = 'y'
-                        while pick_again == 'y':
-                            r3 = open(output3,'w')
+                        if Path(output3).exists():
                             set_time = []
-                            plt.figure()
-                            plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                            plt.scatter(tobs,fobs, color='black', marker='x')
-                            def onclick(event):
-                                global coords
-                                set_time.append(event.xdata) 
-                                plt.scatter(event.xdata, event.ydata, color='red', marker='x')  # Add this line
-                                plt.draw() 
-                                print('Clicked:', event.xdata, event.ydata)  
-                                r3.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+                            with open(output3, 'r') as file:
+                                for line in file:
+                                    # Split the line using commas
+                                    pick_data = line.split(',')
+                                    set_time.append(float(pick_data[0]))
+                            file.close()  # Close the file after reading
 
-                            cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-                            plt.show(block=True)
+                        else:
+                            BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/timepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+                            make_base_dir(BASE_DIR)
+                            
+                            pick_again = 'y'
+                            while pick_again == 'y':
+                                r3 = open(output3,'w')
+                                set_time = []
+                                plt.figure()
+                                plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                                plt.scatter(tobs,fobs, color='black', marker='x')
+                                def onclick(event):
+                                    global coords
+                                    set_time.append(event.xdata) 
+                                    plt.scatter(event.xdata, event.ydata, color='red', marker='x')  # Add this line
+                                    plt.draw() 
+                                    print('Clicked:', event.xdata, event.ydata)  
+                                    r3.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
 
-                            start_time = set_time[0]
-                            end_time = set_time[1]
-                            r3.close()
-                            pick_again = input("Do you want to repick you points? (y or n)")
+                                cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+                                plt.show(block=True)
+
+                                r3.close()
+                                pick_again = input("Do you want to repick you points? (y or n)")
+                        start_time = set_time[0]
+                        end_time = set_time[1]
                         ftobs = []
                         ffobs = []
 
@@ -606,7 +618,6 @@ for line in sta_f.readlines():
                     ax1.margins(x=0)
                     ax1.set_position([0.125, 0.6, 0.775, 0.3])  # Move ax1 plot upwards
 
-
                     # Plot spectrogram
                     cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
                     ax2.set_xlabel('Time (s)')
@@ -624,11 +635,12 @@ for line in sta_f.readlines():
                         ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
                         
                         ax2.scatter(tprime0, ft0p, color='black', marker='x', s=30) 
-                        f0lab.append(str(np.round(f0,2))+',') # +'+/-' + str(np.round(covm[3+pp],2))+',') 
 
                     fss = 'x-small'
-                    f0lab = sorted(f0lab)
-                    ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2)) + ' sec, v0 = '+str(np.round(v0,2)) +' m/s, l = '+str(np.round(l,2)) +' m, \n' + 'f0 = '+' '.join(f0lab) +' Hz', fontsize=fss)
+                    f0lab = sorted(f0_array)
+                    for i in range(len(f0lab)):
+                        f0lab[i] = (str(np.round(f0lab[i],2)))
+                    ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2)) + ' sec, v0 = '+str(np.round(v0,2)) +' m/s, l = '+str(np.round(l,2)) +' m, \n' + 'f0 = '+', '.join(f0lab) +' Hz', fontsize=fss)
                     ax2.axvline(x=120, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: 120 s')
             
                     ax2.legend(loc='upper right',fontsize = 'x-small')
@@ -659,7 +671,8 @@ for line in sta_f.readlines():
                     ax4.grid(axis='y')
 
                     plt.show()     
-                    #qnum = input('What quality number would you give this?(first num for data quality, second for ability to fit model to data)')
+                    qnum = input('What quality number would you give this?(first num for data quality(0-3), second for ability to fit model to data(0-1))')
+
                     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_spec/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
                     make_base_dir(BASE_DIR)
                     fig.savefig('/scratch/irseppi/nodal_data/plane_info/C185_spec/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.png')
@@ -709,5 +722,5 @@ for line in sta_f.readlines():
                     plt.close() 
 
                     print(tprime0,v0,l,f0lab,covm)
-                    C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+',\n')
+                    C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+',\n')
 C185_output.close()
