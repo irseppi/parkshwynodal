@@ -234,10 +234,9 @@ for line in sta_f.readlines():
 
                 tf = np.arange(0, 240, 1)
 
-                output1 = '/scratch/irseppi/nodal_data/plane_info/inversepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
-                    
+                #output1 = '/scratch/irseppi/nodal_data/plane_info/inversepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
+                output1 = 'output/C185_data_picks/inversepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
                 if Path(output1).exists():
-                    
                     coords = []
                     with open(output1, 'r') as file:
                         for line in file:
@@ -247,7 +246,8 @@ for line in sta_f.readlines():
                     file.close()  # Close the file after reading
 
                 else:
-                    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/inversepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+                    #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/inversepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+                    BASE_DIR = 'output/C185_data_picks/inversepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
                     make_base_dir(BASE_DIR)
                     pick_again = 'y'
                     while pick_again == 'y':
@@ -342,7 +342,8 @@ for line in sta_f.readlines():
                 mprior.append(l)
                 mprior.append(tprime0)       
 
-                output2 = '/scratch/irseppi/nodal_data/plane_info/overtonepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
+                #output2 = '/scratch/irseppi/nodal_data/plane_info/overtonepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
+                output2 = 'output/C185_data_picks/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
                 if Path(output2).exists():
 
                     peaks = []
@@ -356,7 +357,8 @@ for line in sta_f.readlines():
                     file.close()  # Close the file after reading
 
                 else:
-                    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/overtonepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+                    #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/overtonepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+                    BASE_DIR = 'output/C185_data_picks/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
                     make_base_dir(BASE_DIR)
                     pick_again = 'y'
                     while pick_again == 'y':
@@ -485,7 +487,8 @@ for line in sta_f.readlines():
                     
                     time_pick = True
                     if time_pick == True:
-                        output3 = '/scratch/irseppi/nodal_data/plane_info/timepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
+                        #output3 = '/scratch/irseppi/nodal_data/plane_info/timepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
+                        output3 = 'output/C185_data_picks/timepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
                         if Path(output3).exists():
                             set_time = []
                             with open(output3, 'r') as file:
@@ -496,7 +499,8 @@ for line in sta_f.readlines():
                             file.close()  # Close the file after reading
 
                         else:
-                            BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/timepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+                            #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/timepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+                            BASE_DIR = 'output/C185_data_picks/timepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
                             make_base_dir(BASE_DIR)
                             
                             pick_again = 'y'
