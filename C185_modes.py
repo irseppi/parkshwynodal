@@ -270,6 +270,26 @@ for line in sta_f.readlines():
                     
             
                 if len(coords) == 0:
+                    '''
+                    pick_again = 'y'
+                    while pick_again == 'y':
+                        r1 = open(output1,'w')
+                        coords = []
+                        plt.figure()
+                        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                        def onclick(event):
+                            global coords
+                            coords.append((event.xdata, event.ydata))
+                            plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                            plt.draw() 
+                            print('Clicked:', event.xdata, event.ydata)  
+                            r1.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+                        cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+
+                        plt.show(block=True)
+                        r1.close()
+                        pick_again = input("Do you want to repick your points? (y or n)")
+                    '''
                     print('No picks for: ', date, flight, sta)
                     continue
                 # Convert the list of coordinates to a numpy array
