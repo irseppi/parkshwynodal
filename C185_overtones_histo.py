@@ -4,7 +4,7 @@ import numpy as np
 
 
 # Define the directory where your files are located
-file = 'output/C185data.csv'
+file = 'output/C185data_updated.csv'
 
 # Initialize a list to store the data from the files
 data = []
@@ -14,10 +14,8 @@ with open(file, 'r') as f:
     for line in f.readlines():
         lines = line.split(',')
         try:
-            if x <= 28:
-                peaks = np.array(lines[6])
-            else:
-                peaks = np.array(lines[7])
+
+            peaks = np.array(lines[7])
             
             
         except:
