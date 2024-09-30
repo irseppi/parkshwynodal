@@ -6,6 +6,7 @@ import datetime
 import pyproj
 from prelude import *
 from scipy.signal import find_peaks, spectrogram
+from pathlib import Path
 
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -93,7 +94,8 @@ def find_closest_point(flight_utm, seismo_utm):
 
 sta_f = open('input/all_station_crossing_db_C185.txt','r')
 C185_output = open('output/C185data_updated.csv', 'a')
-
+output22 = open('output/revisit_C185.txt', 'a')
+output33 = open('output/bad_data_C185.txt', 'a')
 # Loop through each station in text file that we already know comes within 2km of the nodes
 
 for line in sta_f.readlines():
@@ -270,26 +272,7 @@ for line in sta_f.readlines():
                     
             
                 if len(coords) == 0:
-                    '''
-                    pick_again = 'y'
-                    while pick_again == 'y':
-                        r1 = open(output1,'w')
-                        coords = []
-                        plt.figure()
-                        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                        def onclick(event):
-                            global coords
-                            coords.append((event.xdata, event.ydata))
-                            plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-                            plt.draw() 
-                            print('Clicked:', event.xdata, event.ydata)  
-                            r1.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
-                        cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
 
-                        plt.show(block=True)
-                        r1.close()
-                        pick_again = input("Do you want to repick your points? (y or n)")
-                    '''
                     print('No picks for: ', date, flight, sta)
                     continue
                 # Convert the list of coordinates to a numpy array
@@ -436,70 +419,103 @@ for line in sta_f.readlines():
                 ax1.set_ylim(0, int(fs/2))
 
                 plt.show()
+                
+                #if the file is not saved then
+                if not Path('/scratch/irseppi/nodal_data/plane_info/C185_spec/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/').exists():
+                    goon = True
+                    
+                    with open('output/revisit_C185.txt', 'r') as output212, open('output/bad_data_C185.txt', 'r') as output313:
+                        for ynln in output212:
+                            if ynln == str(date)+','+str(flight)+','+str(sta)+','+str(closest_time) + ',\n':
+                                goon = False
+                                break
+                            else:
+                                continue
+                        for ynln2 in output313:
+                            if ynln2 == str(date)+','+str(flight)+','+str(sta)+','+str(closest_time) + ',\n':
+                                goon = False
+                                break
+                            else:
+                                continue
 
-                con = input("Do you want to use this? (y or n)")
-                if con == 'n':
-                    continue
-                else:
+                    if goon == True:
+                        con = input("Do you want to use this? (y or n)")
+
+                        if con == 'n':
+                            save = input("Do you want to revisit this later? (y or n)")
+                            if save == 'y':
+                                output22.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time) + ',\n')
+                                goon = False
+                                break
+                            elif save == 'n':
+                                output33.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time) + ',\n')
+                                goon = False
+                                break
+                        if con == 'y':
+                            corridor_width = 6 
+
+
+
+                else:                           
                     corridor_width = 6 
 
-                    peaks_assos = []
-                    fobs = []
-                    tobs = []
+                peaks_assos = []
+                fobs = []
+                tobs = []
 
-                    for pp in range(len(peaks)):
-                        tprime = freqpeak[pp]
-                        ft0p = peaks[pp]
-                        f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
-                        
+                for pp in range(len(peaks)):
+                    tprime = freqpeak[pp]
+                    ft0p = peaks[pp]
+                    f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
                     
-                        ft = calc_ft(times,  tprime0, f0, v0, l, c)
-                        
-                        maxfreq = []
-                        coord_inv = []
-                        ttt = []
+                
+                    ft = calc_ft(times,  tprime0, f0, v0, l, c)
+                    
+                    maxfreq = []
+                    coord_inv = []
+                    ttt = []
 
-                        f01 = f0 + corridor_width
-                        f02 = f0  - corridor_width
-                        upper = calc_ft(times,  tprime0, f01, v0, l, c)
-                        lower = calc_ft(times,  tprime0, f02, v0, l, c)
+                    f01 = f0 + corridor_width
+                    f02 = f0  - corridor_width
+                    upper = calc_ft(times,  tprime0, f01, v0, l, c)
+                    lower = calc_ft(times,  tprime0, f02, v0, l, c)
 
-                        for t_f in range(len(times)):
+                    for t_f in range(len(times)):
 
-                            try:      
-                                tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
-                                try:
-                                    max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
-                                    maxa = np.argmax(tt[max_amplitude_index])
-                                    max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
-                                except:
-                                    continue
-                                maxfreq.append(max_amplitude_frequency)
-                                coord_inv.append((times[t_f], max_amplitude_frequency))
-                                ttt.append(times[t_f])
-
+                        try:      
+                            tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
+                            try:
+                                max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
+                                maxa = np.argmax(tt[max_amplitude_index])
+                                max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
                             except:
                                 continue
-                        if len(coord_inv) > 0:
-                            if f0 < 200:
-                                coord_inv_array = np.array(coord_inv)
-                                mtest = [f0,v0, l, tprime0]
-                                mtest,_ = invert_f(mtest, coord_inv_array, num_iterations=4)
-                                ft = calc_ft(ttt,  mtest[3], mtest[0], mtest[1], mtest[2], c)
-                            else:
-                                ft = calc_ft(ttt,  tprime0, f0, v0, l, c)
+                            maxfreq.append(max_amplitude_frequency)
+                            coord_inv.append((times[t_f], max_amplitude_frequency))
+                            ttt.append(times[t_f])
 
-                            delf = np.array(ft) - np.array(maxfreq)
-
-                            count = 0
-                            for i in range(len(delf)):
-                                if np.abs(delf[i]) <= (3):
-                                    fobs.append(maxfreq[i])
-                                    tobs.append(ttt[i])
-                                    count += 1
-                            peaks_assos.append(count)
-                        else:
+                        except:
                             continue
+                    if len(coord_inv) > 0:
+                        if f0 < 200:
+                            coord_inv_array = np.array(coord_inv)
+                            mtest = [f0,v0, l, tprime0]
+                            mtest,_ = invert_f(mtest, coord_inv_array, num_iterations=4)
+                            ft = calc_ft(ttt,  mtest[3], mtest[0], mtest[1], mtest[2], c)
+                        else:
+                            ft = calc_ft(ttt,  tprime0, f0, v0, l, c)
+
+                        delf = np.array(ft) - np.array(maxfreq)
+
+                        count = 0
+                        for i in range(len(delf)):
+                            if np.abs(delf[i]) <= (3):
+                                fobs.append(maxfreq[i])
+                                tobs.append(ttt[i])
+                                count += 1
+                        peaks_assos.append(count)
+                    else:
+                        continue
 
                     if len(fobs) == 0:
                         print('No picks for: ', date, flight, sta)
@@ -748,3 +764,5 @@ for line in sta_f.readlines():
                     print(tprime0,v0,l,f0lab,covm)
                     C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+',\n')
 C185_output.close()
+output22.close()
+output33.close()
