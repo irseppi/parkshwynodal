@@ -45,6 +45,12 @@ with open(file, 'r') as f:
     # Read the data from the file and append it to the respective lists based on the mode
     for line in f.readlines():
         lines = line.split(',')
+        quality_num = int(lines[9])
+        if quality_num < 21:
+
+            continue
+        else:
+            print(quality_num)
         x += 1
 
         peaks = np.array(lines[7])
@@ -187,6 +193,7 @@ if diff_mode1_mode2 == True:
         plt.text(medians_mode1_rounded[i]-(diff/2), 5, f'{diff}', ha='center', va='bottom')
         plt.annotate('', xy=(medians_mode1_rounded[i], 5), xytext=(medians_mode2_rounded[i+2], 5),
                     arrowprops=dict(arrowstyle='<->', color='green'))
+
 # Plot the dots for modes
 plt.scatter(mode1_x, mode1_y, label='Mode 1', color='orange')
 mode2_y_modified = [(np.max(mode1_y)) + y for y in mode2_y]

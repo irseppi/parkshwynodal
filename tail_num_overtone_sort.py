@@ -23,16 +23,22 @@ xx = 'yes'
 for line in file.readlines():
     lines = line.split(',')
     flight_num = lines[1]
-    
+    quality_num = int(lines[9])
+    if quality_num != 31:
+        continue
+
     for lp in range(len(flight)):
         if int(flight_num) == int(flight[lp]):
             tail_num = tail_nums[lp]
             if tail_num == 10512184 or tail_num == 11013232 or tail_num == 11146232:
+                xx = 'yes'
+            else:
                 xx = 'no'
                 continue
     if xx == 'no':
         xx = 'yes'
         continue
+
     peaks = np.array(lines[7])
 
     peaks = str(peaks)
@@ -59,6 +65,8 @@ for line in file.readlines():
         if int(flight_num) == int(flight[lp]):
             tail_num = tail_nums[lp]
             if tail_num == 10512184 or tail_num == 11013232 or tail_num == 11146232:
+                ggg = 'yes'
+            else:
                 continue
             # Assign a color to the tail number if it doesn't already have one
             if tail_num not in color_dict:
