@@ -313,6 +313,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 		return  closest_lat, closest_lon, dist_lim, timestamp
 	else:
 		return None, None, None, None
+
 ###################################################################################################################################
 
 def calc_time(t0,dist,alt):
