@@ -46,8 +46,7 @@ with open(file, 'r') as f:
     for line in f.readlines():
         lines = line.split(',')
         quality_num = int(lines[9])
-        if quality_num < 21:
-
+        if int(quality_num) < 21:
             continue
         else:
             print(quality_num)
@@ -66,19 +65,29 @@ with open(file, 'r') as f:
                 peak = float(peak[0:-1])
             except:
                 continue
-            if abs(float(peak) - 82.5) <= 1.5 or abs(float(peak) - 124.5) <= 1.5:
-                xx += 1
-                mode_x = 1
-                break
-            elif abs(float(peak) - 76) <= 5 or abs(float(peak) - 114) <= 5 or abs(float(peak) - 152) <= 5:
-                mode_x = 2
-                yy += 1
-                break
+            if peak < 111 or peak > 126:
+                continue
             else:
-                mode_x = 3
-                zz += 1
+                if abs(float(peak) - 124.5) <= abs(float(peak) - 114):
+                    xx += 1
+                    mode_x = 1
+                    break
+                elif abs(float(peak) - 114) <= abs(float(peak) - 124.5):
+                    mode_x = 2
+                    yy += 1
+                    break
+                #if abs(float(peak) - 82.5) <= 1.5 or abs(float(peak) - 124.5) <= 1.5:
+                #    xx += 1
+                #    mode_x = 1
+                #    break
+                #elif abs(float(peak) - 76) <= 5 or abs(float(peak) - 114) <= 5 or abs(float(peak) - 152) <= 5:
+                #    mode_x = 2
+                #    yy += 1
+                #    break
+                #else:
+                #    mode_x = 3
+                #    zz += 1
                 
-
         if mode_x == 1:
             for peak in peaks:
                 try:
@@ -157,7 +166,7 @@ with open(file, 'r') as f:
 
 
 medians_mode1 = [np.median(mode1_f1), np.median(mode1_f2), np.median(mode1_f3), np.median(mode1_f4), np.median(mode1_f5), np.median(mode1_f6), np.median(mode1_f7), np.median(mode1_f8), np.median(mode1_f9), np.median(mode1_f10), np.median(mode1_f11)]
-medians_mode2 = [np.median(mode2_f1), np.median(mode2_f2), np.median(mode2_f3), np.median(mode2_f4), np.median(mode2_f5), np.median(mode2_f6), np.median(mode2_f7), np.median(mode2_f8), np.median(mode2_f9), np.median(mode2_f10), np.median(mode2_f11), np.median(mode2_f12), np.median(mode2_f13)]
+medians_mode2 = [np.median(mode2_f1), np.median(mode2_f2), np.median(mode2_f3), np.median(mode2_f4), np.median(mode2_f5), np.median(mode2_f6), np.median(mode2_f7), np.median(mode2_f8), np.median(mode2_f9), np.median(mode2_f10), np.median(mode2_f11), np.median(mode2_f12), np.median(mode2_f13), np.median(mode1_f11)]
 medians_mode1_rounded = [round(median, 1) for median in medians_mode1]
 
 medians_mode2_rounded = [round(median, 1) for median in medians_mode2]

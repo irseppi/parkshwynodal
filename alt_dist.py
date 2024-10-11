@@ -12,62 +12,61 @@ utm_proj = pyproj.Proj(proj='utm', zone='6', ellps='WGS84')
 list_f = []
 color_dict = {}
 label_dict = {}
-MODE = 1
+
+MODE = 2
+mode1_flight = []
+mode2_flight = []
 
 plt.figure()
 # Iterate over each line in the file
 for line in file.readlines():
     lines = line.split(',')
-    flight_num = float(lines[1])
+    flight_num = int(lines[1])
     if flight_num in list_f:
         continue
     else:
         list_f.append(flight_num)
+
     peaks = np.array(lines[7])
-
-    peaks = str(peaks)
-    peaks = np.char.replace(peaks, '[', '')
-    peaks = np.char.replace(peaks, ']', '')
-
     peaks = str(peaks)
     peaks = np.array(peaks.split(' '))
+
     for peak in peaks:
         try:
             peak = float(peak[0:-1])
-            print(peak)
         except:
             continue
-        if MODE == 1:
-            if abs(float(peak) - 124.5) <= 2:
-                title = 'Mode 1'
+        if peak <111 or peak > 126:
+            continue
+        else:
+            if abs(float(peak) - 124.5) <= abs(float(peak) - 114):
+                mode1_flight.append(flight_num)
                 break
-            else:
-                continue
-        elif MODE == 2:
-            if abs(float(peak) - 114) <= 2:
-                title = 'Mode 2'
+            elif abs(float(peak) - 114) <= abs(float(peak) - 124.5):
+                mode2_flight.append(flight_num)
                 break
-            else:
-                continue
 
     for lp in range(len(flights)):
-        if int(flight_num) == int(flights[lp]):
+        if flight_num == int(flights[lp]):
             tail_num = tail_nums[lp]
             if tail_num not in color_dict:
                 color_dict[tail_num] = np.random.rand(3,)
+
     date = lines[0]
-    flight_num = str(int(flight_num))
+ 
     month = date[4:6]
     day = date[6:8]
 
-    flight_file = '/scratch/irseppi/nodal_data/flightradar24/2019'+month+day+ '_positions/2019'+month+day+ '_' + flight_num + '.csv'
+    flight_file = '/scratch/irseppi/nodal_data/flightradar24/2019'+month+day+ '_positions/2019'+month+day+ '_' + str(flight_num) + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")
 
     altitude = flight_data['altitude']
     lat = flight_data['latitude']
     lon = flight_data['longitude']
+
     alts = []
     dists = []
+
     for a in range(1,len(altitude)-1):
         if a == 1:
             dist  = 0
@@ -80,11 +79,29 @@ for line in file.readlines():
 
         alts.append(altitude[a])
         dists.append(dist/1000)
-    if tail_num not in label_dict:
-        plt.plot(dists, alts, color=color_dict[tail_num], label=tail_num)
-        label_dict[tail_num] = tail_num
-    else:
-        plt.plot(dists, alts, color=color_dict[tail_num])
+
+    if MODE == 1:
+        print(mode1_flight)
+        title = 'Mode 1'
+        if flight_num in mode1_flight:
+            if tail_num not in label_dict:
+                plt.plot(dists, alts, color=color_dict[tail_num], label=tail_num)
+                label_dict[tail_num] = tail_num
+            else:
+                plt.plot(dists, alts, color=color_dict[tail_num])
+        else:
+            continue
+    elif MODE == 2:
+        print(mode2_flight)
+        title = 'Mode 2'
+        if flight_num in mode2_flight:
+            if tail_num not in label_dict:
+                plt.plot(dists, alts, color=color_dict[tail_num], label=tail_num)
+                label_dict[tail_num] = tail_num
+            else:
+                plt.plot(dists, alts, color=color_dict[tail_num])
+        else:
+            continue
 plt.legend() 
 plt.title(title)
 plt.show()
