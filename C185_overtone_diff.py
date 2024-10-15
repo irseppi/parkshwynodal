@@ -1,12 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Define the directory where your files are located
 file = open('output/C185data_updated.txt', 'r')
 f1 = []
 peaks_filt = []
 
-# Read the data from the file and append it to the respective lists based on the mode
 for line in file.readlines():
     lines = line.split(',')
     quality_num = int(lines[9])
