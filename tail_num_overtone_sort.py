@@ -31,10 +31,11 @@ for line in file.readlines():
         if int(flight_num) == int(flight[lp]):
             tail_num = tail_nums[lp]
             if tail_num == 10512184:
+                xx = 'yes'
+                #continue
+            else:
                 xx = 'no'
                 continue
-            else:
-                xx = 'yes'
     if xx == 'no':
         xx = 'yes'
         continue
@@ -52,23 +53,23 @@ for line in file.readlines():
     count += 1
     ppp = []
     date = []
-
+    y=[]
     for peak in peaks:
         if peak == '' or peak == ' ' or peak == '   ':
             continue
         else:
             ppp.append(float(peak))
-            date.append(float(count))
-
+            date.append(float((lines[3])))
+            y.append(count)
     peaks = ppp
 
     for lp in range(len(flight)):
         if int(flight_num) == int(flight[lp]):
             tail_num = tail_nums[lp]
-            if tail_num == 10512184 :
-                continue
+            if tail_num == 10512184:
+                gg = 22
             else:
-                ggg = 'yes'
+                continue
             # Assign a color to the tail number if it doesn't already have one
             if tail_num not in color_dict:
                 color_dict[tail_num] = np.random.rand(3,)
@@ -76,16 +77,16 @@ for line in file.readlines():
             if tail_num not in peaks_dict:
                 peaks_dict[tail_num] = []
                 date_dict[tail_num] = []
-                
+                y_pos_dict[tail_num] = []
             peaks_dict[tail_num].extend(ppp)
             date_dict[tail_num].extend(date)
-           
+            y_pos_dict[tail_num].extend(y)
 # Plot the data peaks vs their date and color code by tail number
 for tail_num, peaks in peaks_dict.items():
     color = color_dict[tail_num]
     dates = date_dict[tail_num]
-
-    plt.scatter(peaks, dates, label=tail_num,color=color)
+    y =  y_pos_dict[tail_num]
+    plt.scatter(peaks, y, c=dates,label=tail_num) #,color=color)
 
 plt.legend()
 

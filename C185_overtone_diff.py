@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 file = open('output/C185data_updated.txt', 'r')
-f1 = []
+all_med = []
+
 for line in file.readlines():
     lines = line.split(',')
     quality_num = int(lines[9])
@@ -15,42 +17,34 @@ for line in file.readlines():
     peaks = str(peaks)
     peaks = np.array(peaks.split(' '))
     peaks_filt = []
+
     for peak in peaks:
         if peak == '' or peak == ' ' or peak == '   ':
             continue
         else:
             peaks_filt.append(float(peak))
     peaks_filt = sorted(peaks_filt)
-    print(peaks_filt)
-    for p in range(len(peaks_filt)):
 
+    f1 = []
+    for p in range(len(peaks_filt)):
         if p == 0:
             continue
-        else:
-            diff = float(peaks_filt[p]) - float(peaks_filt[p-1])
-            print(float(peaks_filt[p]), float(peaks_filt[p-1]))
-            print(diff)
-            '''
-            if 10 > diff:
-                continue
-            elif diff > 30:
-                continue
-                #missing = diff / 20
-                #for m in range(int(missing)):
-                #    f1.append()
-            
-            else:
-            '''
-            f1.append(diff)
+        
+        diff = float(peaks_filt[p]) - float(peaks_filt[p-1])
+        if diff > 23 or diff < 17:
+            diff= diff/20
+        f1.append(diff)
 
+    if not np.isnan(np.median(f1)):
+        all_med.append(np.median(f1))
 
 plt.figure()
-plt.hist(f1, bins=500)
-plt.axvline(x=np.median(f1), color='red', linestyle='--')
-plt.axvline(x=np.mean(f1), color='red', linestyle='--')
+plt.hist(all_med,bins=100) #, bins=50, color='blue')
+plt.axvline(x=np.median(all_med), color='red', linestyle='--')
 
-plt.text(20, 30, 'Median: '+str(np.round(np.median(f1),2)))
-plt.text(20, 20, 'Mean: '+str(np.round(np.mean(f1),2)))
+
+plt.text(20, 40, 'Median: '+str(np.round(np.median(all_med),2)))
+
 
 #plt.xlim(0,140)
 plt.show()
