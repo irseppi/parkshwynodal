@@ -24,6 +24,7 @@ for line in file.readlines():
     lines = line.split(',')
     flight_num = lines[1]
     quality_num = int(lines[9])
+    nodes = int(lines[2])
     if quality_num < 21:
         continue
     
@@ -60,7 +61,7 @@ for line in file.readlines():
         else:
             ppp.append(float(peak))
             date.append(float((lines[3])))
-            y.append(count)
+            y.append(nodes)
     peaks = ppp
 
     for lp in range(len(flight)):
@@ -79,14 +80,14 @@ for line in file.readlines():
                 date_dict[tail_num] = []
                 y_pos_dict[tail_num] = []
             peaks_dict[tail_num].extend(ppp)
-            date_dict[tail_num].extend(date)
-            y_pos_dict[tail_num].extend(y)
+            date_dict[tail_num].extend(y)
+            y_pos_dict[tail_num].extend(date)
 # Plot the data peaks vs their date and color code by tail number
 for tail_num, peaks in peaks_dict.items():
     color = color_dict[tail_num]
     dates = date_dict[tail_num]
     y =  y_pos_dict[tail_num]
-    plt.scatter(peaks, y, c=dates,label=tail_num) #,color=color)
+    plt.scatter(peaks, y, c=dates,label=nodes) #,color=color)
 
 plt.legend()
 
