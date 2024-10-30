@@ -41,8 +41,9 @@ for line in sta_f.readlines():
     file.close()  # Close the file after reading
     #else:
     #ontinue
-
-    f0_array = sorted(f0_array)
+    f0_array = np.array(f0_array)
+    #f0_array = sorted(f0_array)
+    print(f0_array)
     C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+',\n')
 
 C185_output.close()

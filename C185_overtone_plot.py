@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Define the directory where your files are located
-file = 'output/C185data_1overtone.csv'
+file = 'output3.csv'
 plt.figure()
 # Initialize lists to store the data from the files
 mode1_x = []
@@ -57,7 +57,6 @@ with open(file, 'r') as f:
         peaks = str(peaks)  
         peaks = np.array(peaks.split(' '))
         if len(peaks) == 1:
-            continue
             peaks = np.char.replace(peaks, '[', '')
             peaks = np.char.replace(peaks, ']', '')
 
@@ -92,7 +91,6 @@ with open(file, 'r') as f:
         if mode_x == 1:
             for peak in peaks:
                 try:
-                    int(peak[0:-1])
                     peak = float(peak[0:-1])
                 except:
                     continue
@@ -123,7 +121,6 @@ with open(file, 'r') as f:
         elif mode_x == 2:
             for peak in peaks:
                 try:
-                    int(peak[0:-1])
                     peak = float(peak[0:-1])
                    
                 except:

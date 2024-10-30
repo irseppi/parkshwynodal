@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-file = open('output2.txt', 'r')
+file = open('output3.txt', 'r')
 file2 = pd.read_csv('input/all_station_crossing_db_C185.csv', sep=",")
 tail_nums = file2['TAIL_NUM']
 flight = file2['FLIGHT_NUM']
@@ -23,24 +23,10 @@ xx = 'yes'
 for line in file.readlines():
     lines = line.split(',')
     flight_num = lines[1]
-    quality_num = int(lines[9])
+    #quality_num = int(lines[9])
     nodes = int(lines[2])
-    if quality_num < 21:
-        continue
-    
-    for lp in range(len(flight)):
-        if int(flight_num) == int(flight[lp]):
-            tail_num = tail_nums[lp]
-            if tail_num == 10512184:
-                xx = 'yes'
-                #continue
-            else:
-                xx = 'no'
-                continue
-    if xx == 'no':
-        xx = 'yes'
-        continue
-
+    #if quality_num < 21:
+    #    continue
 
     peaks = np.array(lines[7])
 
@@ -56,6 +42,7 @@ for line in file.readlines():
     date = []
     y=[]
     for peak in peaks:
+        print(peak)
         if peak == '' or peak == ' ' or peak == '   ':
             continue
         else:
@@ -67,10 +54,6 @@ for line in file.readlines():
     for lp in range(len(flight)):
         if int(flight_num) == int(flight[lp]):
             tail_num = tail_nums[lp]
-            if tail_num == 10512184:
-                gg = 22
-            else:
-                continue
             # Assign a color to the tail number if it doesn't already have one
             if tail_num not in color_dict:
                 color_dict[tail_num] = np.random.rand(3,)
@@ -80,14 +63,14 @@ for line in file.readlines():
                 date_dict[tail_num] = []
                 y_pos_dict[tail_num] = []
             peaks_dict[tail_num].extend(ppp)
-            date_dict[tail_num].extend(y)
-            y_pos_dict[tail_num].extend(date)
+            date_dict[tail_num].extend(date)
+            y_pos_dict[tail_num].extend(y)
 # Plot the data peaks vs their date and color code by tail number
 for tail_num, peaks in peaks_dict.items():
     color = color_dict[tail_num]
     dates = date_dict[tail_num]
     y =  y_pos_dict[tail_num]
-    plt.scatter(peaks, y, c=dates,label=nodes) #,color=color)
+    plt.scatter(peaks, y, c=dates) #,label=tail_num) #,color=color)
 
 plt.legend()
 
