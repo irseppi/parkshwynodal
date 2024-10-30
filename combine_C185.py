@@ -156,8 +156,7 @@ for i in range(len(day)):
 
     else:
         continue
-#except:
-#    continue				
+		
                 
 
                                     
