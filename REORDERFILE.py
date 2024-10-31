@@ -1,4 +1,3 @@
-# FILEPATH: Untitled-1
 
 # Read the file
 with open('output/C185data_1overtone.txt', 'r') as file:
