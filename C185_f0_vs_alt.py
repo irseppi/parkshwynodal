@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Define the directory where your files are located
-file = open('output/C185data.csv', 'r')
+file = open('output3.csv', 'r')
 input = open('input/all_station_crossing_db_C185.txt', 'r')
 
 alt_pre = []

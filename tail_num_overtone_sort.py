@@ -23,10 +23,10 @@ xx = 'yes'
 for line in file.readlines():
     lines = line.split(',')
     flight_num = lines[1]
-    #quality_num = int(lines[9])
+    quality_num = int(lines[8]) #lines[9] for output2
     nodes = int(lines[2])
-    #if quality_num < 21:
-    #    continue
+    if quality_num < 21:
+        continue
 
     peaks = np.array(lines[7])
 
@@ -48,7 +48,7 @@ for line in file.readlines():
         else:
             ppp.append(float(peak))
             date.append(float((lines[3])))
-            y.append(nodes)
+            y.append(count)
     peaks = ppp
 
     for lp in range(len(flight)):
@@ -70,7 +70,7 @@ for tail_num, peaks in peaks_dict.items():
     color = color_dict[tail_num]
     dates = date_dict[tail_num]
     y =  y_pos_dict[tail_num]
-    plt.scatter(peaks, y, c=dates) #,label=tail_num) #,color=color)
+    plt.scatter(peaks, dates, c=color,label=tail_num) #,color=color)
 
 plt.legend()
 

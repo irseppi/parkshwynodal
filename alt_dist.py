@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pyproj
 
-file = open('output/C185data_updated.txt', 'r')
+file = open('output3.txt', 'r')
 file2 = pd.read_csv('input/all_station_crossing_db_C185.csv', sep=",")
 tail_nums = file2['TAIL_NUM']
 flights = file2['FLIGHT_NUM']
@@ -13,7 +13,7 @@ list_f = []
 color_dict = {}
 label_dict = {}
 
-MODE = 2
+MODE = 1
 mode1_flight = []
 mode2_flight = []
 

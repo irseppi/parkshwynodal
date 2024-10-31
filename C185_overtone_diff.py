@@ -2,12 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-file = open('output/C185data_updated.txt', 'r')
+file = open('output3.txt', 'r')
 all_med = []
 
 for line in file.readlines():
     lines = line.split(',')
-    quality_num = int(lines[9])
+    quality_num = int(lines[8])
 
     peaks = lines[7]
 
@@ -31,7 +31,8 @@ for line in file.readlines():
             continue
         
         diff = float(peaks_filt[p]) - float(peaks_filt[p-1])
-        if diff > 23 or diff < 17:
+        if diff > 21 or diff < 18:
+            continue
             diff= diff/20
         f1.append(diff)
 
@@ -39,7 +40,7 @@ for line in file.readlines():
         all_med.append(np.median(f1))
 
 plt.figure()
-plt.hist(all_med,bins=100) #, bins=50, color='blue')
+plt.hist(all_med,bins=30) #, bins=50, color='blue')
 plt.axvline(x=np.median(all_med), color='red', linestyle='--')
 
 

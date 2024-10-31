@@ -45,9 +45,9 @@ with open(file, 'r') as f:
     # Read the data from the file and append it to the respective lists based on the mode
     for line in f.readlines():
         lines = line.split(',')
-        #quality_num = int(lines[9])
-        #if int(quality_num) < 21:
-        #    continue
+        quality_num = int(lines[8]) #lines[9] for output2
+        if int(quality_num) < 21:
+            continue
         #else:
         #    print(quality_num)
         x += 1
