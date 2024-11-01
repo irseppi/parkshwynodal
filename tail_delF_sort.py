@@ -22,6 +22,15 @@ count = 0
 for line in file.readlines():
     lines = line.split(',')
     flight_num = lines[1]
+    for lp in range(len(flight)):
+        if int(flight_num) == int(flight[lp]):
+            tail_num = tail_nums[lp]
+            # Assign a color to the tail number if it doesn't already have one
+            if tail_num not in color_dict:
+                color_dict[tail_num] = np.random.rand(3,)
+                y_pos_dict[tail_num] = []
+                med_dict[tail_num] = []
+                date_dict[tail_num] = []
 
     peaks = np.array(lines[7])
 
@@ -36,7 +45,6 @@ for line in file.readlines():
     date = []
     f1 = []
     for peak in peaks:
-
         if peak == '' or peak == ' ' or peak == '   ':
             continue
         else:
@@ -49,32 +57,12 @@ for line in file.readlines():
             f1.append(diff)
         peak_old = peak
 
-
     if not np.isnan(np.median(f1)):
         all_med = np.median(f1)
         y = count
         date = float((lines[3]))
     
-        for lp in range(len(flight)):
-            if int(flight_num) == int(flight[lp]):
-                tail_num = tail_nums[lp]
-                # Assign a color to the tail number if it doesn't already have one
-                if tail_num not in color_dict:
-                    color_dict[tail_num] = np.random.rand(3,)
-                    med_dict[tail_num] = []
-                    date_dict[tail_num] = []
-                    y_pos_dict[tail_num] = []
-        med_dict.update({tail_num: all_med})
-        date_dict.update({tail_num: date})
-        y_pos_dict.update({tail_num: count})
-
-# Plot the data peaks vs their date and color code by tail number
-for tail_num, med in med_dict.items():
-    color = color_dict[tail_num]
-    dates = date_dict[tail_num]
-    y =  y_pos_dict[tail_num]
-    
-    plt.scatter(med, dates, c=color,label=tail_num)
-plt.legend()
+        plt.scatter(all_med, date, c=color_dict[tail_num]) #,label=tail_num)
+#plt.legend()
 
 plt.show()
