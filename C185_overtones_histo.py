@@ -4,7 +4,7 @@ import numpy as np
 
 
 # Define the directory where your files are located
-file = 'output3.csv'
+file = 'output4.csv'
 
 # Initialize a list to store the data from the files
 data = []
@@ -13,10 +13,10 @@ with open(file, 'r') as f:
     # Read the data from the file and append it to the list
     for line in f.readlines():
         lines = line.split(',')
-        quality_num = int(lines[8]) #lines[9] for output2
+        #quality_num = int(lines[8]) #lines[9] for output2
 
-        if quality_num < 21:
-            continue
+        #if quality_num < 21:
+        #    continue
         try:
 
             peaks = np.array(lines[7])

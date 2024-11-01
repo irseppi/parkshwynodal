@@ -2,12 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-file = open('output3.txt', 'r')
+file = open('output4.txt', 'r')
 all_med = []
 
 for line in file.readlines():
     lines = line.split(',')
-    quality_num = int(lines[8])
+    #quality_num = int(lines[8])
 
     peaks = lines[7]
 

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Define the directory where your files are located
-file = 'output3.csv'
+file = 'output4.csv'
 plt.figure()
 # Initialize lists to store the data from the files
 mode1_x = []
@@ -45,13 +45,13 @@ with open(file, 'r') as f:
     # Read the data from the file and append it to the respective lists based on the mode
     for line in f.readlines():
         lines = line.split(',')
-        quality_num = int(lines[8]) #lines[9] for output2
-        if int(quality_num) < 21:
-            continue
+        #quality_num = int(lines[8]) #lines[9] for output2
+        #if int(quality_num) < 21:
+        #    continue
         #else:
         #    print(quality_num)
         x += 1
-
+        mode_x = 0
         peaks = np.array(lines[7])
 
         peaks = str(peaks)  
@@ -76,6 +76,10 @@ with open(file, 'r') as f:
                     mode_x = 2
                     yy += 1
                     break
+                else:
+                    mode_x = 3
+                    continue
+                    zz += 1
                 #if abs(float(peak) - 82.5) <= 1.5 or abs(float(peak) - 124.5) <= 1.5:
                 #    xx += 1
                 #    mode_x = 1
@@ -87,7 +91,7 @@ with open(file, 'r') as f:
                 #else:
                 #    mode_x = 3
                 #    zz += 1
-                
+            
         if mode_x == 1:
             for peak in peaks:
                 try:
