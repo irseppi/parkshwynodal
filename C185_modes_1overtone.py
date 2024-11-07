@@ -20,6 +20,7 @@ for line in sta_f.readlines():
     sta = val[2]
     closest_time = val[3]
     tprime0 = float(val[4])
+    quality_num = int(val[9])
     v0 = float(val[5])
     l = float(val[6])
     c = 343 
