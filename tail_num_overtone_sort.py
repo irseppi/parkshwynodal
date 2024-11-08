@@ -27,6 +27,21 @@ for line in file.readlines():
     lines = line.split(',')
     flight_num = lines[1]
     nodes = int(lines[2])
+    distance = float(lines[6])
+    vo = float(lines[4]) #try with vo and also with diffrence between heading direction and travel direction
+    flight_file = '/scratch/irseppi/nodal_data/flightradar24/'+str(lines[0]) + '_positions/2019' + str(lines[0]) + '_' + flight + '.csv'
+    flight_data = pd.read_csv(flight_file, sep=",")
+    t = flight_data['snapshot_id']
+    speed = flight_data['speed']
+    alt = flight_data['altitude']
+
+    #time_diff = t - float(lines[3])  # Subtract lines[3] from each value in the t array
+
+    # Subtract the value of lines[3] from each value in the time_diff array
+    time_diff = np.subtract(t, float(lines[3]))
+
+    closest_time_index = np.argmin(np.abs(time_diff))
+    closest_time = t[closest_time_index]
 
     peaks = np.array(lines[7])
 
@@ -98,15 +113,15 @@ for tail_num, peaks in peaks_dict.items():
     color = color_dict[tail_num]
     dates = date_dict[tail_num]
     y =  y_pos_dict[tail_num]
-    ax1.scatter(peaks, dates, c=color,label=tail_num) 
+    ax1.scatter(peaks, y, c=color,label=tail_num) 
 for tail_num, med in all_med.items():
     print(tail_num)
     color = color_dict[tail_num]
     y= y_med[tail_num]
     dates = date_med[tail_num]
-    ax2.scatter(med, dates, c=color)  
+    ax2.scatter(med, y, c=color)  
     m = mad[tail_num]
-    ax3.scatter(m, dates, c=color)  
+    ax3.scatter(m, y, c=color)  
 ax2.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
 
 ax3.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)

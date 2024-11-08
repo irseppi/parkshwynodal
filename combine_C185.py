@@ -40,7 +40,7 @@ turb_cat = plane_data['Wake Turbulence Category']
 							
 for i in range(len(day)):
 	#try:
-    spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec/2019-'+month[i]+'-'+day[i]
+    spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec_1o/2019-'+month[i]+'-'+day[i]
     if os.path.exists(spec_dir):
 
         flight_data = pd.read_csv('/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+'_flights.csv', sep=",")
@@ -83,8 +83,8 @@ for i in range(len(day)):
                     image_path = glob.glob('/scratch/irseppi/nodal_data/plane_info/map_all_UTM/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/map_'+flight+'_*')[0]
 
                     map_img = Image.open(image_path)
-                    for image in os.listdir('/scratch/irseppi/nodal_data/plane_info/C185_spectrum/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'):
-                         spectrum = os.path.join('/scratch/irseppi/nodal_data/plane_info/C185_spectrum/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/', image)
+                    for image in os.listdir('/scratch/irseppi/nodal_data/plane_info/C185_spectrum_1o/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'):
+                         spectrum = os.path.join('/scratch/irseppi/nodal_data/plane_info/C185_spectrum_1o/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/', image)
                     spec_img = Image.open(spectrum)
 
                     # Resize images
@@ -146,7 +146,7 @@ for i in range(len(day)):
                     draw.text((google_slide_width - 150, 405), text1,fill='black', font=font)
                     draw.text((google_slide_width - 365, 405), text3, fill='black', font=font)
                     
-                    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_fig/'
+                    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_fig_1o/'
 
                     make_base_dir(BASE_DIR)
                     name= BASE_DIR + '2019'+str(month[i])+str(day[i])+'_'+(flight)+'_'+time+'_'+str(station)+'_'+str(pla)+'_'+str(id)+'_'+str(descrip[h])+'_'+str(engine[h])+str(coun[h])+'.png'
