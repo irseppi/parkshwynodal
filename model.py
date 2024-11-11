@@ -7,8 +7,8 @@ f0_vary = np.arange(0, 250, 20)
 v0_vary = np.arange(0, 200, 20)
 tprime0_vary = np.arange(0, 250, 24)
 l_vary = np.arange(0, 2000, 250)
-
-for n in range(0, 3):
+c_vary = np.arange(295, 355, 5)
+for n in range(3, 4):
 	f0 = 100
 	tprime0 = 120
 	c = 343
@@ -72,10 +72,29 @@ for n in range(0, 3):
 			#plt.plot(tpr, ft, color=cm(norm(l)), linewidth=0.5)
 		plt.plot(l_vary, fchange)
 		plt.xlabel('l')
-	plt.ylabel('Frequency (Hz)')
-	plt.show()
+	if n == 3:
+		fchange = []
+		norm = plt.Normalize(np.min(c_vary), np.max(c_vary))
+		cm = plt.cm.rainbow
 
-plt.figure()
+		sm = plt.cm.ScalarMappable(cmap=cm, norm=norm)
+		plt.title('Varying c')
+		for c in c_vary:
+			ft = []
+			for tprime in tpr:
+				ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
+			
+				ft.append(ft0p)
+			fchange.append(ft[-1]-ft[0])
+			plt.plot(tpr, ft, color=cm(norm(c)),  linewidth=0.5)
+
+		#plt.plot(c_vary, fchange)
+		#plt.xlabel('c')
+	plt.ylim(83,123)
+	plt.ylabel('Frequency (Hz)')
+	#plt.show()
+
+#plt.figure()
 tpr = np.arange(0, 241, 1)
 f0 = 100
 tprime0 = 120
@@ -94,10 +113,10 @@ ti = [50,200]
 for tprime0 in ti:
 	
 	ft0p = f0*1/(1+(v0/c)*(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))/(np.sqrt(l**2+(v0*((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2))**2)))
-	plt.axhline(ft0p, color='k', linestyle='--')
+	#plt.axhline(ft0p, color='k', linestyle='--')
 
 plt.ylabel('Frequency (Hz)')
 plt.xlabel('Time (s)')
 plt.xlim(0, 240)
-plt.ylim(0, 250)
+#plt.ylim(0, 250)
 plt.show()					
