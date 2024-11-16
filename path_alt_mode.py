@@ -105,7 +105,7 @@ color_dict = {}
 all_med = {}
 points = {}
 path ={}
-
+flights = []
 
 # Iterate over each line in the file
 for line in file.readlines():
@@ -197,23 +197,30 @@ for line in file.readlines():
             all_med[flight_num].extend([np.nanmedian(f1)])
             points[flight_num].extend([closest_p])
             path[flight_num].extend(flight_path)
-
+            flights.append(flight_num)
 #for flight_num, med in all_med.items():
-for flight_num in all_med:
-    print(flight_num)
-    plt.figure(figsize=(10, 6))
+flight_num2 = 0
+plt.figure(figsize=(10, 6))
+plt.scatter(seismo_utm_x_km, seismo_utm_y_km, c='r', marker='x')
+gg = 10
+for flight_num in flights:
+    gg += 13
+    if flight_num2 == flight_num:
+        continue
     color = color_dict[flight_num]
     p = np.array(path[flight_num])
     point = np.array(points[flight_num])
     med = all_med[flight_num]
-    plt.plot(p[:,0], p[:,1], c=color)  
-    for i in range(1, len(p)-1):
+    plt.plot(p[:,0], p[:,1], c='k')  
+    for i in range(1, len(p)-1,gg):
         direction = np.arctan2(p[i+1,0] - p[i,0], p[i+1,1] - p[i,1])
         m = (p[i+1,1] - p[i,1])/(p[i+1,0] - p[i,0])
         b = p[i,0] - m*p[i,0]
-        plt.quiver((p[i,0]-b)/m, p[i,1], np.cos(direction), np.sin(direction), angles='xy', color=color, scale=100)
-    c = plt.scatter(point[:,0], point[:,1], c=med, zorder = 10, cmap='seismic', vmin=18, vmax=22)
-    plt.scatter(seismo_utm_x_km, seismo_utm_y_km, c='black', marker='x')
-
-    plt.colorbar(c, label= '\u0394'+'F')
-    plt.show()
+        plt.quiver((p[i,0]-b)/m, p[i,1], np.cos(direction), np.sin(direction), angles='xy', color='k', scale=150)
+    c = plt.scatter(point[:,0], point[:,1], c=med, zorder=10, cmap='seismic', vmin=18, vmax=22, s=100)
+    #plt.scatter(seismo_utm_x_km, seismo_utm_y_km, c='r', marker='x')
+    #plt.title(str(flight_num))
+    #plt.colorbar(c, label= '\u0394'+'F')
+    flight_num2 = flight_num
+plt.colorbar(c, label= '\u0394'+'F')
+plt.show()
