@@ -185,8 +185,8 @@ for line in file.readlines():
     for lp in range(len(flight)):
         if int(flight_num) == int(flight[lp]):
             tail_num = tail_nums[lp]
-            if tail_num != 10512184:
-                continue
+            #if tail_num == 10512184:
+            #    continue
             # Assign a color to the tail number if it doesn't already have one
             if flight_num not in color_dict:
                 color_dict[flight_num] = np.random.rand(3,)
@@ -198,29 +198,27 @@ for line in file.readlines():
             points[flight_num].extend([closest_p])
             path[flight_num].extend(flight_path)
             flights.append(flight_num)
-#for flight_num, med in all_med.items():
 flight_num2 = 0
-plt.figure(figsize=(10, 6))
-plt.scatter(seismo_utm_x_km, seismo_utm_y_km, c='r', marker='x')
-gg = 10
+
+plt.figure()
 for flight_num in flights:
-    gg += 13
     if flight_num2 == flight_num:
         continue
+    #plt.figure()
     color = color_dict[flight_num]
     p = np.array(path[flight_num])
     point = np.array(points[flight_num])
     med = all_med[flight_num]
-    plt.plot(p[:,0], p[:,1], c='k')  
-    for i in range(1, len(p)-1,gg):
+    plt.plot(p[:,0], p[:,1], c=color)  
+    for i in range(1, len(p)-1,13):
         direction = np.arctan2(p[i+1,0] - p[i,0], p[i+1,1] - p[i,1])
         m = (p[i+1,1] - p[i,1])/(p[i+1,0] - p[i,0])
         b = p[i,0] - m*p[i,0]
-        plt.quiver((p[i,0]-b)/m, p[i,1], np.cos(direction), np.sin(direction), angles='xy', color='k', scale=150)
+        plt.quiver((p[i,0]-b)/m, p[i,1], np.cos(direction), np.sin(direction), angles='xy', color='k', scale=100)
     c = plt.scatter(point[:,0], point[:,1], c=med, zorder=10, cmap='seismic', vmin=18, vmax=22, s=100)
-    #plt.scatter(seismo_utm_x_km, seismo_utm_y_km, c='r', marker='x')
-    #plt.title(str(flight_num))
-    #plt.colorbar(c, label= '\u0394'+'F')
+    #plt.title(str(flight_num)+': '+str(tail_num))
     flight_num2 = flight_num
+plt.scatter(seismo_utm_x_km, seismo_utm_y_km, c='k', marker='x')
 plt.colorbar(c, label= '\u0394'+'F')
+plt.axis('equal')
 plt.show()
