@@ -5,7 +5,6 @@ import numpy as np
 
 # Get a list of all the csv files in the 'YYYYDDMM_positions' folder
 files = glob.glob('/scratch/irseppi/nodal_data/flightradar24/*_flights.csv')
-#files = [item for sublist in files for item in sublist]  # Flatten the list
 
 # Initialize an empty DataFrame
 dfs = []
