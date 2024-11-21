@@ -106,7 +106,7 @@ all_med = {}
 points = {}
 path ={}
 flights = []
-
+tail = {}
 # Iterate over each line in the file
 for line in file.readlines():
     lines = line.split(',')
@@ -188,15 +188,17 @@ for line in file.readlines():
             #if tail_num == 10512184:
             #    continue
             # Assign a color to the tail number if it doesn't already have one
-            if flight_num not in color_dict:
-                color_dict[flight_num] = np.random.rand(3,)
+            if tail_num not in color_dict:
+                color_dict[tail_num] = np.random.rand(3,)
+            if flight_num not in path:
                 path[flight_num] = []
                 all_med[flight_num] = []
                 points[flight_num] = []
-            
+                tail[flight_num] = []
             all_med[flight_num].extend([np.nanmedian(f1)])
             points[flight_num].extend([closest_p])
             path[flight_num].extend(flight_path)
+            tail[flight_num].extend([tail_num])
             flights.append(flight_num)
 flight_num2 = 0
 
@@ -205,7 +207,8 @@ for flight_num in flights:
     if flight_num2 == flight_num:
         continue
     #plt.figure()
-    color = color_dict[flight_num]
+    tail_num = tail[flight_num][0]
+    color = color_dict[tail_num]
     p = np.array(path[flight_num])
     point = np.array(points[flight_num])
     med = all_med[flight_num]
