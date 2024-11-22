@@ -185,11 +185,11 @@ for line in file.readlines():
     for lp in range(len(flight)):
         if int(flight_num) == int(flight[lp]):
             tail_num = tail_nums[lp]
-            #if tail_num == 10512184:
-            #    continue
+            if tail_num != 10512184:
+                continue
             # Assign a color to the tail number if it doesn't already have one
-            if tail_num not in color_dict:
-                color_dict[tail_num] = np.random.rand(3,)
+            #if tail_num not in color_dict:
+            #    color_dict[tail_num] = np.random.rand(3,)
             if flight_num not in path:
                 path[flight_num] = []
                 all_med[flight_num] = []
@@ -201,27 +201,26 @@ for line in file.readlines():
             tail[flight_num].extend([tail_num])
             flights.append(flight_num)
 flight_num2 = 0
-
-plt.figure()
+#plt.figure()
 for flight_num in flights:
     if flight_num2 == flight_num:
         continue
-    #plt.figure()
+    plt.figure()
     tail_num = tail[flight_num][0]
-    color = color_dict[tail_num]
+    #color = color_dict[tail_num]
     p = np.array(path[flight_num])
     point = np.array(points[flight_num])
     med = all_med[flight_num]
     plt.plot(p[:,0], p[:,1], c='k')  
-    for i in range(1, len(p)-1,13):
+    for i in range(1, len(p)-1,int(len(p)/5)):
         direction = np.arctan2(p[i+1,0] - p[i,0], p[i+1,1] - p[i,1])
         m = (p[i+1,1] - p[i,1])/(p[i+1,0] - p[i,0])
         b = p[i,0] - m*p[i,0]
-        plt.quiver((p[i,0]-b)/m, p[i,1], np.cos(direction), np.sin(direction), angles='xy', color='k', scale=100)
+        plt.quiver((p[i,0]-b)/m, p[i,1], np.cos(direction), np.sin(direction), angles='xy', color='k', scale=130)
     c = plt.scatter(point[:,0], point[:,1], c=med, zorder=10, cmap='seismic', vmin=18, vmax=22, s=100)
-    #plt.title(str(flight_num)+': '+str(tail_num))
+    plt.title(str(flight_num))
     flight_num2 = flight_num
-plt.scatter(seismo_utm_x_km, seismo_utm_y_km, c='k', marker='x')
-plt.colorbar(c, label= '\u0394'+'F')
-plt.axis('equal')
-plt.show()
+    plt.scatter(seismo_utm_x_km, seismo_utm_y_km, c='k', marker='x')
+    plt.colorbar(c, label= '\u0394'+'F')
+    plt.axis('equal')
+    plt.show()

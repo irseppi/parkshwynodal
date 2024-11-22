@@ -40,11 +40,11 @@ for line in file.readlines():
         all_med.append(np.median(f1))
 
 plt.figure()
-plt.hist(all_med,bins=30) #, bins=50, color='blue')
-plt.axvline(x=np.median(all_med), color='red', linestyle='--')
+plt.hist(all_med,bins=16) #, bins=50, color='blue')
+#plt.axvline(x=np.median(all_med), color='red', linestyle='--')
 
 
-plt.text(20, 40, 'Median: '+str(np.round(np.median(all_med),2)))
+#plt.text(20, 40, 'Median: '+str(np.round(np.median(all_med),2)))
 
 
 #plt.xlim(0,140)
