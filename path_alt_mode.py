@@ -99,7 +99,8 @@ file = open('output4.txt', 'r')
 file2 = pd.read_csv('input/all_station_crossing_db_C185.csv', sep=",")
 tail_nums = file2['TAIL_NUM']
 flight = file2['FLIGHT_NUM']
-
+#x_airport, y_airport = utm_proj(-150.0987984075305,62.32351451135649)
+x_airport, y_airport = utm_proj(-150.1072713049972,62.30091781635389)
 # Create a dictionary to store the color for each tail number
 color_dict = {}
 all_med = {}
@@ -221,6 +222,7 @@ for flight_num in flights:
     plt.title(str(flight_num))
     flight_num2 = flight_num
     plt.scatter(seismo_utm_x_km, seismo_utm_y_km, c='k', marker='x')
+    plt.scatter(x_airport/1000, y_airport/1000,c = 'pink', marker='x',zorder = 10)
     plt.colorbar(c, label= '\u0394'+'F')
     plt.axis('equal')
     plt.show()
