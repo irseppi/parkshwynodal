@@ -213,16 +213,20 @@ for flight_num in flights:
     point = np.array(points[flight_num])
     med = all_med[flight_num]
     plt.plot(p[:,0], p[:,1], c='k')  
-    for i in range(1, len(p)-1,int(len(p)/5)):
+    for i in range(1, len(p)-1, int(len(p)/6)):
         direction = np.arctan2(p[i+1,0] - p[i,0], p[i+1,1] - p[i,1])
-        m = (p[i+1,1] - p[i,1])/(p[i+1,0] - p[i,0])
-        b = p[i,0] - m*p[i,0]
-        plt.quiver((p[i,0]-b)/m, p[i,1], np.cos(direction), np.sin(direction), angles='xy', color='k', scale=130)
-    c = plt.scatter(point[:,0], point[:,1], c=med, zorder=10, cmap='seismic', vmin=18, vmax=22, s=100)
+        no = np.sqrt((p[i+1,0] - p[i,0])**2 + (p[i+1,1] - p[i,1])**2)
+        #np.cos(direction), np.sin(direction)
+        #print(direction)
+        #print(all_med[flight_num][i])
+        #m = (p[i+1,1] - p[i,1])/(p[i+1,0] - p[i,0])
+        #b = p[i,0] - m*p[i,0]
+        yy = plt.quiver(p[i,0], p[i,1], (p[i+1,0] - p[i,0])/no, (p[i+1,1] - p[i,1])/no, angles='xy', color = 'k', pivot = 'tail', headwidth = 5, scale = 50)
+    yy = plt.scatter(point[:,0], point[:,1], c=med, zorder=10, cmap='seismic', vmin=18, vmax=22, s=100)
     plt.title(str(flight_num))
     flight_num2 = flight_num
     plt.scatter(seismo_utm_x_km, seismo_utm_y_km, c='k', marker='x')
     plt.scatter(x_airport/1000, y_airport/1000,c = 'pink', marker='x',zorder = 10)
-    plt.colorbar(c, label= '\u0394'+'F')
+    plt.colorbar(yy, label= '\u0394'+'F')
     plt.axis('equal')
     plt.show()
