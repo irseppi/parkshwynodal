@@ -213,7 +213,7 @@ for flight_num in flights:
     point = np.array(points[flight_num])
     med = all_med[flight_num]
     plt.plot(p[:,0], p[:,1], c='k')  
-    for i in range(1, len(p)-1, int(len(p)/6)):
+    for i in range(1, len(p)-1, 2):
         direction = np.arctan2(p[i+1,0] - p[i,0], p[i+1,1] - p[i,1])
         no = np.sqrt((p[i+1,0] - p[i,0])**2 + (p[i+1,1] - p[i,1])**2)
         #np.cos(direction), np.sin(direction)
@@ -221,7 +221,7 @@ for flight_num in flights:
         #print(all_med[flight_num][i])
         #m = (p[i+1,1] - p[i,1])/(p[i+1,0] - p[i,0])
         #b = p[i,0] - m*p[i,0]
-        yy = plt.quiver(p[i,0], p[i,1], (p[i+1,0] - p[i,0])/no, (p[i+1,1] - p[i,1])/no, angles='xy', color = 'k', pivot = 'tail', headwidth = 5, scale = 50)
+        yy = plt.quiver(p[i,0], p[i,1], (p[i+1,0] - p[i,0])/no, (p[i+1,1] - p[i,1])/no, angles='xy', color = 'k', pivot = 'tail', headwidth = 5, scale = 100)
     yy = plt.scatter(point[:,0], point[:,1], c=med, zorder=10, cmap='seismic', vmin=18, vmax=22, s=100)
     plt.title(str(flight_num))
     flight_num2 = flight_num
