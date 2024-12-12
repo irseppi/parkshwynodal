@@ -18,4 +18,4 @@ dependencies:
   - pySEP=1.0.11
   - imageio.v2=2.8.0
   - mpmath=1.3.0 
-  - sympy-1.12
+  - sympy=1.12

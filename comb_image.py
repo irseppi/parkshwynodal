@@ -46,7 +46,6 @@ for i in range(len(day)):
 	try:
 		spec_dir = '/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-'+month[i]+'-'+day[i]
 		if os.path.exists(spec_dir):
-
 			flight_data = pd.read_csv('/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+'_flights.csv', sep=",")
 			flight_id = flight_data['flight_id']
 			equipment = flight_data['equip']
@@ -55,31 +54,47 @@ for i in range(len(day)):
 			aircraft_id = flight_data['aircraft_id']
 			for flight in os.listdir(spec_dir):
 				f = os.path.join(spec_dir, flight)
-				for l in range(len(flight_id)):
-					if str(flight_id[l]) == str(flight):
-
-						#search text files for plane
-						pla = equipment[l]
-						id = aircraft_id[l]
-						for h in range(len(des)):
-							if pla == des[h]:
-								text2 = str(des[h]) + ': ' + str(man[h]) + ', '+ str(model[h]) + ' (' + str(descrip[h]) + ')'
-								text3 = 'Aircraft ID: '+str(id) + '\nEngine: '+str(engine[h])+'\nEngine Count: ' +str(coun[h])+'\nWake Turbulence Category: '+str(coun[h])
-								break
-							else:
-								text2 = 'Callsign: ' + str(callsign[l])
-								text3 = 'Aircraft ID: Unknown\nEngine: Unknown\nEngine Count: Unknown\nWake Turbulence Category: Unknown'
-							print(text2) 
-						
-					else:
-						continue
 				
 				for station in os.listdir(f):
+					print(station)
 					sta = os.path.join(f, station)
 					for image in os.listdir(sta):
 						time = image[0:10]
 						im = os.path.join(sta, image)
-							
+						for l in range(len(flight_id)):
+							if str(flight_id[l]) == str(flight):
+								flight_file = '/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+ '_positions/2019'+month[i]+day[i]+ '_' + flight + '.csv'
+								flight_data = pd.read_csv(flight_file, sep=",")
+								times = flight_data['snapshot_id']
+								speed = flight_data['speed']
+								alt = flight_data['altitude']
+								head = flight_data['heading']
+								dist = 0
+								deg = 0
+								temp = 0
+								wind = 0 
+								sound = 0
+								eff_sound = 0
+								font2 = ImageFont.truetype('input/Arial.ttf', 25)
+								for t in range(len(times)):
+									if int(time) == int(times[t]):
+										text1 = 'Altitude: '+str(round(alt[t]*0.3048,2))+' m ('+str(round(alt[t],2)) +' ft)\nDistance: '+str(round(dist,2))+' m\nVelocity: '+str(round(speed[t]*0.514444,2))+' m/s ('+str(round(speed[2]*1.15078,2))+' mph)\n               at '+str(round(deg,2))+ '\N{DEGREE SIGN}' + '\nHeading: '+str(round(head[2],2))+ '\N{DEGREE SIGN}'
+										text2 = 'Temperature: '+str(round(temp,2))+'\N{DEGREE SIGN}'+'C\nWind: '+str(round(wind,2))+' m/s\nSound Speed: '+str(round(sound,2))+' m/s\nEffective -\nSound Speed: '+str(round(eff_sound,2))+' m/s'
+									else:
+										continue
+								#search text files for plane
+								print('here')
+								pla = equipment[l]
+								id = aircraft_id[l]
+								for h in range(len(des)):
+									if pla == des[h]:
+										text3 = 'Callsign: ' +  str(callsign[l]) + ' (' + str(des[h]) + ')'
+
+										break
+									else:
+										text3 = 'Callsign: ' + str(callsign[l])
+							else:
+								continue
 						# Open images
 						spectrogram = Image.open(im)
 						# Get the path of the image file using a wildcard
@@ -117,13 +132,7 @@ for i in range(len(day)):
 						canvas.paste(spectrogram, (-40, 0))
 						# Draw text from files
 						draw = ImageDraw.Draw(canvas)
-						font = ImageFont.truetype('input/Arial.ttf', 15) #load_default()  
-						flight_file = '/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+ '_positions/2019'+month[i]+day[i]+ '_' + flight + '.csv'
-						flight_data = pd.read_csv(flight_file, sep=",")
-						t = flight_data['snapshot_id']
-						speed = flight_data['speed']
-						alt = flight_data['altitude']
-						font2 = ImageFont.truetype('input/Arial.ttf', 25)
+						font = ImageFont.truetype('input/Arial.ttf', 14) #load_default()  
 
 						# Label each image
 						draw.text((15, 35), '(a)', fill='black', font=font2)
@@ -132,19 +141,13 @@ for i in range(len(day)):
 						draw.text((google_slide_width - int(plane.width*1.15), int(plane.height) + int(plane.height*0.05)), '(d)', fill='black', font=font2)
 						draw.text((google_slide_width - spec.width + int(spec.width/12) - 15, google_slide_height - spec.height + 20), '(e)', fill='black', font=font2)
 
-						for l in range(len(t)):
-							if int(time) == int(t[l]):
-								text1 = 'Speed: '+str(round(speed[l]*0.514444,2))+' m/s\n           : '+str(round(speed[l]*1.15078,2))+' mph\nAltitude: '+str(round(alt[l]*0.3048,2))+' m\n            : '+str(round(alt[l],2)) +' ft'
-							else:
-								continue
-						
-						bbox = draw.textbbox((google_slide_width - plane.width, 0), text2, font=font)
+						draw.text((google_slide_width - 370, 405), text1, fill='black', font=font)			
+						draw.text((google_slide_width - 155, 405), text2,fill='black', font=font)
+						bbox = draw.textbbox((google_slide_width - plane.width, 0), text3, font=font)
 						draw.rectangle(bbox, fill="white")
-						draw.text((google_slide_width - plane.width, 0), text2, fill='black', font=font)			
-						draw.text((google_slide_width - 150, 405), text1,fill='black', font=font)
-						draw.text((google_slide_width - 365, 405), text3, fill='black', font=font)
-						
-						BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5fig/'
+						draw.text((google_slide_width - plane.width, 0), text3, fill='black', font=font)
+
+						BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5_test/'
 						make_base_dir(BASE_DIR)
 						name= BASE_DIR + '2019'+str(month[i])+str(day[i])+'_'+(flight)+'_'+time+'_'+str(station)+'_'+str(pla)+'_'+str(id)+'_'+str(descrip[h])+'_'+str(engine[h])+str(coun[h])+'.png'
 
