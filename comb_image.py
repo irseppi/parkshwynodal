@@ -56,7 +56,6 @@ for i in range(len(day)):
 				f = os.path.join(spec_dir, flight)
 				
 				for station in os.listdir(f):
-					print(station)
 					sta = os.path.join(f, station)
 					for image in os.listdir(sta):
 						time = image[0:10]
@@ -75,15 +74,17 @@ for i in range(len(day)):
 								wind = 0 
 								sound = 0
 								eff_sound = 0
+								az = 0
+								qnum = 0
+								mnum = 0
 								font2 = ImageFont.truetype('input/Arial.ttf', 25)
 								for t in range(len(times)):
 									if int(time) == int(times[t]):
 										text1 = 'Altitude: '+str(round(alt[t]*0.3048,2))+' m ('+str(round(alt[t],2)) +' ft)\nDistance: '+str(round(dist,2))+' m\nVelocity: '+str(round(speed[t]*0.514444,2))+' m/s ('+str(round(speed[2]*1.15078,2))+' mph)\n               at '+str(round(deg,2))+ '\N{DEGREE SIGN}' + '\nHeading: '+str(round(head[2],2))+ '\N{DEGREE SIGN}'
-										text2 = 'Temperature: '+str(round(temp,2))+'\N{DEGREE SIGN}'+'C\nWind: '+str(round(wind,2))+' m/s\nSound Speed: '+str(round(sound,2))+' m/s\nEffective -\nSound Speed: '+str(round(eff_sound,2))+' m/s'
+										text2 = 'Temperature: '+str(round(temp,2))+'\N{DEGREE SIGN}'+'C\nWind: '+str(round(wind,2))+' m/s\nSound Speed: '+str(round(sound,2))+' m/s\nEffective Sound Speed:\n '+str(round(eff_sound,2))+' m/s at '+str(round(az,2))+ '\N{DEGREE SIGN}'
 									else:
 										continue
 								#search text files for plane
-								print('here')
 								pla = equipment[l]
 								id = aircraft_id[l]
 								for h in range(len(des)):
@@ -136,6 +137,8 @@ for i in range(len(day)):
 
 						# Label each image
 						draw.text((15, 35), '(a)', fill='black', font=font2)
+						draw.text((google_slide_width - int(plane.width*1.5), 35), 'Q#: '+str(qnum), fill='black', font=font2)
+						draw.text((google_slide_width - int(plane.width*1.5), google_slide_height - spec.height - spec.height/2), '[M'+str(mnum)+']', fill='black', font=font2)
 						draw.text((15, 350), '(b)', fill='black', font=font2)
 						draw.text((google_slide_width - int(plane.width*1.15), 20), '(c)', fill='black', font=font2)
 						draw.text((google_slide_width - int(plane.width*1.15), int(plane.height) + int(plane.height*0.05)), '(d)', fill='black', font=font2)
