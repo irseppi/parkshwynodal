@@ -107,9 +107,8 @@ def speed_of_sound(Tc):
     return c
 
 sta_f = open('input/all_station_crossing_db_C185.txt','r')
-C185_output = open('output/C185data_updated.csv', 'a')
-output22 = open('output/revisit_C185.txt', 'a')
-output33 = open('output/bad_data_C185.txt', 'a')
+C185_output = open('output/C185data_atmosphere.csv', 'a')
+
 # Loop through each station in text file that we already know comes within 2km of the nodes
 
 file_in = open('/home/irseppi/REPOSITORIES/parkshwynodal/all_station_crossing_db_updated111.txt','r')
@@ -122,62 +121,62 @@ for line in sta_f.readlines():
     # Loop through each station in text file that we already know comes within 2km of the nodes
     for li in file_in.readlines():
         text = li.split(',')
-        if flight == text[1]:
+        if float(flight) == float(text[1]):
             pi = True
-            alt = text[4]*0.0003048 #convert between feet and km
-            x =  text[2]  # Replace with your UTM x-coordinate
-            y = text[3]  # Replace with your UTM y-coordinate
+            alt = float(text[4])*0.0003048 #convert between feet and km
+            x =  float(text[2])  # Replace with your UTM x-coordinate
+            y = float(text[3])  # Replace with your UTM y-coordinate
             time = float(text[5])
-            break
+
+            # Convert UTM coordinates to latitude and longitude
+            lon, lat = utm_proj(x, y, inverse=True)
+
+            input_files = str(time) + '_' + str(lat) + '_' + str(lon) + '.dat'
+            try:
+                file =  open(input_files, 'r') #as file:
+                data = json.load(file)
+                # Print the converted latitude and longitude
+                ht = datetime.fromtimestamp(time, tz=timezone.utc)
+                h = ht.hour
+
+                # Extract metadata
+                metadata = data['metadata']
+                sourcefile = metadata['sourcefile']
+                datetim = metadata['time']['datetime']
+                latitude = metadata['location']['latitude']
+                longitude = metadata['location']['longitude']
+                parameters = metadata['parameters']
+
+                # Extract data
+                data_list = data['data']
+
+                # Convert data to a DataFrame
+                data_frame = pd.DataFrame(data_list)
+
+                # Print extracted information
+                print(f"Source file: {sourcefile}")
+
+                # Find the "Z" parameter and extract the value at index 600
+                z_index = None
+                hold = np.inf
+                for item in data_list:
+                    if item['parameter'] == 'Z':
+                        for i in range(len(item['values'])):
+                            if abs(float(item['values'][i]) - float(alt)) < hold:
+                                hold = abs(float(item['values'][i]) - float(alt))
+                                z_index = i
+
+                for item in data_list:
+                    if item['parameter'] == 'T':
+                        Tc = - 273.15 + float(item['values'][z_index])
+                c = speed_of_sound(Tc)
+                print(f"Speed of sound: {c} m/s")
+            except:
+                continue
+
         else:
             pi = False
             continue
-    if pi == True:
-        # Convert UTM coordinates to latitude and longitude
-        lon, lat = utm_proj(x, y, inverse=True)
-    else:
-        continue
-    
-
-    # Print the converted latitude and longitude
-    ht = datetime.fromtimestamp(time, tz=timezone.utc)
-    h = ht.hour
-    input_files = str(time) + '_' + str(lat) + '_' + str(lon) + '.dat'
-    
-    with open(input_files, 'r') as file:
-        data = json.load(file)
-
-    # Extract metadata
-    metadata = data['metadata']
-    sourcefile = metadata['sourcefile']
-    datetim = metadata['time']['datetime']
-    latitude = metadata['location']['latitude']
-    longitude = metadata['location']['longitude']
-    parameters = metadata['parameters']
-
-    # Extract data
-    data_list = data['data']
-
-    # Convert data to a DataFrame
-    df = pd.DataFrame(data_list)
-
-    # Print extracted information
-    print(f"Source file: {sourcefile}")
-
-    # Find the "Z" parameter and extract the value at index 600
-    z_index = None
-    hold = np.inf
-    for item in data_list:
-        if item['parameter'] == 'Z':
-            for i in range(len(item['values'])):
-                if abs(float(item['values'][i]) - float(alt)) < hold:
-                    hold = abs(float(item['values'][i]) - float(alt))
-                    z_index = i
-
-    for item in data_list:
-        if item['parameter'] == 'T':
-            Tc = - 273.15 + float(item['values'][z_index])
-
 
     spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight)+'/'+str(sta)+'/'
     
@@ -304,7 +303,6 @@ for line in sta_f.readlines():
                 vmin = 0  
                 vmax = np.max(middle_column) 
 
-                c = 343
                 tprime0 = 120
                 v0 = speed_mps
                 l = np.sqrt(dist_m**2 + (height_m)**2)
@@ -347,17 +345,15 @@ for line in sta_f.readlines():
                     
             
                 if len(coords) == 0:
-
                     print('No picks for: ', date, flight, sta)
                     continue
                 # Convert the list of coordinates to a numpy array
                 coords_array = np.array(coords)
 
                 f0 = 116
-                c = 343
                 m0 = [f0, v0, l, tprime0]
 
-                m,covm = invert_f(m0, coords_array, num_iterations=8)
+                m,covm = invert_f(m0, coords_array, c, num_iterations=8)
                 f0 = m[0]
                 v0 = m[1]
                 l = m[2]
@@ -392,7 +388,7 @@ for line in sta_f.readlines():
 
                     coord_inv_array = np.array(coord_inv)
 
-                    m,_ = invert_f(m0, coord_inv_array, num_iterations=12)
+                    m,_ = invert_f(m0, coord_inv_array, c, num_iterations=12)
                     f0 = m[0]
                     v0 = m[1]
                     l = m[2]
@@ -408,7 +404,7 @@ for line in sta_f.readlines():
                             new_coord_inv_array.append(coord_inv_array[i])
                     coord_inv_array = np.array(new_coord_inv_array)
 
-                    m,covm = invert_f(m0, coord_inv_array, num_iterations=12, sigma=5)
+                    m,covm = invert_f(m0, coord_inv_array, c, num_iterations=12, sigma=5)
                     
                     f0 = m[0]
                     v0 = m[1]
@@ -497,39 +493,7 @@ for line in sta_f.readlines():
                 
                 #if the file is not saved then
                 if not Path('/scratch/irseppi/nodal_data/plane_info/C185_spec/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/').exists():
-                    goon = True
-                    
-                    with open('output/revisit_C185.txt', 'r') as output212, open('output/bad_data_C185.txt', 'r') as output313:
-                        for ynln in output212:
-                            if ynln == str(date)+','+str(flight)+','+str(sta)+','+str(closest_time) + ',\n':
-                                goon = False
-                                break
-                            else:
-                                continue
-                        for ynln2 in output313:
-                            if ynln2 == str(date)+','+str(flight)+','+str(sta)+','+str(closest_time) + ',\n':
-                                goon = False
-                                break
-                            else:
-                                continue
-
-                    if goon == True:
-                        con = input("Do you want to use this? (y or n)")
-
-                        if con == 'n':
-                            save = input("Do you want to revisit this later? (y or n)")
-                            if save == 'y':
-                                output22.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time) + ',\n')
-                                goon = False
-                                break
-                            elif save == 'n':
-                                output33.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time) + ',\n')
-                                goon = False
-                                break
-                        if con == 'y':
-                            corridor_width = 6 
-
-
+                    continue
 
                 else:                           
                     corridor_width = 6 
@@ -575,7 +539,7 @@ for line in sta_f.readlines():
                         if f0 < 200:
                             coord_inv_array = np.array(coord_inv)
                             mtest = [f0,v0, l, tprime0]
-                            mtest,_ = invert_f(mtest, coord_inv_array, num_iterations=4)
+                            mtest,_ = invert_f(mtest, coord_inv_array, c, num_iterations=4)
                             ft = calc_ft(ttt,  mtest[3], mtest[0], mtest[1], mtest[2], c)
                         else:
                             ft = calc_ft(ttt,  tprime0, f0, v0, l, c)
@@ -693,7 +657,7 @@ for line in sta_f.readlines():
                                 t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
                                 ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
 
-                                f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(f0,v0,l,tprime0, tobs[j])
+                                f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(f0,v0,l,tprime0, tobs[j],c)
                             
                                 new_row[0] = f_derivev0
                                 new_row[1] = f_derivel
@@ -839,5 +803,3 @@ for line in sta_f.readlines():
                     print(tprime0,v0,l,f0lab,covm)
                     C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+',\n')
 C185_output.close()
-output22.close()
-output33.close()

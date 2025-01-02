@@ -401,7 +401,7 @@ def calc_f0(tprime, tprime0, ft0p, v0, l, c):
 
 ####################################################################################################################################################################################################################################################################################################################
 
-def df(f0,v0,l,tp0,tp):   
+def df(f0,v0,l,tp0,tp,c):   
     """
 	Calculate the derivatives of f with respect to f0, v0, l, and tp0.
 
@@ -414,7 +414,6 @@ def df(f0,v0,l,tp0,tp):
 	Returns:
 	tuple: A tuple containing the derivatives of f with respect to f0, v0, l, and tp0.
 	"""
-    c = 343 # m/sec speed of sound
 
     #derivative with respect to f0
     f_derivef0 = (1 / (1 - (c * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))) /((c**2 - v0**2) * np.sqrt(l**2 + (c**4 * v0**2 * (-tp + tp0 + np.sqrt((-l**2 * v0**2 + c**2 * (l**2 + (tp - tp0)**2 * v0**2)) / c**4))**2) / (c**2 - v0**2)**2))))
@@ -480,7 +479,7 @@ def invert_f(m0, coords_array, num_iterations,sigma = 1):
 			tprime = tobs[i]
 			t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
 			ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
-			f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(m[0], m[1], m[2], m[3], tobs[i])
+			f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(m[0], m[1], m[2], m[3], tobs[i],c)
 			
 			G[i,0:4] = [f_derivef0, f_derivev0, f_derivel, f_derivetprime0]
 
