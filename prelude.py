@@ -449,7 +449,7 @@ def df(f0,v0,l,tp0,tp,c):
 
 #####################################################################################################################################################################################################################################################################################################################
 
-def invert_f(m0, coords_array, num_iterations,sigma = 1):
+def invert_f(m0, coords_array, c, num_iterations,sigma = 1):
 	"""
 	Inverts the function f using the given initial parameters and data array.
 
@@ -466,7 +466,6 @@ def invert_f(m0, coords_array, num_iterations,sigma = 1):
 	tobs = coords_array[:,0]
 	m = m0
 	n = 0
-	c = 343
 	while n < num_iterations:
 		fnew = []
 		G = np.zeros((w,4)) #partial derivative matrix of f with respect to m
