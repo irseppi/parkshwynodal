@@ -316,7 +316,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 
 ###################################################################################################################################
 
-def calc_time(t0,dist,alt):
+def calc_time(t0,dist,alt,c):
 	"""
 	Calculate the time at which the acoustic wave reaches the station.
 
@@ -328,13 +328,12 @@ def calc_time(t0,dist,alt):
 	Returns:
 	float: Time at which the acoustic wave reaches the station (in seconds).
 	"""
-	c = 343  # Speed of acoustic wave propagation (in meters per second)
 	t = t0 + (np.sqrt(dist**2 + alt**2))/c 
 	return t
 
 #####################################################################################################################
 
-def calc_f(f0, t, l, v0):
+def calc_f(f0, t, l, v0,c):
 	"""
 	Calculates the frequency shift and time of flight for a wave generated at an aircraft and received at a station.
 
@@ -347,7 +346,7 @@ def calc_f(f0, t, l, v0):
 	Returns:
 		tuple: A tuple containing the frequency shift (f) and the time of flight (tflight).
 	"""
-	c = 343  # Speed of acoustic wave propagation (in m/sec)
+
 	tflight = t - (np.sqrt(t**2 - (1 - v0**2/c**2) * (t**2 - l**2/c**2))) / (1 - v0**2/c**2)
 	f = f0 * (1 / (1 + (v0/c) * (v0 * tflight / (np.sqrt(l**2 + (v0 * tflight)**2)))))
 

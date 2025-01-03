@@ -131,49 +131,48 @@ for line in sta_f.readlines():
             # Convert UTM coordinates to latitude and longitude
             lon, lat = utm_proj(x, y, inverse=True)
 
-            input_files = str(time) + '_' + str(lat) + '_' + str(lon) + '.dat'
+            input_files = '/scratch/irseppi/nodal_data/plane_info/atmosphere_data/' + str(time) + '_' + str(lat) + '_' + str(lon) + '.dat'
+
             try:
                 file =  open(input_files, 'r') #as file:
-                data = json.load(file)
-                # Print the converted latitude and longitude
-                ht = datetime.fromtimestamp(time, tz=timezone.utc)
-                h = ht.hour
-
-                # Extract metadata
-                metadata = data['metadata']
-                sourcefile = metadata['sourcefile']
-                datetim = metadata['time']['datetime']
-                latitude = metadata['location']['latitude']
-                longitude = metadata['location']['longitude']
-                parameters = metadata['parameters']
-
-                # Extract data
-                data_list = data['data']
-
-                # Convert data to a DataFrame
-                data_frame = pd.DataFrame(data_list)
-
-                # Print extracted information
-                print(f"Source file: {sourcefile}")
-
-                # Find the "Z" parameter and extract the value at index 600
-                z_index = None
-                hold = np.inf
-                for item in data_list:
-                    if item['parameter'] == 'Z':
-                        for i in range(len(item['values'])):
-                            if abs(float(item['values'][i]) - float(alt)) < hold:
-                                hold = abs(float(item['values'][i]) - float(alt))
-                                z_index = i
-
-                for item in data_list:
-                    if item['parameter'] == 'T':
-                        Tc = - 273.15 + float(item['values'][z_index])
-                c = speed_of_sound(Tc)
-                print(f"Speed of sound: {c} m/s")
             except:
                 continue
+            data = json.load(file)
+            # Print the converted latitude and longitude
+            ht = datetime.fromtimestamp(time, tz=timezone.utc)
+            h = ht.hour
 
+            # Extract metadata
+            metadata = data['metadata']
+            sourcefile = metadata['sourcefile']
+            datetim = metadata['time']['datetime']
+            latitude = metadata['location']['latitude']
+            longitude = metadata['location']['longitude']
+            parameters = metadata['parameters']
+
+            # Extract data
+            data_list = data['data']
+
+            # Convert data to a DataFrame
+            data_frame = pd.DataFrame(data_list)
+
+            # Find the "Z" parameter and extract the value at index 600
+            z_index = None
+            hold = np.inf
+            for item in data_list:
+                if item['parameter'] == 'Z':
+                    for i in range(len(item['values'])):
+                        if abs(float(item['values'][i]) - float(alt)) < hold:
+                            hold = abs(float(item['values'][i]) - float(alt))
+                            z_index = i
+
+            for item in data_list:
+                if item['parameter'] == 'T':
+                    Tc = - 273.15 + float(item['values'][z_index])
+            c = speed_of_sound(Tc)
+            print(f"Speed of sound: {c} m/s")
+            
+            break
         else:
             pi = False
             continue
@@ -238,7 +237,7 @@ for line in sta_f.readlines():
                 height_m = alt_m - elevation 
                 dist_m = dist_km * 1000
                 tmid = closest_time
-                tarrive = calc_time(tmid,dist_m,height_m)
+                tarrive = calc_time(tmid,dist_m,height_m,c)
 
                 ht = datetime.utcfromtimestamp(tarrive)
                 mins = ht.minute
@@ -493,10 +492,11 @@ for line in sta_f.readlines():
                 
                 #if the file is not saved then
                 if not Path('/scratch/irseppi/nodal_data/plane_info/C185_spec/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/').exists():
+                    print('No file')
                     continue
 
-                else:                           
-                    corridor_width = 6 
+                #else:                           
+                corridor_width = 6 
 
                 peaks_assos = []
                 fobs = []
