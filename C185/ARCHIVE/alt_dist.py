@@ -4,9 +4,9 @@ import pandas as pd
 import pyproj
 
 file = open('output3.txt', 'r')
-file2 = pd.read_csv('input/all_station_crossing_db_C185.csv', sep=",")
-tail_nums = file2['TAIL_NUM']
-flights = file2['FLIGHT_NUM']
+file2 = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_C185.txt', sep=",")
+tail_nums = file2['10512184']
+flights = file2['527958214']
 utm_proj = pyproj.Proj(proj='utm', zone='6', ellps='WGS84')
 
 list_f = []

@@ -26,7 +26,7 @@ seismo_utm_y_km = [y / 1000 for y in seismo_utm_y]
 def closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight_utm_y2, seismo_utm_x, seismo_utm_y):
 
     closest_point = None
-    dist_lim = np.Infinity
+    dist_lim = np.inf
 
     x = [flight_utm_x1, flight_utm_x2]
     y = [flight_utm_y1, flight_utm_y2]
@@ -73,7 +73,7 @@ def closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight
 
 def find_closest_point(flight_utm, seismo_utm):
 
-    min_distance = np.Infinity
+    min_distance = np.inf
     closest_point = None
 
     for i in range(len(flight_utm) - 1):
@@ -96,7 +96,7 @@ def find_closest_point(flight_utm, seismo_utm):
 ##################################################################################################################################################
 
 file = open('output4.txt', 'r')
-file2 = pd.read_csv('input/all_station_crossing_db_C185.csv', sep=",")
+file2 = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_C185.csv', sep=",")
 tail_nums = file2['TAIL_NUM']
 flight = file2['FLIGHT_NUM']
 #x_airport, y_airport = utm_proj(-150.0987984075305,62.32351451135649)
