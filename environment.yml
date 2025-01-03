@@ -18,7 +18,6 @@ dependencies:
   - ipywidgets
   - jupyterlab_widgets
   - fiona
-  - pysep
-  - imageio.v2
+
 
 
