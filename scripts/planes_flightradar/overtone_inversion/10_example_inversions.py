@@ -7,34 +7,12 @@ import datetime
 from prelude import *
 from scipy.signal import find_peaks, spectrogram
 from pathlib import Path
-
-def overwrite(times, frequencies, spec,file_to_overwrite, option = 1):
-    file = open(file_to_overwrite,'w')
-    coords = []
-
-    plt.figure()
-    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-    if option == 2:
-        plt.axvline(x=tprime0, c = '#377eb8', ls = '--')
-    def onclick(event):
-        global coords
-        coords.append((event.xdata, event.ydata))
-        plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-        plt.draw() 
-        print('Clicked:', event.xdata, event.ydata)  
-        file.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
-
-    plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-    plt.show(block=True)
-    file.close()
-    coords_array = np.array(coords)
-    return coords_array
-
 show_process = False
 auto_peak_pick = False
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
+elevations = seismo_data['Elevation']
 station = seismo_data['Station']
 flight_num = [530342801,528485724,528473220,528407493,528293430,527937367,529741194,529776675,529179112,530165646,531605202,531715679,529805251,529948401] 
 time = [1551066051,1550172833,1550168070,1550165577,1550089044,1549912188,1550773710,1550787637,1550511447,1550974151,1551662362,1551736354,1550803701,1550867033] 
@@ -100,8 +78,9 @@ for n in range(0,13):
                         torg = tr[2].times()
                       
                     clat, clon, dist_m, tmid = closest_encounter(flight_latitudes, flight_longitudes,line, tm, seismo_latitudes[y], seismo_longitudes[y])
+                    dist_km = dist_m / 1000
                     tarrive = tim + (time[n] - calc_time(tmid,dist_m,alt_m))
-
+                    
                     # Compute spectrogram
                     frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9, detrend = 'constant') 
                     
@@ -139,18 +118,51 @@ for n in range(0,13):
                         plt.figure()
                         plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
                         pick_data = pd.read_csv(output1, header=None)
+
                         plt.scatter(pick_data.iloc[:, 0], pick_data.iloc[:, 1], color='black', marker='x')
                         plt.show()
+
 
                         con = input("Do you want to overwrite your previously stored data with your picks? (y or n)")
                         while con != 'y' and con != 'n':
                             print('Invalid input. Please enter y or n.')
                             con = input("Do you want to overwrite your previously stored data with your picks? (y or n)")
                         if con == 'y':
-                            coords = overwrite(times, frequencies, spec, output1)
+                            r1 = open(output1,'w')
+                            coords = []
+                            plt.figure()
+                            plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+
+                            def onclick(event):
+                                global coords
+                                coords.append((event.xdata, event.ydata))
+                                plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                                plt.draw() 
+                                print('Clicked:', event.xdata, event.ydata)  
+                                r1.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+
+                            cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+
+                            plt.show(block=True)
+                            r1.close()
+
                             pick_again = input("Do you want to repick you points? (y or n)")
                             while pick_again == 'y':
-                                coords = overwrite(times, frequencies, spec, output1)
+                                r1 = open(output1,'w')
+                                coords = []
+                                plt.figure()
+                                plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)  
+                                def onclick(event):
+                                    global coords
+                                    coords.append((event.xdata, event.ydata))
+                                    plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                                    plt.draw() 
+                                    print('Clicked:', event.xdata, event.ydata)  
+                                    r1.write(str(event.xdata) + ',' + str(event.ydata) + ',\n') 
+                                cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+
+                                plt.show(block=True)
+                                r1.close()
                                 pick_again = input("Do you want to repick you points? (y or n)")
                         else:
                             coords = []
@@ -164,18 +176,110 @@ for n in range(0,13):
                     else:
                         BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/inversepicks/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'
                         make_base_dir(BASE_DIR)
-                        coords = overwrite(times, frequencies, spec, output1)
+                        r1 = open(output1,'w')
+                        coords = []
+                        plt.figure()
+                        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+
+                        def onclick(event):
+                            global coords
+                            coords.append((event.xdata, event.ydata))
+                            plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                            plt.draw() 
+                            print('Clicked:', event.xdata, event.ydata)  
+                            r1.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+
+                        cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+
+                        plt.show(block=True)
+                        r1.close()
+
                         pick_again = input("Do you want to repick you points? (y or n)")
                         while pick_again == 'y':
-                            coords = overwrite(times, frequencies, spec, output1)
+                            r1 = open(output1,'w')
+                            coords = []
+                            plt.figure()
+                            plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                            def onclick(event):
+                                global coords
+                                coords.append((event.xdata, event.ydata))
+                                plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                                plt.draw() 
+                                print('Clicked:', event.xdata, event.ydata)  
+                                r1.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+                            cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+
+                            plt.show(block=True)
+                            r1.close()
                             pick_again = input("Do you want to repick you points? (y or n)")
                     # Convert the list of coordinates to a numpy array
                     coords_array = np.array(coords)
 
-                    f0 = fs/4
-                    tprime0 = tarrive
-                    v0 = speed_mps
-                    l = np.sqrt(dist_m**2 + alt_m**2)
+                    if n == 0:
+                        tprime0 = 112
+                        f0 = 115
+                        v0 = 68
+                        l = 2135
+
+                    if n == 1:
+                        f0 = 110
+                        tprime0 = 107
+                        v0 = 100
+                        l = 2700
+
+                    if n == 2:
+                        f0 = 131
+                        tprime0 = 93
+                        v0 = 139
+                        l = 4650
+
+                    if n == 3:
+                        f0 = 121
+                        tprime0 = 116
+                        v0 = 142
+                        l = 2450
+
+                    if n == 4:
+                        f0 = 120
+                        tprime0 = 140
+                        v0 = 64
+                        l = 580
+
+                    if n == 5:
+                        f0 = 17.5
+                        tprime0 = 123
+                        v0 = 112
+                        l = 1150
+
+                    if n == 6:
+                        f0 = 36
+                        tprime0 = 133
+                        v0 = 92
+                        l = 2400
+
+                    if n == 7:
+                        f0 = 26		
+                        tprime0 = 122
+                        v0 = 126
+                        l = 3000
+
+                    if n == 8:
+                        f0 = 87.7
+                        tprime0 = 100
+                        v0 = 67
+                        l = 2300
+
+                    if n == 9:
+                        f0 = 26
+                        tprime0 = 114
+                        v0 = 144
+                        l = 1900
+                    if n > 9:
+
+                        f0 = fs/4
+                        tprime0 = tarrive
+                        v0 = speed_mps
+                        l = np.sqrt(dist_m**2 + (alt_m-elevations[y])**2)
 
                     c = 343
                     m0 = [f0, v0, l, tprime0]
@@ -291,15 +395,46 @@ for n in range(0,13):
                                 print('Invalid input. Please enter y or n.')
                                 con = input("Do you want to overwrite your previously stored overtone picks? (y or n)")
                             if con == 'y':
-                                coords = overwrite(times, frequencies, spec, output2,option = 2)
-                                print(coords)
-                                peaks = coords[1]
-                                freqpeak = coords[0]
+                                r2 = open(output2,'w')
+                                peaks = []
+                                freqpeak = []
+                                plt.figure()
+                                plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                                plt.axvline(x=tprime0, c = '#377eb8', ls = '--')
+                                def onclick(event):
+                                    global coords
+                                    peaks.append(event.ydata)
+                                    freqpeak.append(event.xdata)
+                                    plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                                    plt.draw() 
+                                    print('Clicked:', event.xdata, event.ydata)  
+                                    r2.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+
+                                cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+
+                                plt.show(block=True)
+                                r2.close()
+
                                 pick_again = input("Do you want to repick you points? (y or n)")
                                 while pick_again == 'y':
-                                    coords = overwrite(times, frequencies, spec, output2,option = 2)
-                                    peaks = coords[1]
-                                    freqpeak = coords[0]
+                                    r2 = open(output2,'w')
+                                    peaks = []
+                                    freqpeak = []
+                                    plt.figure()
+                                    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                                    plt.axvline(x=tprime0, c = '#377eb8', ls = '--')
+                                    def onclick(event):
+                                        global coords
+                                        peaks.append(event.ydata)
+                                        freqpeak.append(event.xdata)
+                                        plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                                        plt.draw() 
+                                        print('Clicked:', event.xdata, event.ydata)  
+                                        r2.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+                                    cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+
+                                    plt.show(block=True)
+                                    r2.close()
                                     pick_again = input("Do you want to repick you points? (y or n)")
 
                             elif con == 'n':
@@ -316,16 +451,45 @@ for n in range(0,13):
                         else:
                             BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/overtonepicks/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'
                             make_base_dir(BASE_DIR)
-                            coords = overwrite(times, frequencies, spec, output2,option = 2)
-                            peaks = coords[1]
-                            freqpeak = coords[0]
+                            r2 = open(output2,'w')
+                            peaks = []
+                            freqpeak = []
+                            plt.figure()
+                            plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                            plt.axvline(x=tprime0, c = '#377eb8', ls = '--')
+
+                            def onclick(event):
+                                global coords
+                                peaks.append(event.ydata)
+                                freqpeak.append(event.xdata)
+                                plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                                plt.draw() 
+                                print('Clicked:', event.xdata, event.ydata)  
+                                r2.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+                            cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+                            plt.show(block=True)
+                            r2.close()
                             pick_again = input("Do you want to repick you points? (y or n)")
                             while pick_again == 'y':
-                                coords = overwrite(times, frequencies, spec, output2,option = 2)
-                                peaks = coords[1]
-                                freqpeak = coords[0]
-                                pick_again = input("Do you want to repick you points? (y or n)")
+                                r2 = open(output2,'w')
+                                peaks = []
+                                freqpeak = []
+                                plt.figure()
+                                plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
+                                plt.axvline(x=tprime0, c = '#377eb8', ls = '--')
+                                def onclick(event):
+                                    global coords
+                                    peaks.append(event.ydata)
+                                    freqpeak.append(event.xdata)
+                                    plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                                    plt.draw() 
+                                    print('Clicked:', event.xdata, event.ydata)  
+                                    r2.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+                                cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
 
+                                plt.show(block=True)
+                                r2.close()
+                                pick_again = input("Do you want to repick you points? (y or n)")
                     closest_index = np.argmin(np.abs(tprime0 - times))
                     arrive_time = spec[:,closest_index]
                     for i in range(len(arrive_time)):
@@ -338,15 +502,18 @@ for n in range(0,13):
 
                     ax1.plot(torg, data, 'k', linewidth=0.5)
                     ax1.set_title(title)
+
                     ax1.margins(x=0)
                     ax1.set_position([0.125, 0.6, 0.775, 0.3])  # Move ax1 plot upwards
+
+
 
                     # Plot spectrogram
                     cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
                     ax2.set_xlabel('Time (s)')
-                    ax2.axvline(x=tprime0, c = '#377eb8', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
-
                     f0lab = []
+                    ax2.axvline(x=tprime0, c = '#377eb8', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
+                    
                     for pp in range(len(peaks)):
                         tprime = freqpeak[pp]
                         ft0p = peaks[pp]
@@ -362,7 +529,6 @@ for n in range(0,13):
                         what_if = calc_ft(times, tarrive, fs/4, speed_mps, np.sqrt(dist_m**2 + alt_m**2), c)
                         #ax2.plot(times, what_if, 'red', ls = '--', linewidth=0.4)
                     f0lab_sorted = sorted(f0lab)
-
                     covm = np.sqrt(np.diag(covm))
                     if len(f0lab_sorted) <= 17:
                         fss = 'medium'
@@ -370,15 +536,21 @@ for n in range(0,13):
                         fss = 'small'
                     ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2))+' +/- ' + str(np.round(covm[3],2)) + ' sec, v0 = '+str(np.round(v0,2))+' +/- ' + str(np.round(covm[1],2)) +' m/s, l = '+str(np.round(l,2))+' +/- ' + str(np.round(covm[2],2)) +' m, \n' + 'f0 = '+str(f0lab_sorted)+' +/- ' + str(np.round(covm[0],2)) +' Hz', fontsize=fss)
                     ax2.axvline(x=tarrive, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
+
+                    
                     ax2.legend(loc='upper right',fontsize = 'x-small')
                     ax2.set_ylabel('Frequency (Hz)')
+
+
+                    ax2.margins(x=0)
+                    ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
+
+                    plt.colorbar(mappable=cax, cax=ax3)
+                    ax3.set_ylabel('Relative Amplitude (dB)')
+
                     ax2.margins(x=0)
                     ax2.set_xlim(0, 240)
                     ax2.set_ylim(0, int(fs/2))
-
-                    ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
-                    plt.colorbar(mappable=cax, cax=ax3)
-                    ax3.set_ylabel('Relative Amplitude (dB)')
 
                     # Plot overlay
                     spec2 = 10 * np.log10(MDF)
@@ -394,7 +566,9 @@ for n in range(0,13):
                     ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
                     ax4.grid(axis='y')
 
-                    plt.show()
+                    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'
+                    make_base_dir(BASE_DIR)
+                    fig.savefig('/scratch/irseppi/nodal_data/plane_info/5plane_spec/2019-0'+str(month[n])+'-'+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(time[n])+'_'+str(flight_num[n])+'.png')
                     plt.close()
                     
                     fig = plt.figure(figsize=(10,6))
@@ -421,10 +595,14 @@ for n in range(0,13):
                                 else:
                                     plt.text(freqp - 1, ampp + 0.8, freqp, fontsize=17, fontweight='bold')  
                     plt.xlim(0, int(fs/2))
-                    plt.ylim(0,vmax*1.1)
                     plt.xticks(fontsize=12)
                     plt.yticks(fontsize=12)
+                    plt.ylim(0,vmax*1.1)
                     plt.xlabel('Frequency (Hz)', fontsize=17)
                     plt.ylabel('Relative Amplitude at t = {:.2f} s (dB)'.format(tprime0), fontsize=17)
-                    plt.show()
-                    
+
+
+                    make_base_dir('/scratch/irseppi/nodal_data/plane_info/5spec/20190'+str(month[n])+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/')
+
+                    fig.savefig('/scratch/irseppi/nodal_data/plane_info/5spec/20190'+str(month[n])+str(day[n])+'/'+str(flight_num[n])+'/'+str(sta[n])+'/'+str(sta[n])+'_' + str(time[n]) + '.png')
+                    plt.close() 
