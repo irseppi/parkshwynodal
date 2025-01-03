@@ -69,24 +69,27 @@ for i, flight_file in enumerate(flight_files):
 	fname = filenames[i]	
 	flight_num = fname[9:18]
 	date = fname[0:8]
-	
-	for l in range(len(flight_data)):
+
+	for s in range(len(seismo_data)):
 		dist_lim = 2.1
-		for s in range(len(seismo_data)):
+		con = False
+		for l in range(len(flight_data)):
 			dist = distance(flight_latitudes[l], flight_longitudes[l], seismo_latitudes[s], seismo_longitudes[s])
 			if dist <= dist_lim:
 				timeF = time[l]
 				altF = alt[l]
 				speedF = speed[l]
 				seismo_staF = seismo_sta[s]
+				con = True
 			else:
 				continue
-		if dist_lim < 2.1:
+		if con == True:
 			text = open('/scratch/irseppi/nodal_data/flightradar24/'+date+'_flights.csv')
 			for line in text.readlines():
 				val = line.split(',')
-				if val[0] == flight_num:		
-					output.write(str(date)+','+ str(flight_num)+','+','+val[1]+str(timeF)+','+str(altF)+','+str(speedF)+','+str(seismo_staF)+','+val[3]+'\n')
+				if val[0] == flight_num:
+					print('Found')
+					output.write(str(date)+','+ str(flight_num)+','+val[1]+','+str(timeF)+','+str(altF)+','+str(speedF)+','+str(seismo_staF)+','+val[3]+',\n')
 		else:
 			continue
 	print((i/len(flight_files))*100, '% Done')	
