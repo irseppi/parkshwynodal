@@ -4,7 +4,7 @@ import numpy as np
 
 alt = 1.1 # replace with altitude provided by flightradar24 (convert from feet to km)
 # Read JSON data from a file
-with open('1549843272.8099847_64.84832950193729_-149.82614954364118.dat', 'r') as file:
+with open('ex:1549843272.8099847_64.84832950193729_-149.82614954364118.dat', 'r') as file:
     data = json.load(file)
 
 # Extract metadata
