@@ -125,6 +125,7 @@ for line in sta_f.readlines():
         text = li.split(',')
         if float(flight) == float(text[1]):
             time = float(text[5])
+            print(abs(time-tim))
             if t_less < abs(time-tim):
                 t_less = abs(time-tim)
                 alt = float(text[4])*0.0003048 #convert between feet and km
