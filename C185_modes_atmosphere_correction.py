@@ -175,16 +175,20 @@ for line in sta_f.readlines():
             for item in data_list:
                 if item['parameter'] == 'T':
                     Tc = - 273.15 + float(item['values'][z_index])
+                    temp = Tc
             c = speed_of_sound(Tc)
+            sound_speed = c
+            wind = 
+            effective_sound_speed = 
             print(f"Speed of sound: {c} m/s")
                 
         else:
             continue
 
-    spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight)+'/'+str(sta)+'/'
+    spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight)+'/'+str(sta)+'/'
     
-    #if os.path.exists(spec_dir):
-    #    continue
+    if os.path.exists(spec_dir):
+        continue
 
     flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date) + '_positions/' + str(date) + '_' + str(flight) + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")
@@ -495,7 +499,7 @@ for line in sta_f.readlines():
                 plt.show()
                 
                 #if the file is not saved then
-                if not Path('/scratch/irseppi/nodal_data/plane_info/C185_spec/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/').exists():
+                if not Path('/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/').exists():
                     print('No file')
                     continue
 
@@ -756,9 +760,9 @@ for line in sta_f.readlines():
                     plt.show()     
                     qnum = input('What quality number would you give this?(first num for data quality(0-3), second for ability to fit model to data(0-1))')
 
-                    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_spec/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+                    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
                     make_base_dir(BASE_DIR)
-                    fig.savefig('/scratch/irseppi/nodal_data/plane_info/C185_spec/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.png')
+                    fig.savefig('/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.png')
                     plt.close()
                     
                     fig = plt.figure(figsize=(10,6))
@@ -799,11 +803,11 @@ for line in sta_f.readlines():
                     plt.xlabel('Frequency (Hz)', fontsize=17)
                     plt.ylabel('Relative Amplitude at t = {:.2f} s (dB)'.format(tprime0), fontsize=17)
 
-                    make_base_dir('/scratch/irseppi/nodal_data/plane_info/C185_specrum/20190'+str(month)+str(day)+'/'+str(flight)+'/'+str(sta)+'/')
+                    make_base_dir('/scratch/irseppi/nodal_data/plane_info/C185_specrum_c/20190'+str(month)+str(day)+'/'+str(flight)+'/'+str(sta)+'/')
 
-                    fig.savefig('/scratch/irseppi/nodal_data/plane_info/C185_specrum/20190'+str(month)+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(sta)+'_' + str(closest_time) + '.png')
+                    fig.savefig('/scratch/irseppi/nodal_data/plane_info/C185_specrum_c/20190'+str(month)+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(sta)+'_' + str(closest_time) + '.png')
                     plt.close() 
 
                     print(tprime0,v0,l,f0lab,covm)
-                    C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+',\n')
+                    C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(temp)+','+str(wind)+','+str(sound_speed)+','+str(effective_sound_speed)+',\n')
 C185_output.close()
