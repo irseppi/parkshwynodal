@@ -118,16 +118,21 @@ for line in sta_f.readlines():
     date = val[0]
     flight = val[1]
     sta = val[6]
+    tim = float(val[3])
+    t_less = np.inf
     # Loop through each station in text file that we already know comes within 2km of the nodes
     for li in file_in.readlines():
         text = li.split(',')
         if float(flight) == float(text[1]):
-            pi = True
-            alt = float(text[4])*0.0003048 #convert between feet and km
-            x =  float(text[2])  # Replace with your UTM x-coordinate
-            y = float(text[3])  # Replace with your UTM y-coordinate
             time = float(text[5])
-
+            if t_less < abs(time-tim):
+                t_less = abs(time-tim)
+                alt = float(text[4])*0.0003048 #convert between feet and km
+                x =  float(text[2])  # Replace with your UTM x-coordinate
+                y = float(text[3])  # Replace with your UTM y-coordinate
+                time = float(text[5])
+            else:
+                continue
             # Convert UTM coordinates to latitude and longitude
             lon, lat = utm_proj(x, y, inverse=True)
 
@@ -171,10 +176,8 @@ for line in sta_f.readlines():
                     Tc = - 273.15 + float(item['values'][z_index])
             c = speed_of_sound(Tc)
             print(f"Speed of sound: {c} m/s")
-            
-            break
+                
         else:
-            pi = False
             continue
 
     spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight)+'/'+str(sta)+'/'
