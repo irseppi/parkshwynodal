@@ -10,6 +10,7 @@ import pyproj
 from prelude import *
 from scipy.signal import find_peaks, spectrogram
 from pathlib import Path
+from plot_func import *
 
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -178,8 +179,8 @@ for line in sta_f.readlines():
                     temp = Tc
             c = speed_of_sound(Tc)
             sound_speed = c
-            wind = 
-            effective_sound_speed = 
+            #wind = 
+            #effective_sound_speed = 
             print(f"Speed of sound: {c} m/s")
                 
         else:
@@ -285,26 +286,8 @@ for line in sta_f.readlines():
                 # Compute spectrogram
                 frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9, detrend = 'constant') 
                 
-                a, b = Sxx.shape
-
-                MDF = np.zeros((a,b))
-                for row in range(len(Sxx)):
-                    m = len(Sxx[row])
-                    p = sorted(Sxx[row])
-                    median = p[int(m/2)]
-                    for col in range(m):
-                        MDF[row][col] = median
-                spec = 10 * np.log10(Sxx) - (10 * np.log10(MDF))
-                try_median = False
-                if try_median == True:
-                    if isinstance(sta, int):
-                        spec = np.zeros((a,b))
-                        for col in range(0,b):
-                            p = sorted(Sxx[:, col])
-                            median = p[int(len(p)/2)]
-
-                            for row in range(len(Sxx)):
-                                spec[row][col] = 10 * np.log10(Sxx[row][col]) - ((10 * np.log10(MDF[row][col])) + ((10*np.log10(median))))
+                spec, MDF = remove_median(Sxx)
+                
                 middle_index =  len(times) // 2
                 middle_column = spec[:, middle_index]
                 vmin = 0  
@@ -316,40 +299,7 @@ for line in sta_f.readlines():
 
                 tf = np.arange(0, 240, 1)
 
-                #output1 = '/scratch/irseppi/nodal_data/plane_info/inversepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
-                output1 = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/inversepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
-                if Path(output1).exists():
-                    coords = []
-                    with open(output1, 'r') as file:
-                        for line in file:
-                            # Split the line using commas
-                            pick_data = line.split(',')
-                            coords.append((float(pick_data[0]), float(pick_data[1])))
-                    file.close()  # Close the file after reading
-
-                else:
-                    #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/inversepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
-                    BASE_DIR = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/inversepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
-                    make_base_dir(BASE_DIR)
-                    pick_again = 'y'
-                    while pick_again == 'y':
-                        r1 = open(output1,'w')
-                        coords = []
-                        plt.figure()
-                        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                        def onclick(event):
-                            global coords
-                            coords.append((event.xdata, event.ydata))
-                            plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-                            plt.draw() 
-                            print('Clicked:', event.xdata, event.ydata)  
-                            r1.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
-                        cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-
-                        plt.show(block=True)
-                        r1.close()
-                        pick_again = input("Do you want to repick your points? (y or n)")
-                    
+                coords = doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, closest_time) 
             
                 if len(coords) == 0:
                     print('No picks for: ', date, flight, sta)
@@ -423,47 +373,8 @@ for line in sta_f.readlines():
                 mprior.append(l)
                 mprior.append(tprime0)       
 
-                #output2 = '/scratch/irseppi/nodal_data/plane_info/overtonepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
-                output2 = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
-                if Path(output2).exists():
-
-                    peaks = []
-                    freqpeak = []
-                    with open(output2, 'r') as file:
-                        for line in file:
-                            # Split the line using commas
-                            pick_data = line.split(',')
-                            peaks.append(float(pick_data[1]))
-                            freqpeak.append(float(pick_data[0]))
-                    file.close()  # Close the file after reading
-
-                else:
-                    #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/overtonepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
-                    BASE_DIR = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
-                    make_base_dir(BASE_DIR)
-                    pick_again = 'y'
-                    while pick_again == 'y':
-                        r2 = open(output2,'w')
-                        peaks = []
-                        freqpeak = []
-                        plt.figure()
-                        plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                        plt.axvline(x=tprime0, c = '#377eb8', ls = '--')
-                        plt.axvline(x=120, c = '#e41a1c', ls = '--')
-                        def onclick(event):
-                            global coords
-                            peaks.append(event.ydata)
-                            freqpeak.append(event.xdata)
-                            plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
-                            plt.draw() 
-                            print('Clicked:', event.xdata, event.ydata)  
-                            r2.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
-                        cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-
-                        plt.show(block=True)
-                        r2.close()
-                        pick_again = input("Do you want to repick you points? (y or n)")
-                w  = len(peaks)
+                peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, closest_time, tprime0)
+                w = len(peaks)
                 for o in range(w):
                     tprime = freqpeak[o]
                     ft0p = peaks[o]
@@ -499,9 +410,9 @@ for line in sta_f.readlines():
                 plt.show()
                 
                 #if the file is not saved then
-                if not Path('/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/').exists():
-                    print('No file')
-                    continue
+                #if not Path('/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/').exists():
+                #    print('No file')
+                #    continue
 
                 #else:                           
                 corridor_width = 6 
@@ -509,7 +420,7 @@ for line in sta_f.readlines():
                 peaks_assos = []
                 fobs = []
                 tobs = []
-
+            
                 for pp in range(len(peaks)):
                     tprime = freqpeak[pp]
                     ft0p = peaks[pp]
@@ -560,9 +471,10 @@ for line in sta_f.readlines():
                                 fobs.append(maxfreq[i])
                                 tobs.append(ttt[i])
                                 count += 1
-                        peaks_assos.append(count)
                     else:
                         continue
+                    peaks_assos.append(count)
+                    print(peaks_assos)
 
                     if len(fobs) == 0:
                         print('No picks for: ', date, flight, sta)
@@ -570,64 +482,7 @@ for line in sta_f.readlines():
                     
                     time_pick = True
                     if time_pick == True:
-                        #output3 = '/scratch/irseppi/nodal_data/plane_info/timepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
-                        output3 = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/timepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
-                        if Path(output3).exists():
-                            set_time = []
-                            with open(output3, 'r') as file:
-                                for line in file:
-                                    # Split the line using commas
-                                    pick_data = line.split(',')
-                                    set_time.append(float(pick_data[0]))
-                            file.close()  # Close the file after reading
-
-                        else:
-                            #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/timepicks_updated/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
-                            BASE_DIR = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/timepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
-                            make_base_dir(BASE_DIR)
-                            
-                            pick_again = 'y'
-                            while pick_again == 'y':
-                                r3 = open(output3,'w')
-                                set_time = []
-                                plt.figure()
-                                plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-                                plt.scatter(tobs,fobs, color='black', marker='x')
-                                def onclick(event):
-                                    global coords
-                                    set_time.append(event.xdata) 
-                                    plt.scatter(event.xdata, event.ydata, color='red', marker='x')  # Add this line
-                                    plt.draw() 
-                                    print('Clicked:', event.xdata, event.ydata)  
-                                    r3.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
-
-                                cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
-                                plt.show(block=True)
-
-                                r3.close()
-                                pick_again = input("Do you want to repick you points? (y or n)")
-                        start_time = set_time[0]
-                        end_time = set_time[1]
-                        ftobs = []
-                        ffobs = []
-
-                        ftobs = []
-
-                        peak_ass = []
-                        cum = 0
-                        for p in range(w):
-                            count = 0
-                            for j in range(cum,cum+peaks_assos[p]):
-                                if tobs[j] >= start_time and tobs[j] <= end_time:
-                                    ftobs.append(tobs[j])
-                                    ffobs.append(fobs[j])
-                                    count += 1
-                            cum = cum + peaks_assos[p]
-                        
-                            peak_ass.append(count)
-                        peaks_assos = peak_ass
-                        tobs = ftobs
-                        fobs = ffobs
+                        tobs, fobs = time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax)
 
                     qv = 0
                     num_iterations = 4
@@ -658,8 +513,7 @@ for line in sta_f.readlines():
                             tprime = freqpeak[p]
                             ft0p = peaks[p]
                             f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
-                        
-                    
+
                             for j in range(cum,cum+peaks_assos[p]):
                                 tprime = tobs[j]
                                 t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
@@ -694,120 +548,14 @@ for line in sta_f.readlines():
                     for i in range(len(arrive_time)):
                         if arrive_time[i] < 0:
                             arrive_time[i] = 0
-                    vmin = np.min(arrive_time) 
-                    vmax = np.max(arrive_time)
-
-                    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=False, figsize=(8,6))     
-
-                    ax1.plot(torg, data, 'k', linewidth=0.5)
-                    ax1.set_title(title)
-
-                    ax1.margins(x=0)
-                    ax1.set_position([0.125, 0.6, 0.775, 0.3])  # Move ax1 plot upwards
-
-                    # Plot spectrogram
-                    cax = ax2.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)				
-                    ax2.set_xlabel('Time (s)')
-                    f0lab = []
-                    ax2.axvline(x=tprime0, c = '#377eb8', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
-                    covm = np.sqrt(np.diag(covm))
-                    for pp in range(len(f0_array)):
-                        f0 = f0_array[pp]
-                        
-                        ft = calc_ft(times, tprime0, f0, v0, l, c)
-
-                        ax2.plot(times, ft, '#377eb8', ls = (0,(5,20)), linewidth=0.7) 
-                        tprime = tprime0
-                        t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-                        ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
-                        
-                        ax2.scatter(tprime0, ft0p, color='black', marker='x', s=30) 
-
-                    fss = 'x-small'
-                    f0lab = sorted(f0_array)
-                    for i in range(len(f0lab)):
-                        f0lab[i] = (str(np.round(f0lab[i],2)))
-                    ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2)) + ' sec, v0 = '+str(np.round(v0,2)) +' m/s, l = '+str(np.round(l,2)) +' m, \n' + 'f0 = '+', '.join(f0lab) +' Hz', fontsize=fss)
-                    ax2.axvline(x=120, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: 120 s')
-            
-                    ax2.legend(loc='upper right',fontsize = 'x-small')
-                    ax2.set_ylabel('Frequency (Hz)')
-
-                    ax2.margins(x=0)
-                    ax3 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
-
-                    plt.colorbar(mappable=cax, cax=ax3)
-                    ax3.set_ylabel('Relative Amplitude (dB)')
-
-                    ax2.margins(x=0)
-                    ax2.set_xlim(0, 240)
-                    ax2.set_ylim(0, int(fs/2))
-
-                    # Plot overlay
-                    spec2 = 10 * np.log10(MDF)
-                    middle_column2 = spec2[:, middle_index]
-                    vmin2 = np.min(middle_column2)
-                    vmax2 = np.max(middle_column2)
-
-                    # Create ax4 and plot on the same y-axis as ax2
-                    ax4 = fig.add_axes([0.125, 0.11, 0.07, 0.35], sharey=ax2) 
-                    ax4.plot(middle_column2, frequencies, c='#ff7f00')  
-                    ax4.set_ylim(0, int(fs/2))
-                    ax4.set_xlim(vmax2*1.1, vmin2) 
-                    ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
-                    ax4.grid(axis='y')
-
-                    plt.show()     
-                    qnum = input('What quality number would you give this?(first num for data quality(0-3), second for ability to fit model to data(0-1))')
 
                     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
                     make_base_dir(BASE_DIR)
-                    fig.savefig('/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.png')
-                    plt.close()
-                    
-                    fig = plt.figure(figsize=(10,6))
-                    plt.grid()
+                    qnum = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, month, day, flight, sta, middle_index, closest_time, BASE_DIR)
+                   
+                    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_specrum_c/20190'+str(month)+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+                    make_base_dir(BASE_DIR)
+                    plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, fs, closest_index, closest_time, sta, BASE_DIR)
 
-                    plt.plot(frequencies, arrive_time, c='#377eb8')
-                        
-                    for pp in range(len(f0_array)):
-                        f0 = f0_array[pp]
-                        if fs/2 < f0:
-                            continue
-                        tprime = tprime0
-                        t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
-                        ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
-
-                        upper = int(ft0p + 5)
-                        lower = int(ft0p - 5)
-                        tt = spec[lower:upper, closest_index]
-                        if upper > 250:
-                            freqp = ft0p
-                            ampp = np.interp(ft0p, frequencies, arrive_time)
-                        elif lower < 0:
-                            freqp = ft0p
-                            ampp = np.interp(ft0p, frequencies, arrive_time)
-                        else:
-                            ampp = np.max(tt)
-                            freqp = np.argmax(tt)+lower
-                        plt.scatter(freqp, ampp, color='black', marker='x', s=100)
-                        if isinstance(sta, int):
-                            plt.text(freqp - 5, ampp + 0.8, freqp, fontsize=17, fontweight='bold')
-                        else:
-                            plt.text(freqp - 1, ampp + 0.8, freqp, fontsize=17, fontweight='bold')  
-
-                    plt.xlim(0, int(fs/2))
-                    plt.xticks(fontsize=12)
-                    plt.yticks(fontsize=12)
-                    plt.ylim(0,vmax*1.1)
-                    plt.xlabel('Frequency (Hz)', fontsize=17)
-                    plt.ylabel('Relative Amplitude at t = {:.2f} s (dB)'.format(tprime0), fontsize=17)
-
-                    make_base_dir('/scratch/irseppi/nodal_data/plane_info/C185_specrum_c/20190'+str(month)+str(day)+'/'+str(flight)+'/'+str(sta)+'/')
-
-                    fig.savefig('/scratch/irseppi/nodal_data/plane_info/C185_specrum_c/20190'+str(month)+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(sta)+'_' + str(closest_time) + '.png')
-                    plt.close() 
-
-                    print(tprime0,v0,l,f0lab,covm)
-                    C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(temp)+','+str(wind)+','+str(sound_speed)+','+str(effective_sound_speed)+',\n')
+                    C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(Tc)+','+str(c)+',\n') #+','+str(wind)+','+str(effective_sound_speed)+',\n')
 C185_output.close()
