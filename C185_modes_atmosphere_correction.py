@@ -111,7 +111,7 @@ C185_output = open('output/C185data_atmosphere.csv', 'a')
 
 # Loop through each station in text file that we already know comes within 2km of the nodes
 
-file_in = open('/home/irseppi/REPOSITORIES/parkshwynodal/all_station_crossing_db_updated111.txt','r')
+file_in = open('/home/irseppi/REPOSITORIES/parkshwynodal/all_station_crossing_db_UTM.txt','r')
 
 for line in sta_f.readlines():
     val = line.split(',')
