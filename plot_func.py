@@ -313,7 +313,7 @@ def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta
 
 ##############################################################################################################################################################################################################
 
-def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w):
+def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos):
     """
     Pick the points for the time shift.
 
@@ -382,8 +382,6 @@ def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, f
 
     for p in range(w):
         count = 0
-        print(cum)
-        print(cum+peaks_assos[p])
         for j in range(cum,cum+peaks_assos[p]):
             if tobs[j] >= start_time and tobs[j] <= end_time:
                 ftobs.append(tobs[j])
@@ -396,4 +394,4 @@ def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, f
     tobs = ftobs
     fobs = ffobs
 
-    return tobs, fobs
+    return tobs, fobs, peaks_assos

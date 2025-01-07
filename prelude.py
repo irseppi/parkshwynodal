@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from numpy.linalg import inv
 from obspy.geodetics import gps2dist_azimuth
+from pyproj import Proj
 
 ###############################################################
 
@@ -45,7 +46,7 @@ def distance(lat1, lon1, lat2, lon2):
 	Returns:
 	float: The distance in kilometers between the two points.
 	"""
-	dist = gps2dist_azimuth(lat1, lon1, lat2, lon2)
+	dist, _,_  = gps2dist_azimuth(lat1, lon1, lat2, lon2)
 	dist_km = dist[0]/1000
 
 	return dist_km
@@ -313,6 +314,187 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 		return  closest_lat, closest_lon, dist_lim, timestamp
 	else:
 		return None, None, None, None
+#################################################################################################################################
+	
+def closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight_utm_y2, seismo_utm_x, seismo_utm_y):
+	"""
+	Calculate the closest point on a segment to a seismic station.
+
+	Args:
+
+		flight_utm_x1 (float): UTM x-coordinate of the first point of the flight segment.	
+		flight_utm_y1 (float): UTM y-coordinate of the first point of the flight segment.
+		flight_utm_x2 (float): UTM x-coordinate of the second point of the flight segment.
+		flight_utm_y2 (float): UTM y-coordinate of the second point of the flight segment.
+		seismo_utm_x (float): UTM x-coordinate of the seismic station.
+		seismo_utm_y (float): UTM y-coordinate of the seismic station.
+
+	Returns:
+		tuple: A tuple containing the closest point on the segment, and the distance between the segment and the station.
+	"""
+
+	closest_point = None
+	dist_lim = np.Infinity
+
+	x = [flight_utm_x1, flight_utm_x2]
+	y = [flight_utm_y1, flight_utm_y2]
+
+	if (x[1] - x[0]) == 0:
+		if (y[1]-y[0]) <= 0:
+			ggg = -0.001
+		else:
+			ggg = 0.001
+		for point in np.arange(y[0], y[1], ggg):
+			xx = x[0]
+			yy = point
+			dist_km = np.sqrt((seismo_utm_y-yy)**2 +(seismo_utm_x-xx)**2)
+			
+			if dist_km < dist_lim:
+				dist_lim = dist_km
+				closest_point = (xx,yy)
+			else:
+				continue
+
+	else: 
+		m = (y[1]-y[0])/(x[1]-x[0])
+		b = y[0] - m*x[0]
+
+		if (x[1] - x[0]) <= 0:
+			ggg = -0.001
+		else:
+			ggg = 0.001
+		for point in np.arange(x[0], x[1], ggg):
+			xx = point
+		
+			yy = m*xx + b
+			dist_km = np.sqrt((seismo_utm_y-yy)**2 +(seismo_utm_x-xx)**2)
+			
+			if dist_km < dist_lim:
+				dist_lim = dist_km
+				closest_point = (xx,yy)
+			else:
+				continue
+
+	return closest_point, dist_lim
+
+#################################################################################################################################
+
+def find_closest_point(flight_utm, seismo_utm):
+	"""
+	Find the closest point on a flight path to a seismic station.
+
+	Args:
+		flight_utm (list): List of UTM coordinates of the flight path.
+		seismo_utm (tuple): UTM coordinates of the seismic station.
+
+	Returns:
+		tuple: A tuple containing the closest point on the flight path, the distance between the flight path and the station, and the index of the closest point.
+	"""
+	min_distance = np.Infinity
+	closest_point = None
+
+	for i in range(len(flight_utm) - 1):
+		flight_utm_x1, flight_utm_y1 = flight_utm[i]
+		flight_utm_x2, flight_utm_y2 = flight_utm[i + 1]
+		seismo_utm_x, seismo_utm_y = seismo_utm
+		point, d = closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight_utm_y2, seismo_utm_x, seismo_utm_y)
+		
+		if point == None:
+			continue
+		elif d < min_distance:
+			min_distance = d
+			closest_point = point
+			index = i
+		else:
+			continue
+
+	return closest_point, min_distance, index	
+
+#################################################################################################################################################################
+
+def closest_approach_UTM(seismo_latitudes, seismo_longitudes, flight_latitudes, flight_longitudes, timestamp, altitude, speed, stations, elevations, c, sta):
+	"""
+	Calculate the closest approach between a flight path and a seismic station.
+
+	Args:
+		seismo_latitudes (list): List of seismic station latitudes.
+		seismo_longitudes (list): List of seismic station longitudes.
+		flight_latitudes (list): List of flight latitudes.
+		flight_longitudes (list): List of flight longitudes.
+		timestamp (list): List of timestamps.
+		altitude (list): List of altitudes.
+		speed (list): List of speeds.
+		stations (list): List of station names.
+		elevations (list): List of station elevations.
+		c (float): Speed of sound.
+		sta (str): Station name.
+
+	Returns:
+		tuple: A tuple containing the closest x and y coordinates, the distance between the flight path and the station, the time of the closest approach, the time the wave arrives at the station, the altitude of the aircraft, the speed of the aircraft, the elevation of the station, the speed of sound, the height of the aircraft, the distance between the aircraft and the station, and the time of the closest approach.
+	"""
+	utm_proj = Proj(proj='utm', zone='6', ellps='WGS84')
+
+	seismo_utm = [utm_proj(lon, lat) for lat, lon in zip(seismo_latitudes, seismo_longitudes)]
+	seismo_utm_x, seismo_utm_y = zip(*seismo_utm)
+
+	# Convert UTM coordinates to kilometers
+	seismo_utm_x_km = [x / 1000 for x in seismo_utm_x]
+	seismo_utm_y_km = [y / 1000 for y in seismo_utm_y]
+
+	#seismo_utm_km = [(x, y) for x, y in zip(seismo_utm_x_km, seismo_utm_y_km)]
+	# Convert flight latitude and longitude to UTM coordinates
+	flight_utm = [utm_proj(lon, lat) for lat, lon in zip(flight_latitudes, flight_longitudes)]
+	flight_utm_x, flight_utm_y = zip(*flight_utm)
+
+    # Convert UTM coordinates to kilometers
+	flight_utm_x_km = [x / 1000 for x in flight_utm_x]
+	flight_utm_y_km = [y / 1000 for y in flight_utm_y]
+	flight_path = [(x,y) for x, y in zip(flight_utm_x_km, flight_utm_y_km)]
+
+	# Iterate over seismometer data
+	for s in range(len(stations)):
+		if str(sta) == str(stations[s]):
+			seismometer = (seismo_utm_x_km[s], seismo_utm_y_km[s])  
+
+			closest_p, dist_km, index= find_closest_point(flight_path, seismometer)
+			
+			if dist_km <= 2:
+				closest_x, closest_y = closest_p
+				#Calculate the time of the closest point
+				flight_utm_x1, flight_utm_y1 = flight_path[index]
+				flight_utm_x2, flight_utm_y2 = flight_path[index + 1]
+
+				x_timestamp_dif_vec = flight_utm_x2 - flight_utm_x1
+				y_timestamp_dif_vec = flight_utm_y2 - flight_utm_y1
+
+				cx_timestamp_dif_vec =  closest_x - flight_utm_x1
+				cy_timestamp_dif_vec = closest_y - flight_utm_y1
+
+				line_vector = (x_timestamp_dif_vec, y_timestamp_dif_vec)
+				cline_vector = (cx_timestamp_dif_vec, cy_timestamp_dif_vec)
+
+				line_magnitude = np.sqrt(line_vector[0] ** 2 + line_vector[1] ** 2)
+				cline_magnitude = np.sqrt(cline_vector[0] ** 2 + cline_vector[1] ** 2)
+
+				length_ratio = cline_magnitude / line_magnitude
+				closest_time = timestamp[index] + length_ratio*(timestamp[index+1] - timestamp[index])
+
+				alt = (altitude[index]+altitude[index+1])/2
+				sp = (speed[index]+speed[index+1])/2
+
+				alt_m = alt * 0.3048
+				elevation = elevations[s]
+				speed_mps = sp * 0.514444
+				height_m = alt_m - elevation 
+				dist_m = dist_km * 1000
+				tmid = closest_time
+				tarrive = calc_time(tmid,dist_m,height_m,c)
+		else:
+			continue
+	# if closest point does not exist, return None	
+	if dist_km > 2:
+		return None, None, None, None, None, None, None, None, None, None, None, None
+	return closest_x, closest_y, dist_km, closest_time, tarrive, alt, sp, elevation, speed_mps, height_m, dist_m, tmid
 
 ###################################################################################################################################
 
@@ -496,7 +678,84 @@ def invert_f(m0, coords_array, c, num_iterations,sigma = 1):
 
 	return m, covmlsq
 
-####################3####################################################################################################################################################################
+#####################################################################################################################################################################################################################################################################################################################
+
+def full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, mprior, c, w, num_iterations = 4):
+	"""
+	Performs inversion using all picked overtones. 
+
+	Args:
+		fobs (numpy.ndarray): Picked frequency values from individual overtone inversion picks.
+		tobs (numpy.ndarray): Picked time values from individual overtone inversion picks.
+		freqpeak (numpy.ndarray): Center time value of doppler curve for each overtone
+		peaks (numpy.ndarray): Value of the frequency at the center time of the doppler curve for each overtone.
+
+	Returns:
+		numpy.ndarray: The inverted parameters for the function f. Velocity of the aircraft, distance of closest approach, time of closest approach, and the fundamental frequency produced by the aircraft.
+		numpy.ndarray: The covariance matrix of the inverted parameters.
+		numpy.ndarray: The array of the fundamental frequency produced by the aircraft.
+	"""
+
+	qv = 0
+
+	cprior = np.zeros((w+3,w+3))
+
+	for row in range(len(cprior)):
+		if row == 0:
+			cprior[row][row] = 20**2
+		elif row == 1:
+			cprior[row][row] = 500**2
+		elif row == 2:
+			cprior[row][row] = 20**2
+		else:
+			cprior[row][row] = 1**2
+	
+	Cd = np.zeros((len(fobs), len(fobs)), int)
+	np.fill_diagonal(Cd, 3**2)
+	mnew = np.array(mprior)
+
+	
+	while qv < num_iterations:
+		G = np.zeros((0,w+3))
+		fnew = []
+		cum = 0
+		for p in range(w):
+			new_row = np.zeros(w+3)
+			tprime = freqpeak[p]
+			ft0p = peaks[p]
+			f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
+
+			for j in range(cum,cum+peaks_assos[p]):
+				tprime = tobs[j]
+				t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
+				ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
+
+				f_derivef0, f_derivev0, f_derivel, f_derivetprime0 = df(f0,v0,l,tprime0, tobs[j],c)
+			
+				new_row[0] = f_derivev0
+				new_row[1] = f_derivel
+				new_row[2] = f_derivetprime0
+				new_row[3+p] = f_derivef0
+						
+				G = np.vstack((G, new_row))
+						
+				fnew.append(ft0p)
+		
+			cum = cum + peaks_assos[p]
+
+		m = np.array(mnew) + cprior@G.T@la.inv(G@cprior@G.T+Cd)@(np.array(fobs)- np.array(fnew))
+		mnew = m
+		v0 = mnew[0]
+		l = mnew[1]
+		tprime0 = mnew[2]
+		f0_array = mnew[3:]
+
+		print(m)
+		qv += 1
+	covm = la.inv(G.T@la.inv(Cd)@G + la.inv(cprior))
+	return m, covm, f0_array
+
+########################################################################################################################################################################################
 
 def load_flights(month1, month2, first_day, last_day):
 	"""
