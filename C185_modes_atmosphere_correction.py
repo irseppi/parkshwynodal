@@ -131,7 +131,7 @@ for line in sta_f.readlines():
                 alt = float(text[4])*0.0003048 #convert between feet and km
                 x =  float(text[2])  # Replace with your UTM x-coordinate
                 y = float(text[3])  # Replace with your UTM y-coordinate
-                time = float(text[5])
+                #time = float(text[5])
             else:
                 continue
             # Convert UTM coordinates to latitude and longitude
