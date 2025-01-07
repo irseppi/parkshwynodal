@@ -126,7 +126,7 @@ for line in sta_f.readlines():
         if float(flight) == float(text[1]):
             time = float(text[5])
             print(t_less < abs(time-tim))
-            if t_less < abs(time-tim):
+            if t_less > abs(time-tim):
                 t_less = abs(time-tim)
                 alt = float(text[4])*0.0003048 #convert between feet and km
                 x =  float(text[2])  # Replace with your UTM x-coordinate
