@@ -295,7 +295,7 @@ for line in sta_f.readlines():
 
     #else:                           
     corridor_width = 6 
-
+ 
     peaks_assos = []
     fobs = []
     tobs = []
@@ -305,7 +305,6 @@ for line in sta_f.readlines():
         ft0p = peaks[pp]
         f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
         
-    
         ft = calc_ft(times,  tprime0, f0, v0, l, c)
         
         maxfreq = []
@@ -350,34 +349,31 @@ for line in sta_f.readlines():
                     fobs.append(maxfreq[i])
                     tobs.append(ttt[i])
                     count += 1
-        else:
-            continue
-        peaks_assos.append(count)
+            peaks_assos.append(count)
 
 
-        if len(fobs) == 0:
-            print('No picks for: ', date, flight, sta)
-            continue
-        
-        time_pick = True
-        if time_pick == True:
-            tobs, fobs, peaks_assos = time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos)
+    if len(fobs) == 0:
+        print('No picks for: ', date, flight, sta)
+        continue
+    
 
-        m, covm, f0_array = full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, mprior, c, w, 4)
+    tobs, fobs, peaks_assos = time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos)
 
-        closest_index = np.argmin(np.abs(tprime0 - times))
-        arrive_time = spec[:,closest_index]
-        for i in range(len(arrive_time)):
-            if arrive_time[i] < 0:
-                arrive_time[i] = 0
+    m, covm, f0_array = full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, mprior, c, w, 4)
 
-        BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
-        make_base_dir(BASE_DIR)
-        qnum = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, month, day, flight, sta, middle_index, closest_time, BASE_DIR)
-        
-        BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_specrum_c/20190'+str(month)+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
-        make_base_dir(BASE_DIR)
-        plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, fs, closest_index, closest_time, sta, BASE_DIR)
+    closest_index = np.argmin(np.abs(tprime0 - times))
+    arrive_time = spec[:,closest_index]
+    for i in range(len(arrive_time)):
+        if arrive_time[i] < 0:
+            arrive_time[i] = 0
 
-        C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(Tc)+','+str(c)+',\n') #+','+str(wind)+','+str(effective_sound_speed)+',\n')
+    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+    make_base_dir(BASE_DIR)
+    qnum = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight, middle_index, closest_time, BASE_DIR)
+    
+    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_specrum_c/20190'+str(month)+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+    make_base_dir(BASE_DIR)
+    plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, fs, closest_index, closest_time, sta, BASE_DIR)
+
+    C185_output.write(str(date)+','+str(flight)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(Tc)+','+str(c)+',\n') #+','+str(wind)+','+str(effective_sound_speed)+',\n')
 C185_output.close()

@@ -314,6 +314,7 @@ def closest_encounter(flight_latitudes, flight_longitudes, index, timestamp, sei
 		return  closest_lat, closest_lon, dist_lim, timestamp
 	else:
 		return None, None, None, None
+	
 #################################################################################################################################
 	
 def closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight_utm_y2, seismo_utm_x, seismo_utm_y):
@@ -680,7 +681,7 @@ def invert_f(m0, coords_array, c, num_iterations,sigma = 1):
 
 #####################################################################################################################################################################################################################################################################################################################
 
-def full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, mprior, c, w, num_iterations = 4):
+def full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, mprior, c, w, num_iterations = 4):
 	"""
 	Performs inversion using all picked overtones. 
 
