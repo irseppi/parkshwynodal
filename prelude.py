@@ -329,7 +329,7 @@ def closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight
 	"""
 
 	closest_point = None
-	dist_lim = np.Infinity
+	dist_lim = np.inf
 
 	x = [flight_utm_x1, flight_utm_x2]
 	y = [flight_utm_y1, flight_utm_y2]
@@ -385,7 +385,7 @@ def find_closest_point(flight_utm, seismo_utm):
 	Returns:
 		tuple: A tuple containing the closest point on the flight path, the distance between the flight path and the station, and the index of the closest point.
 	"""
-	min_distance = np.Infinity
+	min_distance = np.inf
 	closest_point = None
 
 	for i in range(len(flight_utm) - 1):
