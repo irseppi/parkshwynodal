@@ -1,13 +1,7 @@
-import sys
-import fileinput
 import os
-import pandas as pd
 import numpy as np
 import numpy.linalg as la
-import matplotlib.pyplot as plt
-from datetime import datetime
 from pathlib import Path
-from numpy.linalg import inv
 from obspy.geodetics import gps2dist_azimuth
 from pyproj import Proj
 

@@ -1,14 +1,12 @@
 import numpy as np
 import pandas as pd
 import json
-import matplotlib.pyplot as plt
 import obspy
 import datetime
 from datetime import datetime, timezone
 from pyproj import Proj
 from prelude import *
 from scipy.signal import find_peaks, spectrogram
-from pathlib import Path
 from plot_func import *
 
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
@@ -84,7 +82,7 @@ for line in sta_f.readlines():
             # Convert data to a DataFrame
             data_frame = pd.DataFrame(data_list)
 
-            # Find the "Z" parameter and extract the value at index 600
+            # Find the "Z" parameter and extract the value at index
             z_index = None
             hold = np.inf
             for item in data_list:
@@ -125,7 +123,7 @@ for line in sta_f.readlines():
     if closest_x == None:
         continue
 
-    ht = datetime.utcfromtimestamp(tarrive)
+    ht = datetime.fromtimestamp(tarrive, tz=timezone.utc)
     mins = ht.minute
     secs = ht.second
     month = ht.month
