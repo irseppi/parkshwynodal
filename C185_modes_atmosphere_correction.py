@@ -260,40 +260,7 @@ for line in sta_f.readlines():
         f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
         mprior.append(f0)
     mprior = np.array(mprior)
-    fig, ax1 = plt.subplots(1, 1)   
-
-    # Plot spectrogram
-    cax = ax1.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)		
-    
-    ax1.set_xlabel('Time (s)')
-
-    for pp in range(len(peaks)):
-        tprime = freqpeak[pp]
-        ft0p = peaks[pp]
-        f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
-
-        ft = calc_ft(times, tprime0, f0, v0, l, c)
-
-        ax1.plot(times, ft, '#377eb8', ls = (0,(5,20)), linewidth=0.7) 
-                    
-    ax1.axvline(x=tprime0, color='red', linestyle='--', linewidth=0.7)
-    ax1.axvline(x=120, color='black', linestyle='--', linewidth=0.7)  
-
-    ax2 = fig.add_axes([0.9, 0.11, 0.015, 0.35])
-
-    plt.colorbar(mappable=cax, cax=ax2)
-
-    ax1.set_xlim(0, 240)
-    ax1.set_ylim(0, int(fs/2))
-
-    plt.show()
-    
-    #if the file is not saved then
-    #if not Path('/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/').exists():
-    #    print('No file')
-    #    continue
-
-    #else:                           
+                          
     corridor_width = 6 
  
     peaks_assos = []
@@ -369,7 +336,7 @@ for line in sta_f.readlines():
 
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
-    qnum = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight, middle_index, closest_time, BASE_DIR)
+    qnum, covm = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight, middle_index, closest_time, BASE_DIR)
     
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_specrum_c/20190'+str(month)+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
