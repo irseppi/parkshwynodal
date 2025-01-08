@@ -4,7 +4,7 @@ import numpy as np
 
 
 # Define the directory where your files are located
-file = 'output4.csv'
+file = 'C185data_atmosphere.csv'
 
 # Initialize a list to store the data from the files
 data = []

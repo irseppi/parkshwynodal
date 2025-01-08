@@ -355,3 +355,34 @@ def print_eq():
 		equip = val[6]
 		print(equip)
 
+#######################################################################################
+
+def comb_lines(filename):
+	"""
+	Combines lines in the input file that are part of the same record.
+
+	Args:
+		filename (str): The path of the file to be modified.
+
+	Returns:
+		None
+	"""
+	with open(filename, "r") as file:
+		lines = file.readlines()
+
+	new_lines = []
+	prev_line = ""
+
+	for line in lines:
+		if line.startswith(" "):
+			prev_line += line.strip()
+		else:
+			new_lines.append(prev_line)
+			prev_line = line.strip()
+
+	# Append the last line
+	new_lines.append(prev_line)
+
+	# Write the modified lines back to the file
+	with open(filename, "w") as file:
+		file.write("\n".join(new_lines))

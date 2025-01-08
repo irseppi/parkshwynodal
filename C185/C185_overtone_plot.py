@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Define the directory where your files are located
-file = 'output4.csv'
+file = 'C185data_atmosphere.csv'
 plt.figure()
 # Initialize lists to store the data from the files
 mode1_x = []
@@ -55,12 +55,16 @@ with open(file, 'r') as f:
         peaks = np.array(lines[7])
 
         peaks = str(peaks)  
-        peaks = np.array(peaks.split(' '))
-        if len(peaks) == 1:
-            peaks = np.char.replace(peaks, '[', '')
-            peaks = np.char.replace(peaks, ']', '')
 
+        peaks = np.char.replace(peaks, '[', '')
+        peaks = np.char.replace(peaks, ']', '')
+        peaks = str(peaks)
+
+        peaks = np.array(peaks.split(' '))
         for peak in peaks:
+            if peak == '' or peak == ' ' or peak == '   ':
+                continue
+            print(peak)
             try:
                 peak = float(peak[0:-1])
             except:
@@ -168,31 +172,27 @@ with open(file, 'r') as f:
                 mode3_y.append(zz)
 
 
-medians_mode1 = [np.median(mode1_f1), np.median(mode1_f2), np.median(mode1_f3), np.median(mode1_f4), np.median(mode1_f5), np.median(mode1_f6), np.median(mode1_f7), np.median(mode1_f8), np.median(mode1_f9), np.median(mode1_f10), np.median(mode1_f11)]
-medians_mode2 = [np.median(mode2_f1), np.median(mode2_f2), np.median(mode2_f3), np.median(mode2_f4), np.median(mode2_f5), np.median(mode2_f6), np.median(mode2_f7), np.median(mode2_f8), np.median(mode2_f9), np.median(mode2_f10), np.median(mode2_f11), np.median(mode2_f12), np.median(mode2_f13), np.median(mode1_f11)]
-medians_mode1_rounded = [round(median, 1) for median in medians_mode1]
+medians_mode1 = [np.nanmedian(mode1_f1), np.nanmedian(mode1_f2), np.nanmedian(mode1_f3), np.nanmedian(mode1_f4), np.nanmedian(mode1_f5), np.nanmedian(mode1_f6), np.nanmedian(mode1_f7), np.nanmedian(mode1_f8), np.nanmedian(mode1_f9), np.nanmedian(mode1_f10), np.nanmedian(mode1_f11)]
+medians_mode2 = [np.nanmedian(mode2_f1), np.nanmedian(mode2_f2), np.nanmedian(mode2_f3), np.nanmedian(mode2_f4), np.nanmedian(mode2_f5), np.nanmedian(mode2_f6), np.nanmedian(mode2_f7), np.nanmedian(mode2_f8), np.nanmedian(mode2_f9), np.nanmedian(mode2_f10), np.nanmedian(mode2_f11), np.nanmedian(mode2_f12), np.nanmedian(mode2_f13), np.nanmedian(mode1_f11)]
+medians_mode1_rounded = [round(median, 1) for median in medians_mode1 if not np.isnan(median)]
 
-medians_mode2_rounded = [round(median, 1) for median in medians_mode2]
+medians_mode2_rounded = [round(median, 1) for median in medians_mode2 if not np.isnan(median)]
 
 for medians in medians_mode1:
-    if medians == np.nan:
-        continue
     plt.axvline(x=medians, color='orange', linestyle='--')
 for medians in medians_mode2:
-    if medians == np.nan:
-        continue
     plt.axvline(x=medians, color='blue', linestyle='--')
 
 # Set the x-axis labels as rounded median values
 plt.xticks(medians_mode1_rounded + medians_mode2_rounded)
+
 # Add labels for the differences between medians
 for i in range(len(medians_mode1_rounded) - 1):
     diff = round(medians_mode1_rounded[i+1] - medians_mode1_rounded[i], 1)
     plt.text(medians_mode1_rounded[i]+(diff/2), 1, f'{diff}', ha='center', va='bottom')
     plt.annotate('', xy=(medians_mode1_rounded[i], 1), xytext=(medians_mode1_rounded[i+1], 1),
                  arrowprops=dict(arrowstyle='<->', color='orange'))
-    #diff_mode2_mode1 = round(medians_mode1_rounded[i] - medians_mode2_rounded[i], 1)
-    #plt.text(medians_mode1_rounded[i]+diff_mode2_mode1, np.max(mode1_y) + 2, f'{diff_mode2_mode1}', ha='center', va='bottom')
+    
 for i in range(len(medians_mode2_rounded) - 1):
     diff = round(medians_mode2_rounded[i+1] - medians_mode2_rounded[i], 1)
     plt.text(medians_mode2_rounded[i]+(diff/2), 3, f'{diff}', ha='center', va='bottom')

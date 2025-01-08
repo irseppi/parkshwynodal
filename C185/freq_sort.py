@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-file = open('output2.txt', 'r')
+file = open('C185data_atmosphere.txt','r')
 
 counts = []
 pppp = []

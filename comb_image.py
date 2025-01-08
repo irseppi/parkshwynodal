@@ -26,9 +26,6 @@ for day in range(1, 26):
 day = d
 month = m
 
-#day = ['11','13','14','18','21','24','25','04','04','22','22','23']
-#month =  ['02','02','02','02','02','02','02','03','03','02','02','02']
-
 text = open('input/all_station_crossing_db.txt', 'r')
 
 airplane = 'input/20231010_Aircraft_UA_Fairbanks.csv'
