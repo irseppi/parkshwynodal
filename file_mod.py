@@ -386,3 +386,69 @@ def comb_lines(filename):
 	# Write the modified lines back to the file
 	with open(filename, "w") as file:
 		file.write("\n".join(new_lines))
+
+# Write a function to take one column of a text file and order it in increasing order. Using that column, all rows will be rearranged in order.
+def order_rows_by_column(filename, col):
+	with open(filename, 'r') as file:
+		lines = file.readlines()
+
+	# Extract the values from the specified column
+	values = []
+	for line in lines:
+		columns = line.split(',')
+
+		values.append(columns[col].strip())
+	print(values)
+	# Sort the values based on the column
+	sorted_values = sorted(values)
+
+	# Rearrange the lines based on the sorted values
+	rearranged_lines = []
+	for value in sorted_values:
+		for line in lines:
+			if value in line:
+				rearranged_lines.append(line)
+				break
+
+	# Write the rearranged lines back to the file
+	with open(filename, 'w') as file:
+		file.writelines(rearranged_lines)
+
+
+def check_matching_values(file1, col1, file2, col2):
+	with open(file1, 'r') as f1, open(file2, 'r') as f2:
+		lines1 = f1.readlines()
+		lines2 = f2.readlines()
+
+	if len(lines1) != len(lines2):
+		print(f"The number of rows in {file1} and {file2} is different.")
+		return
+
+	for i, (line1, line2) in enumerate(zip(lines1, lines2)):
+		columns1 = line1.split(',')
+		value1 = columns1[col1].strip()
+
+		columns2 = line2.split(',')
+		value2 = columns2[col2].strip()
+		print(value1, value2)
+		if value1 != value2:
+			print(f"Row {i+1} in {file1} and {file2} have different values.")
+			
+def cojoin_columns(file1, start_col1, end_col1, file2, start_col2, end_col2, output_file):
+	with open(file1, 'r') as f1, open(file2, 'r') as f2, open(output_file, 'w') as output:
+		lines1 = f1.readlines()
+		lines2 = f2.readlines()
+
+		if len(lines1) != len(lines2):
+			print(f"The number of rows in {file1} and {file2} is different.")
+			return
+
+		for line1, line2 in zip(lines1, lines2):
+			columns1 = line1.split(',')
+			values1 = [columns1[i].strip() for i in range(start_col1, end_col1 + 1)]
+
+			columns2 = line2.split(',')
+			values2 = [columns2[i].strip() for i in range(start_col2, end_col2 + 1)]
+
+			cojoined_line = ','.join(values1 + values2) + '\n'
+			output.write(cojoined_line)
