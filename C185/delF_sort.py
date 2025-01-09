@@ -18,6 +18,7 @@ med_dict = {}
 date_dict = {}
 count = 0
 peak_old = None 
+med_store = []
 # Iterate over each line in the file
 for line in file.readlines():
     lines = line.split(',')
@@ -47,6 +48,7 @@ for line in file.readlines():
 
     if not np.isnan(np.nanmedian(f1)):
         all_med = np.nanmedian(f1)
+        med_store.append(all_med)
     print(flight_num)
     print(all_med)
     for lp in range(len(flight)):
@@ -68,7 +70,7 @@ for tail_num, med in med_dict.items():
     plt.scatter(med, y, c=color,label=tail_num)
 plt.legend()
 plt.xlim(0,80)
-#plt.show()
+plt.show()
 
 plt.figure()
 for tail_num, med in med_dict.items():
@@ -82,5 +84,10 @@ for tail_num, med in med_dict.items():
     else:
         plt.hist(med, bins=3, color=color, label=tail_num)
 plt.legend()
+plt.xlim(0,80)
+plt.show()
+
+plt.figure()
+plt.hist(med_store, bins=2000)
 plt.xlim(0,80)
 plt.show()
