@@ -37,6 +37,7 @@ mode2_f11 = []
 mode2_f12 = []
 mode2_f13 = []
 mode2_f14 = []
+QNUM = False
 with open(file, 'r') as f:
     x = 0
     xx = 0
@@ -45,11 +46,12 @@ with open(file, 'r') as f:
     # Read the data from the file and append it to the respective lists based on the mode
     for line in f.readlines():
         lines = line.split(',')
-        #quality_num = int(lines[8]) #lines[9] for output2
-        #if int(quality_num) < 21:
-        #    continue
-        #else:
-        #    print(quality_num)
+        if QNUM == True:
+            quality_num = int(lines[8]) #lines[9] for output2
+            if int(quality_num) < 21:
+                continue
+            else:
+                print(quality_num)
         x += 1
         mode_x = 0
         peaks = np.array(lines[7])
@@ -64,7 +66,6 @@ with open(file, 'r') as f:
         for peak in peaks:
             if peak == '' or peak == ' ' or peak == '   ':
                 continue
-            print(peak)
             try:
                 peak = float(peak[0:-1])
             except:
@@ -84,17 +85,6 @@ with open(file, 'r') as f:
                     mode_x = 3
                     continue
                     zz += 1
-                #if abs(float(peak) - 82.5) <= 1.5 or abs(float(peak) - 124.5) <= 1.5:
-                #    xx += 1
-                #    mode_x = 1
-                #    break
-                #elif abs(float(peak) - 76) <= 5 or abs(float(peak) - 114) <= 5 or abs(float(peak) - 152) <= 5:
-                #    mode_x = 2
-                #    yy += 1
-                #    break
-                #else:
-                #    mode_x = 3
-                #    zz += 1
             
         if mode_x == 1:
             for peak in peaks:
