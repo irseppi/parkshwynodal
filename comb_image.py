@@ -98,8 +98,10 @@ for i in range(len(day)):
 							continue
 					# Open images
 					spectrogram = Image.open(im)
+
 					# Get the path of the image file using a wildcard
-					image_path = glob.glob('/scratch/irseppi/nodal_data/plane_info/map_all/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/map_'+flight+'_*')[0]
+					print('/scratch/irseppi/nodal_data/plane_info/map_all/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/map_'+flight+'_*')
+					image_path = glob.glob('/scratch/irseppi/nodal_data/plane_info/map_all_UTM/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/map_'+flight+'_*')[0]
 
 					map_img = Image.open(image_path)
 					spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/C185_specrum_c/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+station+'_' + str(time) + '.png')
