@@ -371,6 +371,8 @@ def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, f
 
             r3.close()
             pick_again = input("Do you want to repick you points? (y or n)")
+    if len(set_time) == 0:
+        set_time = [0, 250]
     start_time = set_time[0]
     end_time = set_time[1]
     ftobs = []
