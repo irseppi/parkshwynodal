@@ -243,14 +243,16 @@ for line in sta_f.readlines():
         v0 = m[1]
         l = m[2]
         tprime0 = m[3]
-
+    else:
+        continue
     mprior = []
     mprior.append(v0)
     mprior.append(l)
     mprior.append(tprime0)       
 
     peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, closest_time, tprime0)
-
+    tobs = coord_inv_array[:,0]
+    fobs = coord_inv_array[:,1]
     tobs, fobs, peaks_assos = time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos)
 
     coord_inv = []
