@@ -19,7 +19,7 @@ def find_closest_point(flight_utm, seismo_utm):
 	"""
 	min_distance = np.inf
 	closest_point = None
-	#print(seismo_utm.shape)
+
 	for i in range(len(flight_utm)-1):
 		for g in range(len(seismo_utm)):
 			flight_utm_x1, flight_utm_y1 = flight_utm[i]

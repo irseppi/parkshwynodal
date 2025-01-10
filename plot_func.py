@@ -29,7 +29,7 @@ def remove_median(Sxx):
 
 ##############################################################################################################################################################################################################
 
-def plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight, middle_index, closest_time, dir_name):
+def plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight, middle_index, closest_time, dir_name, plot_show=True):
     """
     Plot the spectrogram and spectrum of the given data.
 
@@ -120,10 +120,11 @@ def plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0
     ax4.set_xlim(vmax2*1.1, vmin2) 
     ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=False, bottom=False)
     ax4.grid(axis='y')
-
-    plt.show()     
-    qnum = input('What quality number would you give this?(first num for data quality(0-3), second for ability to fit model to data(0-1))')
-
+    if plot_show:
+        plt.show()     
+        qnum = input('What quality number would you give this?(first num for data quality(0-3), second for ability to fit model to data(0-1))')
+    else:
+        qnum = '__'
     fig.savefig(dir_name+'/'+str(closest_time)+'_'+str(flight)+'.png')
     plt.close()
     print(tprime0,v0,l,f0lab,covm)
