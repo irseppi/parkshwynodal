@@ -38,7 +38,10 @@ for line in sta_f.readlines():
     val = line.split(',')
     date = val[0]
     flight = val[1]
-    sta = val[6]
+    try:
+        sta = int(val[6])
+    except:
+        continue
     tim = float(val[3])
     t_less = np.inf
     # Loop through each station in text file that we already know comes within 2km of the nodes
@@ -179,7 +182,7 @@ for line in sta_f.readlines():
     if len(coords) == 0:
         print('No picks for: ', date, flight, sta)
         continue
-
+    print('here')
     # Convert the list of coordinates to a numpy array
     coords_array = np.array(coords)
 
@@ -190,20 +193,17 @@ for line in sta_f.readlines():
     f0 = m[0]
     v0 = m[1]
     l = m[2]
-    tprime0 = m[3]
-    
+
     ft = calc_ft(times, tprime0, f0, v0, l, c)
-    if isinstance(sta, int):
-        peaks = []
-        p, _ = find_peaks(middle_column, distance = 7)
-        corridor_width = (fs/2) / len(p) 
-                        
-        if len(p) == 0:
-            corridor_width = fs/4
+   
+    peaks = []
+    p, _ = find_peaks(middle_column, distance = 7)
+    corridor_width = 6
 
-        coord_inv = []
+    coord_inv = []
 
-        for t_f in range(len(times)):
+    for t_f in range(len(times)):
+        try:
             upper = int(ft[t_f] + corridor_width)
             lower = int(ft[t_f] - corridor_width)
             if lower < 0:
@@ -217,43 +217,46 @@ for line in sta_f.readlines():
             max_amplitude_frequency = frequencies[max_amplitude_index+lower]
             peaks.append(max_amplitude_frequency)
             coord_inv.append((times[t_f], max_amplitude_frequency))
-
-
-        coord_inv_array = np.array(coord_inv)
-
-        m,_ = invert_f(m0, coord_inv_array, c, num_iterations=12)
-        f0 = m[0]
-        v0 = m[1]
-        l = m[2]
-        tprime0 = m[3]
-
-        ft = calc_ft(times, tprime0, f0, v0, l, c)
-        
-        delf = np.array(ft) - np.array(peaks)
-        
-        new_coord_inv_array = []
-        for i in range(len(delf)):
-            if np.abs(delf[i]) <= 3:
-                new_coord_inv_array.append(coord_inv_array[i])
-        coord_inv_array = np.array(new_coord_inv_array)
-
-        m,covm = invert_f(m0, coord_inv_array, c, num_iterations=12, sigma=5)
-        
-        f0 = m[0]
-        v0 = m[1]
-        l = m[2]
-        tprime0 = m[3]
-    else:
+            coord_inv_array = np.array(coord_inv)
+        except:
+            continue
+    if len(coord_inv) < 1:
+        print('No picks for: ', date, flight, sta)
         continue
+
+    m,_ = invert_f(m0, coord_inv_array, c, num_iterations=12)
+    f0 = m[0]
+    v0 = m[1]
+    l = m[2]
+    tprime0 = m[3]
+
+    ft = calc_ft(times, tprime0, f0, v0, l, c)
+    
+    delf = np.array(ft) - np.array(peaks)
+    
+    new_coord_inv_array = []
+    for i in range(len(delf)):
+        if np.abs(delf[i]) <= 3:
+            new_coord_inv_array.append(coord_inv_array[i])
+    coord_inv_array = np.array(new_coord_inv_array)
+
+    m,covm = invert_f(m0, coord_inv_array, c, num_iterations=12, sigma=5)
+    
+    f0 = m[0]
+    v0 = m[1]
+    l = m[2]
+    tprime0 = m[3]
+
     mprior = []
     mprior.append(v0)
     mprior.append(l)
     mprior.append(tprime0)       
-
+    
     peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, closest_time, tprime0)
+    w = len(peaks)
     tobs = coord_inv_array[:,0]
     fobs = coord_inv_array[:,1]
-    tobs, fobs, peaks_assos = time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos)
+    tobs, fobs, peaks_assos = time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos = False)
 
     coord_inv = []
     for t_f in range(len(tobs)):
@@ -261,7 +264,7 @@ for line in sta_f.readlines():
     coord_inv_array = np.array(coord_inv)
     m,covm = invert_f(m0, coord_inv_array, c, num_iterations=12, sigma=5)
     f0_array = []
-    w = len(peaks)
+   
     for o in range(w):
         tprime = freqpeak[o]
         ft0p = peaks[o]
@@ -275,8 +278,9 @@ for line in sta_f.readlines():
 
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c_1o/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
+    print('here')
     qnum, covm = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight, middle_index, closest_time, BASE_DIR, plot_show=False)
-    
+    print('here')
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_specrum_c_1o/20190'+str(month)+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
     plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, fs, closest_index, closest_time, sta, BASE_DIR)

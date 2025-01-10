@@ -375,23 +375,27 @@ def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, f
     end_time = set_time[1]
     ftobs = []
     ffobs = []
-
-    ftobs = []
-
-    peak_ass = []
-    cum = 0
-
-    for p in range(w):
-        count = 0
-        for j in range(cum,cum+peaks_assos[p]):
+    if peaks_assos == False:
+        for j in range(len(tobs)):
             if tobs[j] >= start_time and tobs[j] <= end_time:
                 ftobs.append(tobs[j])
                 ffobs.append(fobs[j])
-                count += 1
-        cum = cum + peaks_assos[p]
-    
-        peak_ass.append(count)
-    peaks_assos = peak_ass
+        peaks_assos = np.nan
+    else:
+        peak_ass = []
+        cum = 0
+
+        for p in range(w):
+            count = 0
+            for j in range(cum,cum+peaks_assos[p]):
+                if tobs[j] >= start_time and tobs[j] <= end_time:
+                    ftobs.append(tobs[j])
+                    ffobs.append(fobs[j])
+                    count += 1
+            cum = cum + peaks_assos[p]
+        
+            peak_ass.append(count)
+        peaks_assos = peak_ass
     tobs = ftobs
     fobs = ffobs
 
