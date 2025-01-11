@@ -60,7 +60,6 @@ for li in file_in.readlines():
     lon, lat = utm_proj(x, y, inverse=True)
 
     input_files = '/scratch/irseppi/nodal_data/plane_info/atmosphere_data/' + str(time) + '_' + str(lat) + '_' + str(lon) + '.dat'
-    print(input_files)
     try:
         file =  open(input_files, 'r') #as file:
     except:
@@ -173,7 +172,7 @@ for li in file_in.readlines():
 
     tf = np.arange(0, 240, 1)
 
-    coords = doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, closest_time) 
+    coords = doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, closest_time, make_picks=False) 
 
     if len(coords) == 0:
         print('No picks for: ', date, flight_num, sta)
@@ -193,6 +192,7 @@ for li in file_in.readlines():
     ft = calc_ft(times, tprime0, f0, v0, l, c)
    
     peaks = []
+    t_up = []
     p, _ = find_peaks(middle_column, distance = 7)
     corridor_width = 6
 
@@ -212,6 +212,7 @@ for li in file_in.readlines():
             
             max_amplitude_frequency = frequencies[max_amplitude_index+lower]
             peaks.append(max_amplitude_frequency)
+            t_up.append(times[t_f])
             coord_inv.append((times[t_f], max_amplitude_frequency))
             coord_inv_array = np.array(coord_inv)
         except:
@@ -226,7 +227,7 @@ for li in file_in.readlines():
     l = m[2]
     tprime0 = m[3]
 
-    ft = calc_ft(times, tprime0, f0, v0, l, c)
+    ft = calc_ft(t_up, tprime0, f0, v0, l, c)
     
     delf = np.array(ft) - np.array(peaks)
     
@@ -248,11 +249,11 @@ for li in file_in.readlines():
     mprior.append(l)
     mprior.append(tprime0)       
     
-    peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, closest_time, tprime0)
+    peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, closest_time, tprime0, make_picks=False)
     w = len(peaks)
     tobs = coord_inv_array[:,0]
     fobs = coord_inv_array[:,1]
-    tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos = False)
+    tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos = False, make_picks=False)
 
     coord_inv = []
     for t_f in range(len(tobs)):

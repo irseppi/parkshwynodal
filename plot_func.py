@@ -199,7 +199,7 @@ def plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, f
 
 ##############################################################################################################################################################################################################
 
-def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, closest_time):
+def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, closest_time, make_picks=True):
     """
     Pick the points for the doppler shift.
 
@@ -227,7 +227,8 @@ def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta,
                 pick_data = line.split(',')
                 coords.append((float(pick_data[0]), float(pick_data[1])))
         file.close()  
-    else:
+        return coords
+    elif make_picks:
         BASE_DIR = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/inversepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
         make_base_dir(BASE_DIR)
         pick_again = 'y'
@@ -248,11 +249,13 @@ def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta,
             plt.show(block=True)
             r1.close()
             pick_again = input("Do you want to repick your points? (y or n)")
-    return coords
+        return coords
+    else:
+        return []
 
 ##############################################################################################################################################################################################################
 
-def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, closest_time, tprime0):
+def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, closest_time, tprime0, make_picks=True):
     """
     Pick the points for the overtone shift.
 
@@ -284,8 +287,8 @@ def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta
                 peaks.append(float(pick_data[1]))
                 freqpeak.append(float(pick_data[0]))
         file.close()  
-
-    else:
+        return peaks, freqpeak
+    elif make_picks:
         BASE_DIR = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
         make_base_dir(BASE_DIR)
         pick_again = 'y'
@@ -310,11 +313,14 @@ def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta
             plt.show(block=True)
             r2.close()
             pick_again = input("Do you want to repick you points? (y or n)")
-    return peaks, freqpeak
+        
+        return peaks, freqpeak
+    else:
+        return [], []
 
 ##############################################################################################################################################################################################################
 
-def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos):
+def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=True):
     """
     Pick the points for the time shift.
 
@@ -347,7 +353,39 @@ def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, f
                 pick_data = line.split(',')
                 set_time.append(float(pick_data[0]))
         file.close()  
-    else:
+        if len(set_time) == 0:
+            set_time = [0, 250]
+        start_time = set_time[0]
+        end_time = set_time[1]
+        ftobs = []
+        ffobs = []
+        if peaks_assos == False:
+            for j in range(len(tobs)):
+                if tobs[j] >= start_time and tobs[j] <= end_time:
+                    ftobs.append(tobs[j])
+                    ffobs.append(fobs[j])
+            peaks_assos = np.nan
+        else:
+            peak_ass = []
+            cum = 0
+
+            for p in range(w):
+                count = 0
+                for j in range(cum,cum+peaks_assos[p]):
+                    if tobs[j] >= start_time and tobs[j] <= end_time:
+                        ftobs.append(tobs[j])
+                        ffobs.append(fobs[j])
+                        count += 1
+                cum = cum + peaks_assos[p]
+            
+                peak_ass.append(count)
+            peaks_assos = peak_ass
+        tobs = ftobs
+        fobs = ffobs
+
+        return tobs, fobs, peaks_assos
+
+    elif make_picks:
         BASE_DIR = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/timepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
         make_base_dir(BASE_DIR)
         
@@ -371,34 +409,36 @@ def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, f
 
             r3.close()
             pick_again = input("Do you want to repick you points? (y or n)")
-    if len(set_time) == 0:
-        set_time = [0, 250]
-    start_time = set_time[0]
-    end_time = set_time[1]
-    ftobs = []
-    ffobs = []
-    if peaks_assos == False:
-        for j in range(len(tobs)):
-            if tobs[j] >= start_time and tobs[j] <= end_time:
-                ftobs.append(tobs[j])
-                ffobs.append(fobs[j])
-        peaks_assos = np.nan
-    else:
-        peak_ass = []
-        cum = 0
-
-        for p in range(w):
-            count = 0
-            for j in range(cum,cum+peaks_assos[p]):
+        if len(set_time) == 0:
+            set_time = [0, 250]
+        start_time = set_time[0]
+        end_time = set_time[1]
+        ftobs = []
+        ffobs = []
+        if peaks_assos == False:
+            for j in range(len(tobs)):
                 if tobs[j] >= start_time and tobs[j] <= end_time:
                     ftobs.append(tobs[j])
                     ffobs.append(fobs[j])
-                    count += 1
-            cum = cum + peaks_assos[p]
-        
-            peak_ass.append(count)
-        peaks_assos = peak_ass
-    tobs = ftobs
-    fobs = ffobs
+            peaks_assos = np.nan
+        else:
+            peak_ass = []
+            cum = 0
 
-    return tobs, fobs, peaks_assos
+            for p in range(w):
+                count = 0
+                for j in range(cum,cum+peaks_assos[p]):
+                    if tobs[j] >= start_time and tobs[j] <= end_time:
+                        ftobs.append(tobs[j])
+                        ffobs.append(fobs[j])
+                        count += 1
+                cum = cum + peaks_assos[p]
+            
+                peak_ass.append(count)
+            peaks_assos = peak_ass
+        tobs = ftobs
+        fobs = ffobs
+
+        return tobs, fobs, peaks_assos
+    else:
+        return tobs, fobs, []
