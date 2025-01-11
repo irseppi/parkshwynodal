@@ -75,9 +75,9 @@ for i, flight_file in enumerate(flight_files):
 	flight_utm_y_km = [y / 1000 for y in flight_utm_y]
 	flight_path = [(x,y) for x, y in zip(flight_utm_x_km, flight_utm_y_km)]
 
-	seismometer = (seismo_utm_x_km, seismo_utm_y_km)  
+	seismometer =  [(x,y) for x, y in zip(seismo_utm_x_km, seismo_utm_y_km)]  
 	closest_p, dist_km, index, min_sta = find_closest_point(flight_path, seismometer)
-	
+	print(dist_km)
 	if dist_km <= 2:
 		closest_x, closest_y = closest_p
 		station_x, station_y = min_sta
@@ -127,7 +127,7 @@ for i, flight_file in enumerate(flight_files):
 	time_stamp = time_UTC.timestamp()
 
 	output = str(time_stamp) + '_' + str(lat_p) + '_' + str(lon_p) + '.dat' 
-
+	
 	comand = f'ncpag2s.py line --date {year}-{month}-{day} --hour {h} --startlat {lat_p} --startlon {lon_p} --endlat {lat_s} --endlon {lon_s} --points 21 --output {output}'
 
 	os.system(comand)
