@@ -29,7 +29,7 @@ def remove_median(Sxx):
 
 ##############################################################################################################################################################################################################
 
-def plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight, middle_index, closest_time, dir_name, plot_show=True):
+def plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tarrive, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight, middle_index, closest_time, dir_name, plot_show=True):
     """
     Plot the spectrogram and spectrum of the given data.
 
@@ -92,7 +92,7 @@ def plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0
     for i in range(len(f0lab)):
         f0lab[i] = (str(np.round(f0lab[i],2)))
     ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2)) + ' sec, v0 = '+str(np.round(v0,2)) +' m/s, l = '+str(np.round(l,2)) +' m, \n' + 'f0 = '+', '.join(f0lab) +' Hz', fontsize=fss)
-    ax2.axvline(x=120, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: 120 s')
+    ax2.axvline(x=tarrive, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: 120 s')
 
     ax2.legend(loc='upper right',fontsize = 'x-small')
     ax2.set_ylabel('Frequency (Hz)')

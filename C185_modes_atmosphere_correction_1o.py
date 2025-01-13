@@ -52,10 +52,11 @@ for li in file_in.readlines():
         continue
 
     time = float(text[5])
+    start_time = time - 120
     # Print the converted latitude and longitude
     ht = datetime.fromtimestamp(time, tz=timezone.utc)
     h = ht.hour
-    
+
     alt = float(text[4])*0.0003048 #convert between feet and km
     x =  float(text[2])  # Replace with your UTM x-coordinate
     y = float(text[3])  # Replace with your UTM y-coordinate
@@ -115,11 +116,11 @@ for li in file_in.readlines():
     flight_latitudes = flight_data['latitude']
     flight_longitudes = flight_data['longitude']
     time = flight_data['snapshot_id']
-    timestamp = flight_data['snapshot_id']
+    timestamps = flight_data['snapshot_id']
     speed = flight_data['speed']
     altitude = flight_data['altitude']
 
-    closest_x, closest_y, dist_km, closest_time, tarrive, alt, sp, elevation, speed_mps, height_m, dist_m, tmid = closest_approach_UTM(seismo_latitudes, seismo_longitudes, flight_latitudes, flight_longitudes, timestamp, altitude, speed, stations, elevations, c, sta)
+    closest_x, closest_y, dist_km, closest_time, tarrive, alt, sp, elevation, speed_mps, height_m, dist_m, tmid = closest_approach_UTM(seismo_latitudes, seismo_longitudes, flight_latitudes, flight_longitudes, timestamps, altitude, speed, stations, elevations, c, sta)
     if closest_x == None:
         continue
 
@@ -284,7 +285,7 @@ for li in file_in.readlines():
 
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c_1o/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
-    qnum, covm = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight_num, middle_index, closest_time, BASE_DIR, plot_show=True)
+    qnum, covm = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tarrive-start_time, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight_num, middle_index, closest_time, BASE_DIR, plot_show=False)
 
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_specrum_c_1o/20190'+str(month)+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
