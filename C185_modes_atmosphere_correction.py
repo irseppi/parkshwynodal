@@ -243,7 +243,7 @@ for li in file_in.readlines():
     new_coord_inv_array = []
     for i in range(len(delf)):
         if np.abs(delf[i]) <= 3:
-            new_coord_inv_array.append(coord_inv_array[i])
+            new_coord_inv_array.append(coord_inv_array[i,:])
     coord_inv_array = np.array(new_coord_inv_array)
 
     m,covm = invert_f(m0, coord_inv_array, c, num_iterations=12, sigma=5)

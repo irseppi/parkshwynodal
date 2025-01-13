@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-file = open('old_new_invers.txt','r')
+file = open('2_ex_diff.txt','r')
 
 file2 = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_C185.csv', sep=",")
 tail_nums = file2['TAIL_NUM']
@@ -42,7 +42,7 @@ for line in file.readlines():
     v0_new.append(float(lines[10]))
     flight_num = float(lines[1])
     distance_old.append(float(lines[6]))
-    distance_new.append(float(lines[11]))
+    distance_new.append(float(lines[10]))
     date = lines[3]
 
     peaks_old = np.array(lines[7])
@@ -54,7 +54,7 @@ for line in file.readlines():
     peaks_old = str(peaks_old)
     peaks_old = np.array(peaks_old.split(' '))
 
-    peaks_new = np.array(lines[12])
+    peaks_new = np.array(lines[11])
 
     peaks_new= str(peaks_new)
     peaks_new = np.char.replace(peaks_new, '[', '')
