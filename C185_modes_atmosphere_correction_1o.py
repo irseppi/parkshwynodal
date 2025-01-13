@@ -52,6 +52,10 @@ for li in file_in.readlines():
         continue
 
     time = float(text[5])
+    # Print the converted latitude and longitude
+    ht = datetime.fromtimestamp(time, tz=timezone.utc)
+    h = ht.hour
+    
     alt = float(text[4])*0.0003048 #convert between feet and km
     x =  float(text[2])  # Replace with your UTM x-coordinate
     y = float(text[3])  # Replace with your UTM y-coordinate
@@ -63,11 +67,9 @@ for li in file_in.readlines():
     try:
         file =  open(input_files, 'r') #as file:
     except:
+        print('No file for: ', date, flight_num, sta)
         continue
     data = json.load(file)
-    # Print the converted latitude and longitude
-    ht = datetime.fromtimestamp(time, tz=timezone.utc)
-    h = ht.hour
 
     # Extract metadata
     metadata = data['metadata']
@@ -121,13 +123,14 @@ for li in file_in.readlines():
     if closest_x == None:
         continue
 
-    ht = datetime.fromtimestamp(tarrive, tz=timezone.utc)
+    #ht = datetime.fromtimestamp(tarrive, tz=timezone.utc)
+    #ht = datetime.fromtimestamp(time, tz=timezone.utc)
     mins = ht.minute
     secs = ht.second
     month = ht.month
     day = ht.day
 
-    h = ht.hour
+    #h = ht.hour
     h_u = str(h+1)
     if h < 23:			
         day2 = str(day)
@@ -177,7 +180,7 @@ for li in file_in.readlines():
     if len(coords) == 0:
         print('No picks for: ', date, flight_num, sta)
         continue
-    print('here')
+    
     # Convert the list of coordinates to a numpy array
     coords_array = np.array(coords)
 
@@ -249,11 +252,11 @@ for li in file_in.readlines():
     mprior.append(l)
     mprior.append(tprime0)       
     
-    peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, closest_time, tprime0, make_picks=False)
+    peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, closest_time, tprime0, make_picks=True)
     w = len(peaks)
     tobs = coord_inv_array[:,0]
     fobs = coord_inv_array[:,1]
-    tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos = False, make_picks=False)
+    tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos = False, make_picks=True)
 
     coord_inv = []
     for t_f in range(len(tobs)):
@@ -267,6 +270,12 @@ for li in file_in.readlines():
         ft0p = peaks[o]
         f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
         f0_array.append(f0)
+    f0_array = np.array(f0_array)
+    tprime0 = m[3]
+    v0 = m[0]
+    l = m[1]
+    c = speed_of_sound(Tc)
+
     closest_index = np.argmin(np.abs(tprime0 - times))
     arrive_time = spec[:,closest_index]
     for i in range(len(arrive_time)):
@@ -275,7 +284,7 @@ for li in file_in.readlines():
 
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c_1o/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
-    qnum, covm = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight_num, middle_index, closest_time, BASE_DIR, plot_show=False)
+    qnum, covm = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight_num, middle_index, closest_time, BASE_DIR, plot_show=True)
 
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_specrum_c_1o/20190'+str(month)+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
