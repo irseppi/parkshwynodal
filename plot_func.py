@@ -29,7 +29,7 @@ def remove_median(Sxx):
 
 ##############################################################################################################################################################################################################
 
-def plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tarrive, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight, middle_index, closest_time, dir_name, plot_show=True):
+def plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight, middle_index, tarrive, closest_time, dir_name, plot_show=True):
     """
     Plot the spectrogram and spectrum of the given data.
 
@@ -74,7 +74,7 @@ def plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tarrive, tp
     ax2.set_xlabel('Time (s)')
     f0lab = []
     ax2.axvline(x=tprime0, c = '#377eb8', ls = '--', linewidth=0.7,label='Estimated arrival: '+str(np.round(tprime0,2))+' s')
-    covm = np.sqrt(np.diag(covm))
+    
     for pp in range(len(f0_array)):
         f0 = f0_array[pp]
         
@@ -92,7 +92,7 @@ def plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tarrive, tp
     for i in range(len(f0lab)):
         f0lab[i] = (str(np.round(f0lab[i],2)))
     ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2)) + ' sec, v0 = '+str(np.round(v0,2)) +' m/s, l = '+str(np.round(l,2)) +' m, \n' + 'f0 = '+', '.join(f0lab) +' Hz', fontsize=fss)
-    ax2.axvline(x=tarrive, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: 120 s')
+    ax2.axvline(x=tarrive, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: '+str(np.round(tprime0,2))+' s')
 
     ax2.legend(loc='upper right',fontsize = 'x-small')
     ax2.set_ylabel('Frequency (Hz)')
@@ -128,7 +128,7 @@ def plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tarrive, tp
     fig.savefig(dir_name+'/'+str(closest_time)+'_'+str(flight)+'.png')
     plt.close()
     print(tprime0,v0,l,f0lab,covm)
-    return qnum, covm
+    return qnum
 
 ##############################################################################################################################################################################################################
 
@@ -158,7 +158,7 @@ def plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, f
     fig = plt.figure(figsize=(10,6))
     plt.grid()
 
-    plt.plot(frequencies, arrive_time, c='#377eb8')
+    plt.plot(frequencies, spec[:,closest_index], c='#377eb8')
         
     for pp in range(len(f0_array)):
         f0 = f0_array[pp]
@@ -167,9 +167,10 @@ def plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, f
         tprime = tprime0
         t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
         ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
-
-        upper = int(ft0p + 5)
-        lower = int(ft0p - 5)
+        if ft0p > 250:
+            continue
+        upper = int(ft0p + 10)
+        lower = int(ft0p - 10)
         tt = spec[lower:upper, closest_index]
         if upper > 250:
             freqp = ft0p

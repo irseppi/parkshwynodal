@@ -108,8 +108,8 @@ for li in file_in.readlines():
 
     spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c_1o/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
     
-    if os.path.exists(spec_dir):
-        continue
+    #if os.path.exists(spec_dir):
+    #    continue
 
     flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date) + '_positions/' + str(date) + '_' + str(flight_num) + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")
@@ -264,18 +264,25 @@ for li in file_in.readlines():
         coord_inv.append((tobs[t_f], fobs[t_f]))
     coord_inv_array = np.array(coord_inv)
     m,covm = invert_f(m0, coord_inv_array, c, num_iterations=12, sigma=5)
+    f0_inv = m[0]
+    tprime0 = m[3]
+    v0 = m[1]
+    l = m[2]
+
+    covm = np.sqrt(np.diag(covm))
+
+    fss = 'x-small'
     f0_array = []
-   
     for o in range(w):
         tprime = freqpeak[o]
         ft0p = peaks[o]
         f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
+        if abs(f0 - f0_inv) < 5:
+            f0 = f0_inv
         f0_array.append(f0)
     f0_array = np.array(f0_array)
-    tprime0 = m[3]
-    v0 = m[0]
-    l = m[1]
-    c = speed_of_sound(Tc)
+
+
 
     closest_index = np.argmin(np.abs(tprime0 - times))
     arrive_time = spec[:,closest_index]
@@ -285,7 +292,7 @@ for li in file_in.readlines():
 
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c_1o/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
-    qnum, covm = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tarrive-start_time, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight_num, middle_index, closest_time, BASE_DIR, plot_show=False)
+    qnum = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight_num, middle_index, tarrive-start_time, closest_time, BASE_DIR, plot_show=True)
 
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_specrum_c_1o/20190'+str(month)+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
