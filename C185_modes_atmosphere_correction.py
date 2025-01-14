@@ -35,7 +35,7 @@ for line in sta_f.readlines():
         second_column.append(val[1])
 sta_f.close()
 second_column_array = np.array(second_column)
-C185_output = open('output/C185data_atmosphere_1o.csv', 'a')
+C185_output = open('output/C185data_atmosphere.csv', 'a')
 
 # Loop through each station in text file that we already know comes within 2km of the nodes
 
@@ -327,6 +327,7 @@ for li in file_in.readlines():
     tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=False)
 
     m, covm, f0_array = full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, f0_array, mprior, c, w, 20)
+    covm = np.sqrt(np.diag(covm))
     print(covm)
     closest_index = np.argmin(np.abs(tprime0 - times))
     arrive_time = spec[:,closest_index]
