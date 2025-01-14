@@ -92,7 +92,7 @@ def plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0
     for i in range(len(f0lab)):
         f0lab[i] = (str(np.round(f0lab[i],2)))
     ax2.set_title("Final Model:\nt0'= "+str(np.round(tprime0,2)) + ' sec, v0 = '+str(np.round(v0,2)) +' m/s, l = '+str(np.round(l,2)) +' m, \n' + 'f0 = '+', '.join(f0lab) +' Hz', fontsize=fss)
-    ax2.axvline(x=tarrive, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: '+str(np.round(tprime0,2))+' s')
+    ax2.axvline(x=tarrive, c = '#e41a1c', ls = '--',linewidth=0.5,label='Wave arrvial: '+str(np.round(tarrive,2))+' s')
 
     ax2.legend(loc='upper right',fontsize = 'x-small')
     ax2.set_ylabel('Frequency (Hz)')
@@ -358,6 +358,7 @@ def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, f
             set_time = [0, 250]
         start_time = set_time[0]
         end_time = set_time[1]
+        print(start_time,end_time)
         ftobs = []
         ffobs = []
         if peaks_assos == False:

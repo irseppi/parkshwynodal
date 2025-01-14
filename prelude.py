@@ -675,7 +675,7 @@ def invert_f(m0, coords_array, c, num_iterations,sigma = 1):
 
 #####################################################################################################################################################################################################################################################################################################################
 
-def full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, mprior, c, w, num_iterations = 4):
+def full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, f0_array, mprior, c, w, num_iterations = 4):
 	"""
 	Performs inversion using all picked overtones. 
 
@@ -708,7 +708,6 @@ def full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft
 	Cd = np.zeros((len(fobs), len(fobs)), int)
 	np.fill_diagonal(Cd, 3**2)
 	mnew = np.array(mprior)
-
 	
 	while qv < num_iterations:
 		G = np.zeros((0,w+3))
@@ -716,10 +715,8 @@ def full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft
 		cum = 0
 		for p in range(w):
 			new_row = np.zeros(w+3)
-			tprime = freqpeak[p]
-			ft0p = peaks[p]
-			f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
-
+			f0 = f0_array[p]
+			
 			for j in range(cum,cum+peaks_assos[p]):
 				tprime = tobs[j]
 				t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)

@@ -46,13 +46,10 @@ for li in file_in.readlines():
     if flight_num not in second_column_array:
         continue
     date = text[0]
-    try:
-        sta = int(text[9])
-    except:
-        continue
-
+    sta = text[9]
     time = float(text[5])
     start_time = time - 120
+
     # Print the converted latitude and longitude
     ht = datetime.fromtimestamp(time, tz=timezone.utc)
     h = ht.hour
@@ -124,8 +121,6 @@ for li in file_in.readlines():
     if closest_x == None:
         continue
 
-    #ht = datetime.fromtimestamp(tarrive, tz=timezone.utc)
-    #ht = datetime.fromtimestamp(time, tz=timezone.utc)
     mins = ht.minute
     secs = ht.second
     month = ht.month
@@ -170,7 +165,7 @@ for li in file_in.readlines():
     vmin = 0  
     vmax = np.max(middle_column) 
 
-    tprime0 = 120
+    tprime0 = tarrive-start_time
     v0 = speed_mps
     l = np.sqrt(dist_m**2 + (height_m)**2)
 
@@ -195,19 +190,18 @@ for li in file_in.readlines():
     tprime0 = m[3]
     
     ft = calc_ft(times, tprime0, f0, v0, l, c)
-    
-    peaks = []
-    t_up = []
-    p, _ = find_peaks(middle_column, distance = 7)
-    corridor_width = (fs/2) / len(p) 
-                    
-    if len(p) == 0:
-        corridor_width = fs/4
+    if isinstance(sta, int):
+        peaks = []
+        p, _ = find_peaks(middle_column, distance = 7)
+        corridor_width = (fs/2) / len(p) 
+                        
+        if len(p) == 0:
+            corridor_width = fs/4
 
-    coord_inv = []
+        coord_inv = []
 
-    for t_f in range(len(times)):
-        try:
+        for t_f in range(len(times)):
+            print
             upper = int(ft[t_f] + corridor_width)
             lower = int(ft[t_f] - corridor_width)
             if lower < 0:
@@ -220,38 +214,36 @@ for li in file_in.readlines():
             
             max_amplitude_frequency = frequencies[max_amplitude_index+lower]
             peaks.append(max_amplitude_frequency)
-            t_up.append(times[t_f])
             coord_inv.append((times[t_f], max_amplitude_frequency))
-        except:
-            continue
-    if len(coord_inv) < 1:
-        print('No picks for: ', date, flight_num, sta)
-        continue
 
-    coord_inv_array = np.array(coord_inv)
 
-    m,_ = invert_f(m0, coord_inv_array, c, num_iterations=12)
-    f0 = m[0]
-    v0 = m[1]
-    l = m[2]
-    tprime0 = m[3]
+        coord_inv_array = np.array(coord_inv)
 
-    ft = calc_ft(t_up, tprime0, f0, v0, l, c)
-    
-    delf = np.array(ft) - np.array(peaks)
-    
-    new_coord_inv_array = []
-    for i in range(len(delf)):
-        if np.abs(delf[i]) <= 3:
-            new_coord_inv_array.append(coord_inv_array[i,:])
-    coord_inv_array = np.array(new_coord_inv_array)
+        m,_ = invert_f(m0, coord_inv_array, c, num_iterations=12)
+        f0 = m[0]
+        v0 = m[1]
+        l = m[2]
+        tprime0 = m[3]
 
-    m,covm = invert_f(m0, coord_inv_array, c, num_iterations=12, sigma=5)
-    
-    f0 = m[0]
-    v0 = m[1]
-    l = m[2]
-    tprime0 = m[3]
+        ft = calc_ft(times, tprime0, f0, v0, l, c)
+        
+        delf = np.array(ft) - np.array(peaks)
+        
+        new_coord_inv_array = []
+        for i in range(len(delf)):
+            if np.abs(delf[i]) <= 3:
+                new_coord_inv_array.append(coord_inv_array[i])
+        coord_inv_array = np.array(new_coord_inv_array)
+
+        m,covm = invert_f(m0, coord_inv_array, c, num_iterations=12, sigma=5)
+        
+        f0 = m[0]
+        v0 = m[1]
+        l = m[2]
+        tprime0 = m[3]
+    #tprime0 = tarrive-start_time
+    #v0 = speed_mps
+    #l = np.sqrt(dist_m**2 + (height_m)**2)
 
     mprior = []
     mprior.append(v0)
@@ -259,16 +251,17 @@ for li in file_in.readlines():
     mprior.append(tprime0)       
 
     peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, closest_time, tprime0, make_picks=False)
-
+    f0_array = []
     w = len(peaks)
     for o in range(w):
         tprime = freqpeak[o]
         ft0p = peaks[o]
         f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
         mprior.append(f0)
+        f0_array.append(f0)
     mprior = np.array(mprior)
                           
-    corridor_width = 6 
+    corridor_width = 10
  
     peaks_assos = []
     fobs = []
@@ -295,7 +288,7 @@ for li in file_in.readlines():
             try:      
                 tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
                 try:
-                    max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
+                    max_amplitude_index,_ = find_peaks(tt)#, prominence = 15, wlen=10, height=vmax*0.1)
                     maxa = np.argmax(tt[max_amplitude_index])
                     max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
                 except:
@@ -306,6 +299,7 @@ for li in file_in.readlines():
 
             except:
                 continue
+
         if len(coord_inv) > 0:
             if f0 < 200:
                 coord_inv_array = np.array(coord_inv)
@@ -319,7 +313,7 @@ for li in file_in.readlines():
 
             count = 0
             for i in range(len(delf)):
-                if np.abs(delf[i]) <= (3):
+                if np.abs(delf[i]) <= (4):
                     fobs.append(maxfreq[i])
                     tobs.append(ttt[i])
                     count += 1
@@ -329,12 +323,11 @@ for li in file_in.readlines():
     if len(fobs) == 0:
         print('No picks for: ', date, flight_num, sta)
         continue
-    
 
     tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=False)
 
-    m, covm, f0_array = full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, mprior, c, w, 4)
-
+    m, covm, f0_array = full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, f0_array, mprior, c, w, 20)
+    print(covm)
     closest_index = np.argmin(np.abs(tprime0 - times))
     arrive_time = spec[:,closest_index]
     for i in range(len(arrive_time)):
@@ -343,7 +336,7 @@ for li in file_in.readlines():
 
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
-    qnum = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight_num, middle_index, tarrive-start_time, closest_time, BASE_DIR, plot_show=True)
+    qnum = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, arrive_time, MDF, covm, flight_num, middle_index, tarrive-start_time, closest_time, BASE_DIR, plot_show=False)
 
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_specrum_c/20190'+str(month)+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
