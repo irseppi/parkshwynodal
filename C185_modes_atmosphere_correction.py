@@ -103,10 +103,10 @@ for li in file_in.readlines():
     #effective_sound_speed = 
     print(f"Speed of sound: {c} m/s")
 
-    spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c_1o/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
+    spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
     
-    #if os.path.exists(spec_dir):
-    #    continue
+    if os.path.exists(spec_dir):
+        continue
 
     flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date) + '_positions/' + str(date) + '_' + str(flight_num) + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")

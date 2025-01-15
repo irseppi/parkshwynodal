@@ -358,7 +358,7 @@ def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, f
             set_time = [0, 250]
         start_time = set_time[0]
         end_time = set_time[1]
-        print(start_time,end_time)
+
         ftobs = []
         ffobs = []
         if peaks_assos == False:
