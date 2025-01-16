@@ -46,13 +46,10 @@ for li in file_in.readlines():
     if flight_num not in second_column_array:
         continue
     date = text[0]
-    try:
-        sta = int(text[9])
-    except:
-        continue
-
+    sta = text[9]
     time = float(text[5])
     start_time = time - 120
+
     # Print the converted latitude and longitude
     ht = datetime.fromtimestamp(time, tz=timezone.utc)
     h = ht.hour
@@ -108,8 +105,8 @@ for li in file_in.readlines():
 
     spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c_1o/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
     
-    #if os.path.exists(spec_dir):
-    #    continue
+    if os.path.exists(spec_dir):
+        continue
 
     flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date) + '_positions/' + str(date) + '_' + str(flight_num) + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")
@@ -170,7 +167,7 @@ for li in file_in.readlines():
     vmin = 0  
     vmax = np.max(middle_column) 
 
-    tprime0 = 120
+    tprime0 = tarrive-start_time
     v0 = speed_mps
     l = np.sqrt(dist_m**2 + (height_m)**2)
 
@@ -194,16 +191,19 @@ for li in file_in.readlines():
     l = m[2]
 
     ft = calc_ft(times, tprime0, f0, v0, l, c)
-   
-    peaks = []
-    t_up = []
-    p, _ = find_peaks(middle_column, distance = 7)
-    corridor_width = 6
+    print(sta)
+    if isinstance(sta, int):
+        peaks = []
+        t_up = []
+        p, _ = find_peaks(middle_column, distance = 7)
+        corridor_width = (fs/2) / len(p) 
+                        
+        if len(p) == 0:
+            corridor_width = fs/4
 
-    coord_inv = []
+        coord_inv = []
 
-    for t_f in range(len(times)):
-        try:
+        for t_f in range(len(times)):
             upper = int(ft[t_f] + corridor_width)
             lower = int(ft[t_f] - corridor_width)
             if lower < 0:
@@ -218,35 +218,31 @@ for li in file_in.readlines():
             peaks.append(max_amplitude_frequency)
             t_up.append(times[t_f])
             coord_inv.append((times[t_f], max_amplitude_frequency))
-            coord_inv_array = np.array(coord_inv)
-        except:
-            continue
-    if len(coord_inv) < 1:
-        print('No picks for: ', date, flight_num, sta)
-        continue
 
-    m,_ = invert_f(m0, coord_inv_array, c, num_iterations=12)
-    f0 = m[0]
-    v0 = m[1]
-    l = m[2]
-    tprime0 = m[3]
+        coord_inv_array = np.array(coord_inv)
 
-    ft = calc_ft(t_up, tprime0, f0, v0, l, c)
-    
-    delf = np.array(ft) - np.array(peaks)
-    
-    new_coord_inv_array = []
-    for i in range(len(delf)):
-        if np.abs(delf[i]) <= 3:
-            new_coord_inv_array.append(coord_inv_array[i])
-    coord_inv_array = np.array(new_coord_inv_array)
+        m,_ = invert_f(m0, coord_inv_array, c, num_iterations=12)
+        f0 = m[0]
+        v0 = m[1]
+        l = m[2]
+        tprime0 = m[3]
 
-    m,covm = invert_f(m0, coord_inv_array, c, num_iterations=12, sigma=5)
-    
-    f0 = m[0]
-    v0 = m[1]
-    l = m[2]
-    tprime0 = m[3]
+        ft = calc_ft(t_up, tprime0, f0, v0, l, c)
+        
+        delf = np.array(ft) - np.array(peaks)
+        
+        new_coord_inv_array = []
+        for i in range(len(delf)):
+            if np.abs(delf[i]) <= 3:
+                new_coord_inv_array.append(coord_inv_array[i])
+        coord_inv_array = np.array(new_coord_inv_array)
+
+        m,covm = invert_f(m0, coord_inv_array, c, num_iterations=12, sigma=5)
+        
+        f0 = m[0]
+        v0 = m[1]
+        l = m[2]
+        tprime0 = m[3]
 
     mprior = []
     mprior.append(v0)

@@ -201,7 +201,6 @@ for li in file_in.readlines():
         coord_inv = []
 
         for t_f in range(len(times)):
-            print
             upper = int(ft[t_f] + corridor_width)
             lower = int(ft[t_f] - corridor_width)
             if lower < 0:
@@ -288,7 +287,7 @@ for li in file_in.readlines():
             try:      
                 tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
                 try:
-                    max_amplitude_index,_ = find_peaks(tt)#, prominence = 15, wlen=10, height=vmax*0.1)
+                    max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
                     maxa = np.argmax(tt[max_amplitude_index])
                     max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
                 except:
