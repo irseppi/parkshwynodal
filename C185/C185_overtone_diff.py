@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-file = open('output4.txt', 'r')
+file = open('C185data_atmosphere.txt', 'r')
 all_med = []
 
 for line in file.readlines():

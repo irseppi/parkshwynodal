@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-file = open('output4.txt', 'r')
-file2 = pd.read_csv('input/all_station_crossing_db_C185.csv', sep=",")
+file = open('C185data_atmosphere.txt', 'r')
+file2 = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_C185.csv', sep=",")
 tail_nums = file2['TAIL_NUM']
 flight = file2['FLIGHT_NUM']
 time = file2['TIME']
@@ -29,7 +29,7 @@ for line in file.readlines():
     nodes = int(lines[2])
     distance = float(lines[6])
     vo = float(lines[4]) #try with vo and also with diffrence between heading direction and travel direction
-    flight_file = '/scratch/irseppi/nodal_data/flightradar24/'+str(lines[0]) + '_positions/2019' + str(lines[0]) + '_' + flight + '.csv'
+    flight_file = '/scratch/irseppi/nodal_data/flightradar24/'+str(lines[0]) + '_positions/' + str(lines[0]) + '_' + str(flight_num) + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")
     t = flight_data['snapshot_id']
     speed = flight_data['speed']
