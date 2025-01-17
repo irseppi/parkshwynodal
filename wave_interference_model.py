@@ -11,7 +11,7 @@ omega = 2 * np.pi * int_frequency  # Angular frequency
 t = np.linspace(0, 0.1, 1000)  # Zoom in by reducing the time range
 
 # Define the waves with harmonics
-def generate_wave(t, omega, phase, harmonics=10):
+def generate_wave(t, omega, phase, harmonics=6):
     wave = np.zeros_like(t)
     for n in range(1, harmonics + 1):
         wave+= (1/n) * np.sin(n * omega * t + phase)
