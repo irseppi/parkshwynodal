@@ -219,6 +219,10 @@ for li in file_in.readlines():
 
     coord_inv_array = np.array(coord_inv)
 
+    if len(coord_inv_array) == 0:
+        print('No picks for: ', date, flight_num, sta)
+        continue
+    
     m,_ = invert_f(m0, coord_inv_array, c, num_iterations=12)
     f0 = m[0]
     v0 = m[1]
@@ -263,7 +267,7 @@ for li in file_in.readlines():
         coord_inv.append((tobs[t_f], fobs[t_f]))
     coord_inv_array = np.array(coord_inv)
     m,covm = invert_f(m0, coord_inv_array, c, num_iterations=12, sigma=5)
-    
+
     f0_inv = m[0]
     tprime0 = m[3]
     v0 = m[1]
