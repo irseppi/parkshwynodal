@@ -41,7 +41,7 @@ turb_cat = plane_data['Wake Turbulence Category']
 							
 for i in range(len(day)):
 	#try:
-	spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-'+month[i]+'-'+day[i]
+	spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c_1o/2019-'+month[i]+'-'+day[i]
 	if os.path.exists(spec_dir):
 		flight_data = pd.read_csv('/scratch/irseppi/nodal_data/flightradar24/2019'+month[i]+day[i]+'_flights.csv', sep=",")
 		flight_id = flight_data['flight_id']
@@ -104,7 +104,7 @@ for i in range(len(day)):
 					image_path = glob.glob('/scratch/irseppi/nodal_data/plane_info/map_all_UTM/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/map_'+flight+'_*')[0]
 
 					map_img = Image.open(image_path)
-					spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/C185_specrum_c/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+station+'_' + str(time) + '.png')
+					spec_img = Image.open('/scratch/irseppi/nodal_data/plane_info/C185_specrum_c_1o/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/'+station+'_' + str(time) + '.png')
 
 					# Resize images
 					google_slide_width = 1280  # Width of a Google Slide in pixels
@@ -153,7 +153,7 @@ for i in range(len(day)):
 					draw.text((google_slide_width - plane.width, 0), text3, fill='black', font=font)
 					#show image
 
-					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_atmosphere_correction/'
+					BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_atmosphere_correction_1o/'
 					make_base_dir(BASE_DIR)
 					name= BASE_DIR + '2019'+str(month[i])+str(day[i])+'_'+(flight)+'_'+time+'_'+str(station)+'_'+str(pla)+'_'+str(id)+'_'+str(descrip[h])+'_'+str(engine[h])+str(coun[h])+'.png'
 

@@ -167,6 +167,8 @@ def plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, f
         tprime = tprime0
         t = ((tprime - tprime0)- np.sqrt((tprime-tprime0)**2-(1-v0**2/c**2)*((tprime-tprime0)**2-l**2/c**2)))/(1-v0**2/c**2)
         ft0p = f0/(1+(v0/c)*(v0*t)/(np.sqrt(l**2+(v0*t)**2)))
+        if ft0p == np.nan:
+            continue
         if ft0p > 250:
             continue
         upper = int(ft0p + 10)
