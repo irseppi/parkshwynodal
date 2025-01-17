@@ -210,7 +210,7 @@ for li in file_in.readlines():
             tt = spec[lower:upper, t_f]
         except:
             continue
-        if len(tt) == 0:
+        if len(tt) == 0: #why would this happen?
             continue
         max_amplitude_index = np.argmax(tt)
         
