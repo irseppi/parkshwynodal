@@ -210,6 +210,8 @@ for li in file_in.readlines():
             tt = spec[lower:upper, t_f]
         except:
             continue
+        if len(tt) == 0:
+            continue
         max_amplitude_index = np.argmax(tt)
         
         max_amplitude_frequency = frequencies[max_amplitude_index+lower]
@@ -222,7 +224,7 @@ for li in file_in.readlines():
     if len(coord_inv_array) == 0:
         print('No picks for: ', date, flight_num, sta)
         continue
-    
+
     m,_ = invert_f(m0, coord_inv_array, c, num_iterations=12)
     f0 = m[0]
     v0 = m[1]
