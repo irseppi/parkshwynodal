@@ -6,7 +6,7 @@ import matplotlib.animation as animation
 rpm = 2500
 int_frequency = rpm / 60  # Convert rpm to Hz
 omega = 2 * np.pi * int_frequency  # Angular frequency
-fint_requency = 3 * rpm / 60  # Frequency of the waves
+int_requency = 3 * rpm / 60  # Frequency of the waves
 # Time array
 t = np.linspace(0, 0.1, 1000)  # Zoom in by reducing the time range
 # Define the waves with harmonics
