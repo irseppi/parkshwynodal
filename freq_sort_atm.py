@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-file = open('2_ex_diff.txt','r')
+file = open('old_new_invers.txt','r')
 
 file2 = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_C185.csv', sep=",")
 tail_nums = file2['TAIL_NUM']
@@ -54,7 +54,7 @@ for line in file.readlines():
     peaks_old = str(peaks_old)
     peaks_old = np.array(peaks_old.split(' '))
 
-    peaks_new = np.array(lines[11])
+    peaks_new = np.array(lines[12])
 
     peaks_new= str(peaks_new)
     peaks_new = np.char.replace(peaks_new, '[', '')
@@ -72,6 +72,7 @@ for line in file.readlines():
         pppp_new.append(float(peak_new))
 
     if len(pppp_old) > len(pppp_new):
+
         # Find the two closest values
         closest_values = min(zip(pppp_old[:-1], pppp_old[1:]), key=lambda x: abs(x[0] - x[1]))
 

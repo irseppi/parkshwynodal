@@ -420,10 +420,6 @@ def check_matching_values(file1, col1, file2, col2):
 		lines1 = f1.readlines()
 		lines2 = f2.readlines()
 
-	if len(lines1) != len(lines2):
-		print(f"The number of rows in {file1} and {file2} is different.")
-		return
-
 	for i, (line1, line2) in enumerate(zip(lines1, lines2)):
 		columns1 = line1.split(',')
 		value1 = columns1[col1].strip()
@@ -439,9 +435,6 @@ def cojoin_columns(file1, start_col1, end_col1, file2, start_col2, end_col2, out
 		lines1 = f1.readlines()
 		lines2 = f2.readlines()
 
-		if len(lines1) != len(lines2):
-			print(f"The number of rows in {file1} and {file2} is different.")
-			return
 
 		for line1, line2 in zip(lines1, lines2):
 			columns1 = line1.split(',')
