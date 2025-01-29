@@ -27,7 +27,7 @@ seismo_utm_km = [(x, y) for x, y in zip(seismo_utm_x_km, seismo_utm_y_km)]
 
 def closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight_utm_y2, seismo_utm_x, seismo_utm_y):
     closest_point = None
-    dist_lim = np.Infinity
+    dist_lim = np.inf
 
     x = [flight_utm_x1, flight_utm_x2]
     y = [flight_utm_y1, flight_utm_y2]
@@ -72,7 +72,7 @@ def closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight
 
 
 def find_closest_point(flight_utm, seismo_utm):
-    min_distance = np.Infinity
+    min_distance = np.inf
     closest_point = None
 
     for i in range(len(flight_utm) - 1):
@@ -215,7 +215,7 @@ for line in sta_f.readlines():
                 vmin = 0  
                 vmax = np.max(middle_column) 
 
-                c = 343
+                c = 329
                 tprime0 = 120
                 v0 = speed_mps
                 l = np.sqrt(dist_m**2 + (height_m)**2)
@@ -241,7 +241,7 @@ for line in sta_f.readlines():
                 coords_array = np.array(coords)
 
                 f0 = 116
-                c = 343
+                c = 329
                 m0 = [f0, v0, l, tprime0]
 
                 m,covm = invert_f(m0, coords_array, num_iterations=8)
