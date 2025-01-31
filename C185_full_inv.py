@@ -61,7 +61,7 @@ for li in file_in.readlines():
     # Convert UTM coordinates to latitude and longitude
     lon, lat = utm_proj(x, y, inverse=True)
 
-    Tc = -18
+    Tc = -2
     c = speed_of_sound(Tc)
     sound_speed = c
     #wind = 
