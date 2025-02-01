@@ -83,11 +83,14 @@ for li in file_in.readlines():
         if item['parameter'] == 'T':
             Tc = - 273.15 + float(item['values'][z_index])
             temp = Tc
+            Tc_low = - 273.15 + float(item['values'][1])
     c = speed_of_sound(Tc)
+    c_low = speed_of_sound(Tc_low)
     sound_speed = c
     print(f"Speed of sound: {c} m/s")
+    print(f"Speed of sound low: {c_low} m/s")
     print(f"Temperature: {Tc} degrees Celsius")
-
+    print(f"Temperature_low: {Tc_low} degrees Celsius")
     temp_array.append(Tc)
     c_array.append(c)
     file.close()
@@ -100,7 +103,7 @@ plt.show()
 
 plt.figure()
 plt.hist(c_array,bins=20)
-median_temp = np.median(c_array)
-plt.axvline(median_temp, color='r', linestyle='--', label=str(median_temp))
+median_c = np.median(c_array)
+plt.axvline(median_c, color='r', linestyle='--', label=str(median_c))
 plt.legend()
 plt.show()
