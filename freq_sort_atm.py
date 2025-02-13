@@ -114,29 +114,32 @@ for line in file.readlines():
 
     for lp in range(len(flight)):
         if int(flight_num) == int(flight[lp]):
-            tail_num = tail_nums[lp]
-            if tail_num not in color_dict:
-                color_dict[tail_num] = np.random.rand(3,)
-                peaks_dict_old[tail_num] = []
-                peaks_dict_new[tail_num] = []
-                date_dict[tail_num] = []
-                count_dict[tail_num] = []
-            date_dict[tail_num].extend(dates)
-            peaks_dict_old[tail_num].extend(pppp_old)
-            peaks_dict_new[tail_num].extend(pppp_new)
-            count_dict[tail_num].extend(counts)
+            
+            if str(tail_nums[lp]) == '10512184':
+                continue
+                print(tail_nums[lp])
+            if flight_num not in color_dict:
+                color_dict[flight_num] = np.random.rand(3,)
+                peaks_dict_old[flight_num] = []
+                peaks_dict_new[flight_num] = []
+                date_dict[flight_num] = []
+                count_dict[flight_num] = []
+            date_dict[flight_num].extend(dates)
+            peaks_dict_old[flight_num].extend(pppp_old)
+            peaks_dict_new[flight_num].extend(pppp_new)
+            count_dict[flight_num].extend(counts)
                 
 for tail_num, p_old in peaks_dict_old.items():
     date = date_dict[tail_num]
     y = count_dict[tail_num]
     color = color_dict[tail_num]
-    plt.scatter(p_old, y, c='b') #c=color, label=tail_num)
+    #plt.scatter(p_old, y, c='b') #c=color, label=tail_num)
     
     p_new = peaks_dict_new[tail_num]
-    plt.scatter(p_new, y, c='r')#, c=color)
+    plt.scatter(p_new, y, c=color,label=tail_num)
     
     # Plot a dashed line between p_old and p_new
-    plt.plot([p_old, p_new], [y, y], linestyle='--',color='orange') # color=color)
+    #plt.plot([p_old, p_new], [y, y], linestyle='--',color='orange') # color=color)
 
 plt.legend(loc='upper left',fontsize = 'x-small')
 
