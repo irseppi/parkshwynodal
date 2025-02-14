@@ -26,14 +26,14 @@ v0_new = []
 distance_old = []
 distance_new = []
 
-plt.figure()
+#plt.figure()
 # Iterate over each line in the file
 for line in file.readlines():
     y += 1
     counts = []
-    pppp_old = []
+    #pppp_old = []
     pppp_new = []
-    dates = []
+    #dates = []
 
     lines = line.split(',')
     time_old.append(float(lines[3]))
@@ -43,16 +43,16 @@ for line in file.readlines():
     flight_num = float(lines[1])
     distance_old.append(float(lines[6]))
     distance_new.append(float(lines[10]))
-    date = lines[3]
+    #date = lines[3]
 
-    peaks_old = np.array(lines[7])
+    #peaks_old = np.array(lines[7])
 
-    peaks_old = str(peaks_old)
-    peaks_old = np.char.replace(peaks_old, '[', '')
-    peaks_old = np.char.replace(peaks_old, ']', '')
+    #peaks_old = str(peaks_old)
+    #peaks_old = np.char.replace(peaks_old, '[', '')
+    #peaks_old = np.char.replace(peaks_old, ']', '')
 
-    peaks_old = str(peaks_old)
-    peaks_old = np.array(peaks_old.split(' '))
+    #peaks_old = str(peaks_old)
+    #peaks_old = np.array(peaks_old.split(' '))
 
     peaks_new = np.array(lines[12])
 
@@ -63,73 +63,73 @@ for line in file.readlines():
     peaks_new = str(peaks_new)
     peaks_new = np.array(peaks_new.split(' '))
     
-    for i in range(len(peaks_old)):
-        peak_old = peaks_old[i]
-        pppp_old.append(float(peak_old))
+    #for i in range(len(peaks_old)):
+    #    peak_old = peaks_old[i]
+    #    pppp_old.append(float(peak_old))
 
     for i in range(len(peaks_new)):
         peak_new = peaks_new[i]
         pppp_new.append(float(peak_new))
+        counts.append(float(y))
+    #if len(pppp_old) > len(pppp_new):
 
-    if len(pppp_old) > len(pppp_new):
+    #    # Find the two closest values
+    #    closest_values = min(zip(pppp_old[:-1], pppp_old[1:]), key=lambda x: abs(x[0] - x[1]))
 
-        # Find the two closest values
-        closest_values = min(zip(pppp_old[:-1], pppp_old[1:]), key=lambda x: abs(x[0] - x[1]))
+    #    # Calculate the average of the two closest values
+    #    average = sum(closest_values) / 2
+
+    #    # Replace the two closest values with the average
+    #    pppp_old.remove(closest_values[0])
+    #    pppp_old.remove(closest_values[1])
+    #    pppp_old.append(average)
+    #elif len(pppp_new) > len(pppp_old):
+    #    # Find the two closest values
+    #    closest_values = min(zip(pppp_new[:-1], pppp_new[1:]), key=lambda x: abs(x[0] - x[1]))
 
         # Calculate the average of the two closest values
-        average = sum(closest_values) / 2
+    #    average = sum(closest_values) / 2
 
         # Replace the two closest values with the average
-        pppp_old.remove(closest_values[0])
-        pppp_old.remove(closest_values[1])
-        pppp_old.append(average)
-    elif len(pppp_new) > len(pppp_old):
-        # Find the two closest values
-        closest_values = min(zip(pppp_new[:-1], pppp_new[1:]), key=lambda x: abs(x[0] - x[1]))
+    #    pppp_new.remove(closest_values[0])
+    #    pppp_new.remove(closest_values[1])
+    #    pppp_new.append(average)
 
-        # Calculate the average of the two closest values
-        average = sum(closest_values) / 2
-
-        # Replace the two closest values with the average
-        pppp_new.remove(closest_values[0])
-        pppp_new.remove(closest_values[1])
-        pppp_new.append(average)
-
-    if len(pppp_old) == len(pppp_new):
-        for i in range(len(pppp_new)):
-            dates.append(float(date))
-            counts.append(float(y))
-    else:
-        print(line)
-        continue
-    pppp_old = sorted(pppp_old)
+    #if len(pppp_old) == len(pppp_new):
+    #    for i in range(len(pppp_new)):
+    #        dates.append(float(date))
+    #        counts.append(float(y))
+    #else:
+    #    print(line)
+    #    continue
+    #pppp_old = sorted(pppp_old)
     pppp_new = sorted(pppp_new)
 
-    peak_diff = abs(np.array(pppp_new) - np.array(pppp_old))
-    indices_to_remove = [i for i, diff in enumerate(peak_diff) if diff > 10]
-    pppp_old = [num for i, num in enumerate(pppp_old) if i not in indices_to_remove]
-    pppp_new = [num for i, num in enumerate(pppp_new) if i not in indices_to_remove]
-    counts = [num for i, num in enumerate(counts) if i not in indices_to_remove]
-    dates = [num for i, num in enumerate(dates) if i not in indices_to_remove]
+    #peak_diff = abs(np.array(pppp_new) - np.array(pppp_old))
+    #indices_to_remove = [i for i, diff in enumerate(peak_diff) if diff > 10]
+    #pppp_old = [num for i, num in enumerate(pppp_old) if i not in indices_to_remove]
+    #pppp_new = [num for i, num in enumerate(pppp_new) if i not in indices_to_remove]
+    #counts = [num for i, num in enumerate(counts) if i not in indices_to_remove]
+    #dates = [num for i, num in enumerate(dates) if i not in indices_to_remove]
 
     for lp in range(len(flight)):
         if int(flight_num) == int(flight[lp]):
             
-            if str(tail_nums[lp]) == '10512184':
-                continue
-                print(tail_nums[lp])
+            #if str(tail_nums[lp]) == '10512184':
+            #    continue
+
             if flight_num not in color_dict:
                 color_dict[flight_num] = np.random.rand(3,)
-                peaks_dict_old[flight_num] = []
+                #peaks_dict_old[flight_num] = []
                 peaks_dict_new[flight_num] = []
-                date_dict[flight_num] = []
+                #date_dict[flight_num] = []
                 count_dict[flight_num] = []
-            date_dict[flight_num].extend(dates)
-            peaks_dict_old[flight_num].extend(pppp_old)
+            #date_dict[flight_num].extend(dates)
+            #peaks_dict_old[flight_num].extend(pppp_old)
             peaks_dict_new[flight_num].extend(pppp_new)
             count_dict[flight_num].extend(counts)
-                
-for tail_num, p_old in peaks_dict_old.items():
+'''            
+for tail_num, p_old in peaks_dict_new.items():
     date = date_dict[tail_num]
     y = count_dict[tail_num]
     color = color_dict[tail_num]
@@ -143,4 +143,54 @@ for tail_num, p_old in peaks_dict_old.items():
 
 plt.legend(loc='upper left',fontsize = 'x-small')
 
+plt.show()
+'''
+fig,ax1 = plt.subplots(1, 1, sharex=False, figsize=(8,6))     
+
+ax1.margins(x=0)
+#ax1.grid(axis='both') 
+ax2 = fig.add_axes([0.83, 0.11, 0.07, 0.77], sharey=ax1)
+ax3 = fig.add_axes([0.90, 0.11, 0.04, 0.77], sharey=ax1) 
+ax4 = fig.add_axes([0.94, 0.11, 0.04, 0.77], sharey=ax1) 
+ax1.set_title('Frequency Peaks')
+for tail_num, peaks in peaks_dict_new.items():
+    color = color_dict[tail_num]
+    y =  count_dict[tail_num]
+    ax1.scatter(peaks, y, c=color,label=tail_num) 
+    f1 = []
+    for i,peak in enumerate(peaks):
+        if peak < 111 or peak > 126:
+                continue
+        else:
+            rpm = 60 * (peak/3)
+            ax2.scatter(rpm, y[i], c=color)
+        if y[i] == y[i-1]:
+            diff = float(peak) - float(peaks[i-1])
+            #if diff > 24 or diff < 16:
+            #    continue
+
+            f1.append(diff)
+
+            if not np.isnan(np.nanmedian(f1)):
+                del_f = (np.nanmedian(f1))
+                if del_f > 24 or del_f < 16:
+                    continue
+                ax3.scatter(del_f, y[i], c=color)
+                ax4.scatter(del_f/rpm, y[i], c=color)
+        else:
+            f1 = []
+            continue
+ax2.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
+ax3.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
+ax2.set_title('rpm')
+ax3.set_title('\u0394'+'F')
+#ax2.grid(axis='both') 
+ax1.set_xlabel('Frequency')
+ax2.set_xlabel('rpm')
+ax3.set_xlabel('\u0394'+'F')
+ax1.legend(loc='upper left',fontsize = 'x-small')
+ax1.set_xlim(0, 300)
+ax1.set_xticks(range(0, 251, 25)) 
+
+#ax1.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
 plt.show()
