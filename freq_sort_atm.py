@@ -18,15 +18,19 @@ peaks_new = np.array([float(peak) for peak in data[:, 6]])
 color_dict = {}
 count_dict = {}
 peaks_dict_new = {}
+y = 0
 
 for i, flight_num in enumerate(flight_num):
     if flight_num not in color_dict:
         color_dict[flight_num] = np.random.rand(3,)
         peaks_dict_new[flight_num] = []
         count_dict[flight_num] = []
-    peaks_dict_new[flight_num].extend(peaks_new[i])
-    count_dict[flight_num].extend(np.full_like(peaks_new[i], i))
-
+    peaks_dict_new[flight_num].extend([list(peaks_new)])  # Convert peaks_new[i] to a list
+    counts = []
+    for i in range(len(peaks_new)):
+        counts.append(y)
+    count_dict[flight_num].extend(counts)  # Create a list of the same length as peaks_new[i]
+    y =+ 1
 fig, ax1 = plt.subplots(1, 1, sharex=False, figsize=(8, 6))
 ax1.margins(x=0)
 ax2 = fig.add_axes([0.83, 0.11, 0.07, 0.77], sharey=ax1)
@@ -37,13 +41,22 @@ ax1.set_title('Frequency Peaks')
 for tail_num, peaks in peaks_dict_new.items():
     color = color_dict[tail_num]
     y = count_dict[tail_num]
+
+    peaks = np.array(peaks)  # Convert peaks to a NumPy array
+    y = np.array(y)  # Convert y to a NumPy array
+
+
     ax1.scatter(peaks, y, c=color, label=tail_num)
     rpm = 60 * (peaks / 3)
     ax2.scatter(rpm, y, c=color)
     diff = np.diff(peaks)
-    valid_diff = np.logical_and(diff > 16, diff < 24)
-    ax3.scatter(diff[valid_diff], y[valid_diff], c=color)
-    ax4.scatter(rpm[valid_diff] / diff[valid_diff], y[valid_diff], c=color)
+    valid_diff_indices = np.array(np.where(np.logical_and(diff > 16, diff < 24))[0])
+
+
+    valid_diff = diff[valid_diff_indices]
+    ax3.scatter(valid_diff, y[valid_diff_indices], c=color)
+
+    #ax4.scatter(rpm[valid_diff_indices[1]] / valid_diff, y[valid_diff_indices[1]], c=color)
 
 ax2.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
 ax3.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
