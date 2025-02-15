@@ -158,30 +158,34 @@ for tail_num, peaks in peaks_dict_new.items():
     y =  count_dict[tail_num]
     ax1.scatter(peaks, y, c=color,label=tail_num) 
     f1 = []
+    #n = 0
     for i,peak in enumerate(peaks):
         if peak < 111 or peak > 126:
                 continue
         else:
             rpm = 60 * (peak/3)
             ax2.scatter(rpm, y[i], c=color)
+    for i,peak in enumerate(peaks):
         if y[i] == y[i-1]:
             diff = float(peak) - float(peaks[i-1])
             #if diff > 24 or diff < 16:
             #    continue
-
+            #f_over = n*(1/peak)/2 
             f1.append(diff)
 
             if not np.isnan(np.nanmedian(f1)):
                 del_f = (np.nanmedian(f1))
-                if del_f > 24 or del_f < 16:
-                    continue
+                #if del_f > 24 or del_f < 16:
+                #    continue
                 ax3.scatter(del_f, y[i], c=color)
-                ax4.scatter(del_f/rpm, y[i], c=color)
+                ax4.scatter(rpm/del_f, y[i], c=color)
+                
         else:
             f1 = []
             continue
 ax2.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
 ax3.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
+ax4.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
 ax2.set_title('rpm')
 ax3.set_title('\u0394'+'F')
 #ax2.grid(axis='both') 
