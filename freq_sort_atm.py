@@ -48,7 +48,7 @@ ax2 = fig.add_axes([0.83, 0.11, 0.07, 0.77], sharey=ax1)
 ax3 = fig.add_axes([0.90, 0.11, 0.05, 0.77], sharey=ax1)
 ax4 = fig.add_axes([0.95, 0.11, 0.04, 0.77], sharey=ax1)
 ax1.set_title('Frequency Peaks')
-
+difff = []
 for flight_num, peaks in peaks_dict_new.items():
     color = color_dict[flight_num]
     y = count_dict[flight_num]
@@ -74,7 +74,8 @@ for flight_num, peaks in peaks_dict_new.items():
                 if del_f > 24 or del_f < 16:
                     continue
                 ax3.scatter(del_f, y[i], c=color)
-                ax4.scatter(rpm/del_f, y[i], c=color)
+                ax4.scatter(peak/del_f, y[i], c=color)
+                difff.append(peak/del_f)
         else:
             f1 = []
             continue
@@ -87,7 +88,7 @@ ax3.set_title('\u0394' + 'F')
 ax1.set_xlabel('Frequency')
 ax2.set_xlabel('rpm')
 ax3.set_xlabel('\u0394' + 'F')
-ax4.set_xlabel('rpm /'+ '\u0394' + 'F')
+ax4.set_xlabel('F0 /'+ '\u0394' + 'F')
 ax1.legend(loc='upper left', fontsize='x-small')
 ax1.set_xlim(0, 300)
 ax1.set_xticks(range(0, 251, 25))
@@ -96,4 +97,10 @@ ax1.grid()
 ax2.grid()
 ax3.grid()
 ax4.grid()
+plt.show()
+print(len(difff), len(counts))
+y = counts
+plt.figure()
+for i in range(len(difff)):
+    plt.scatter(np.median(np.absolute(difff[i] - np.median(difff))), y[i], c='b')
 plt.show()

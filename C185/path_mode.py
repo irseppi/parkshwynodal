@@ -95,7 +95,7 @@ def find_closest_point(flight_utm, seismo_utm):
 
 ##################################################################################################################################################
 
-file = open('output4.txt', 'r')
+file = open('output3.txt', 'r')
 file2 = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_C185.csv', sep=",")
 tail_nums = file2['TAIL_NUM']
 flight = file2['FLIGHT_NUM']
