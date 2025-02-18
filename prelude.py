@@ -556,6 +556,30 @@ def calc_ft(times, tprime0, f0, v0, l, c):
 
 ###################################################################################################################################################################
 
+def Sd(dnew, dobs, ndata, tsigma):
+	"""
+	Calculate the data misfit using the predictions and observations.
+	MISFIT FUNCTION: least squares, Tarantola (2005), Eq. 6.251
+	Args:
+		dnew (array): Array of predicted data.
+		dobs (array): Array of observed data.
+		ndata (int): Number of data points.
+		tsigma (float): Uncertainty in f0 measurements, Hz
+	Returns:
+		float: Data misfit value.
+	"""
+	sigma_obs = tsigma * np.ones((ndata))  # standard deviations
+	cobs0 = np.diag(np.square(sigma_obs))  # diagonal covariance matrix
+
+	Cdfac = ndata
+
+	cobs = Cdfac * cobs0              # with normalization factor
+	icobs = la.inv(cobs)
+	sd = 0.5 * (dnew - dobs).T @ icobs @ (dnew - dobs)
+	return sd
+
+###################################################################################################################################################################
+
 def calc_f0(tprime, tprime0, ft0p, v0, l, c):
 	"""
 	Calculate the fundamental frequency produced by an aircraft where the wave is generated given the model parameters.
