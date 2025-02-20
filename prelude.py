@@ -560,6 +560,7 @@ def Sd(dnew, dobs, ndata, tsigma):
 	"""
 	Calculate the data misfit using the predictions and observations.
 	MISFIT FUNCTION: least squares, Tarantola (2005), Eq. 6.251
+	From: https://github.com/uafgeoteach/GEOS626_seis/blob/main/hw_genlsq.ipynb
 	Args:
 		dnew (array): Array of predicted data.
 		dobs (array): Array of observed data.
