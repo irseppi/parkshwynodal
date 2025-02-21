@@ -265,13 +265,13 @@ for li in file_in.readlines():
                 continue
 
         if len(coord_inv) > 0:
-            #if f0 < 200:
-            coord_inv_array = np.array(coord_inv)
-            mtest = [f0,v0, l, tprime0]
-            mtest,_,_ = invert_f(mtest, coord_inv_array, c, num_iterations=4)
-            ft = calc_ft(ttt,  mtest[3], mtest[0], mtest[1], mtest[2], c)
-            #else:
-            #   ft = calc_ft(ttt,  tprime0, f0, v0, l, c)
+            if f0 < 200:
+                coord_inv_array = np.array(coord_inv)
+                mtest = [f0,v0, l, tprime0]
+                mtest,_,_ = invert_f(mtest, coord_inv_array, c, num_iterations=4)
+                ft = calc_ft(ttt,  mtest[3], mtest[0], mtest[1], mtest[2], c)
+            else:
+               ft = calc_ft(ttt,  tprime0, f0, v0, l, c)
 
             delf = np.array(ft) - np.array(maxfreq)
 
@@ -283,13 +283,12 @@ for li in file_in.readlines():
                     count += 1
             peaks_assos.append(count)
 
-
     if len(fobs) == 0:
         print('No picks for: ', date, flight_num, sta)
         continue
 
     tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=False)
-
+    print('here')
     m, covm, f0_array, F_m = full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, f0_array, mprior, c, w, 20)
     covm = np.sqrt(np.diag(covm))
     print(covm)
