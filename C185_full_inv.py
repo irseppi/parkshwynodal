@@ -35,7 +35,7 @@ for line in sta_f.readlines():
         second_column.append(val[1])
 sta_f.close()
 second_column_array = np.array(second_column)
-C185_output = open('output/C185data_cfc.csv', 'a')
+C185_output = open('output/C185data_cfc_updated.csv', 'a')
 
 # Loop through each station in text file that we already know comes within 2km of the nodes
 
@@ -148,7 +148,7 @@ for li in file_in.readlines():
     f0 = 116
     m0 = [f0, v0, l, tprime0]
 
-    m,covm = invert_f(m0, coords_array, c, num_iterations=8)
+    m,covm, F_m = invert_f(m0, coords_array, c, num_iterations=8)
     f0 = m[0]
     v0 = m[1]
     l = m[2]
@@ -183,7 +183,7 @@ for li in file_in.readlines():
 
         coord_inv_array = np.array(coord_inv)
 
-        m,_ = invert_f(m0, coord_inv_array, c, num_iterations=12)
+        m,_,_ = invert_f(m0, coord_inv_array, c, num_iterations=12)
         f0 = m[0]
         v0 = m[1]
         l = m[2]
@@ -199,7 +199,7 @@ for li in file_in.readlines():
                 new_coord_inv_array.append(coord_inv_array[i])
         coord_inv_array = np.array(new_coord_inv_array)
 
-        m,covm = invert_f(m0, coord_inv_array, c, num_iterations=12, sigma=5)
+        m,covm, F_m = invert_f(m0, coord_inv_array, c, num_iterations=12, sigma=5)
         
         f0 = m[0]
         v0 = m[1]
@@ -265,13 +265,13 @@ for li in file_in.readlines():
                 continue
 
         if len(coord_inv) > 0:
-            if f0 < 200:
-                coord_inv_array = np.array(coord_inv)
-                mtest = [f0,v0, l, tprime0]
-                mtest,_ = invert_f(mtest, coord_inv_array, c, num_iterations=4)
-                ft = calc_ft(ttt,  mtest[3], mtest[0], mtest[1], mtest[2], c)
-            else:
-                ft = calc_ft(ttt,  tprime0, f0, v0, l, c)
+            #if f0 < 200:
+            coord_inv_array = np.array(coord_inv)
+            mtest = [f0,v0, l, tprime0]
+            mtest,_,_ = invert_f(mtest, coord_inv_array, c, num_iterations=4)
+            ft = calc_ft(ttt,  mtest[3], mtest[0], mtest[1], mtest[2], c)
+            #else:
+            #   ft = calc_ft(ttt,  tprime0, f0, v0, l, c)
 
             delf = np.array(ft) - np.array(maxfreq)
 
@@ -290,7 +290,7 @@ for li in file_in.readlines():
 
     tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=False)
 
-    m, covm, f0_array = full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, f0_array, mprior, c, w, 20)
+    m, covm, f0_array, F_m = full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, f0_array, mprior, c, w, 20)
     covm = np.sqrt(np.diag(covm))
     print(covm)
     closest_index = np.argmin(np.abs(tprime0 - times))
@@ -307,5 +307,5 @@ for li in file_in.readlines():
     make_base_dir(BASE_DIR)
     plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, fs, closest_index, closest_time, sta, BASE_DIR)
 
-    C185_output.write(str(date)+','+str(flight_num)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(Tc)+','+str(c)+',\n') #+','+str(wind)+','+str(effective_sound_speed)+',\n')
+    C185_output.write(str(date)+','+str(flight_num)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(Tc)+','+str(c)+','+str(F_m)+',\n') #+','+str(wind)+','+str(effective_sound_speed)+',\n')
 C185_output.close()

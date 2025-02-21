@@ -229,7 +229,7 @@ for line in sta_f.readlines():
                 vmin = 0  
                 vmax = np.max(middle_column) 
 
-                c = 343
+                c = 329
                 tprime0 = 120
                 v0 = speed_mps
                 l = np.sqrt(dist_m**2 + (height_m)**2)
@@ -279,7 +279,7 @@ for line in sta_f.readlines():
                 coords_array = np.array(coords)
 
                 f0 = 116
-                c = 343
+                c = 329
                 m0 = [f0, v0, l, tprime0]
 
                 m,covm = invert_f(m0, coords_array, num_iterations=8)

@@ -650,7 +650,7 @@ def df(f0,v0,l,tp0,tp,c):
 
 #####################################################################################################################################################################################################################################################################################################################
 
-def invert_f(m0, coords_array, c, num_iterations,sigma = 1):
+def invert_f(m0, coords_array, c, num_iterations,sigma = 3):
 	"""
 	Inverts the function f using the given initial parameters and data array.
 
@@ -695,12 +695,12 @@ def invert_f(m0, coords_array, c, num_iterations,sigma = 1):
 		print(m)
 		m0 = m
 		n += 1
-
-	return m, covmlsq
+	F_m = Sd(fnew, fobs, len(fobs), sigma)
+	return m, covmlsq, F_m
 
 #####################################################################################################################################################################################################################################################################################################################
 
-def full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, f0_array, mprior, c, w, num_iterations = 4):
+def full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, f0_array, mprior, c, w, num_iterations = 4, sigma = 3):
 	"""
 	Performs inversion using all picked overtones. 
 
@@ -731,7 +731,7 @@ def full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft
 			cprior[row][row] = 1**2
 	
 	Cd = np.zeros((len(fobs), len(fobs)), int)
-	np.fill_diagonal(Cd, 3**2)
+	np.fill_diagonal(Cd, sigma**2)
 	mnew = np.array(mprior)
 	
 	while qv < num_iterations:
@@ -770,7 +770,8 @@ def full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft
 		print(m)
 		qv += 1
 	covm = la.inv(G.T@la.inv(Cd)@G + la.inv(cprior))
-	return m, covm, f0_array
+	F_m = Sd(fnew, fobs, len(fobs), sigma)
+	return m, covm, f0_array, F_m
 
 ########################################################################################################################################################################################
 
