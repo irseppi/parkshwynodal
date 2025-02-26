@@ -573,7 +573,8 @@ def Sd(dnew, dobs, ndata, tsigma):
 	cobs0 = np.diag(np.square(sigma_obs))  # diagonal covariance matrix
 
 	Cdfac = ndata
-
+	dnew = np.array(dnew)
+	dobs = np.array(dobs)
 	cobs = Cdfac * cobs0              # with normalization factor
 	icobs = la.inv(cobs)
 	sd = 0.5 * (dnew - dobs).T @ icobs @ (dnew - dobs)

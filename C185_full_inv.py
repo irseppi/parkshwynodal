@@ -64,14 +64,13 @@ for li in file_in.readlines():
     Tc = -2
     c = speed_of_sound(Tc)
     sound_speed = c
-    #wind = 
-    #effective_sound_speed = 
+
     print(f"Speed of sound: {c} m/s")
 
-    spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec_cfc/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
+    #spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec_cfc/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
     
-    if os.path.exists(spec_dir):
-        continue
+    #if os.path.exists(spec_dir):
+    #    continue
 
     flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date) + '_positions/' + str(date) + '_' + str(flight_num) + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")
@@ -205,9 +204,6 @@ for li in file_in.readlines():
         v0 = m[1]
         l = m[2]
         tprime0 = m[3]
-    #tprime0 = tarrive-start_time
-    #v0 = speed_mps
-    #l = np.sqrt(dist_m**2 + (height_m)**2)
 
     mprior = []
     mprior.append(v0)
@@ -225,7 +221,7 @@ for li in file_in.readlines():
         f0_array.append(f0)
     mprior = np.array(mprior)
                           
-    corridor_width = 10
+    corridor_width = 6
  
     peaks_assos = []
     fobs = []
@@ -251,12 +247,12 @@ for li in file_in.readlines():
 
             try:      
                 tt = spec[int(np.round(lower[t_f],0)):int(np.round(upper[t_f],0)), t_f]
-                try:
-                    max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
-                    maxa = np.argmax(tt[max_amplitude_index])
-                    max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
-                except:
-                    continue
+
+                max_amplitude_index,_ = find_peaks(tt, prominence = 15, wlen=10, height=vmax*0.1)
+                maxa = np.argmax(tt[max_amplitude_index])
+                max_amplitude_frequency = frequencies[int(max_amplitude_index[maxa])+int(np.round(lower[t_f],0))]
+                print(max_amplitude_frequency)
+
                 maxfreq.append(max_amplitude_frequency)
                 coord_inv.append((times[t_f], max_amplitude_frequency))
                 ttt.append(times[t_f])
@@ -286,9 +282,9 @@ for li in file_in.readlines():
     if len(fobs) == 0:
         print('No picks for: ', date, flight_num, sta)
         continue
-
+   
     tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=False)
-    print('here')
+
     m, covm, f0_array, F_m = full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, f0_array, mprior, c, w, 20)
     covm = np.sqrt(np.diag(covm))
     print(covm)
