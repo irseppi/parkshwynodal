@@ -21,7 +21,7 @@ data.extend(column)
 
 plt.figure()
 # Plot the histogram
-plt.hist(data) #,250)
+plt.hist(data) 
 plt.axvline(np.median(data), color='k', linestyle='dashed', linewidth=1)
 plt.text(np.median(data), plt.ylim()[0], str(np.round(np.median(data),3)), ha='left', va='bottom')
 plt.title('Misfit of Atmosphere Corrected 1 Overtone Inversion')
