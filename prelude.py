@@ -491,7 +491,40 @@ def closest_approach_UTM(seismo_latitudes, seismo_longitudes, flight_latitudes, 
 		return None, None, None, None, None, None, None, None, None, None, None, None
 	return closest_x, closest_y, dist_km, closest_time, tarrive, alt, sp, elevation, speed_mps, height_m, dist_m, tmid
 
-###################################################################################################################################
+################################################################################################################################
+
+def effective_sound_speed(c, v_wind):
+	"""
+	Calculate the effective sound speed.
+
+	Args:
+		c (float): Speed of sound.
+		v_wind (float): Wind speed.
+
+	Returns:
+		float: The effective sound speed.
+	"""
+	ceff = c + v_wind
+	return ceff
+
+#################################################################################################################
+
+def speed_of_sound(Tc):
+	"""
+	Calculate the time at which the acoustic wave reaches the station.
+
+	Parameters:
+	Tc (float): Temperature in degrees celsius
+
+	Returns:
+	float: Speed of sound for temperature Tc (in m/s).
+	"""
+	#gama = 1.4 #typical adiabatic index for air
+	#c = np.sqrt(gama*R*T/M)
+	c = 331.3+0.6*Tc
+	return c
+
+####################################################################################################################
 
 def calc_time(t0,dist,alt,c):
 	"""

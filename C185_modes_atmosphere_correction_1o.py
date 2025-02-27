@@ -35,8 +35,13 @@ for line in sta_f.readlines():
         second_column.append(val[1])
 sta_f.close()
 second_column_array = np.array(second_column)
-C185_output = open('output/C185data_atmosphere_1o_updated.csv', 'a')
 
+temp_correction = False
+
+if temp_correction == True:
+    C185_output = open('output/C185data_atmosphere_1o_updated.csv', 'a')
+else:
+    C185_output = open('output/C185data_1o_updated.csv', 'a')
 # Loop through each station in text file that we already know comes within 2km of the nodes
 
 file_in = open('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_UTM.txt','r')
@@ -64,50 +69,54 @@ for li in file_in.readlines():
     # Convert UTM coordinates to latitude and longitude
     lon, lat = utm_proj(x, y, inverse=True)
 
-    input_files = '/scratch/irseppi/nodal_data/plane_info/atmosphere_data/' + str(time) + '_' + str(lat) + '_' + str(lon) + '.dat'
-    try:
-        file =  open(input_files, 'r') #as file:
-    except:
-        print('No file for: ', date, flight_num, sta)
-        continue
-    data = json.load(file)
+    if temp_correction == True:
+        input_files = '/scratch/irseppi/nodal_data/plane_info/atmosphere_data/' + str(time) + '_' + str(lat) + '_' + str(lon) + '.dat'
+        try:
+            file =  open(input_files, 'r') #as file:
+        except:
+            print('No file for: ', date, flight_num, sta)
+            continue
+        data = json.load(file)
 
-    # Extract metadata
-    metadata = data['metadata']
-    sourcefile = metadata['sourcefile']
-    datetim = metadata['time']['datetime']
-    latitude = metadata['location']['latitude']
-    longitude = metadata['location']['longitude']
-    parameters = metadata['parameters']
+        # Extract metadata
+        metadata = data['metadata']
+        sourcefile = metadata['sourcefile']
+        datetim = metadata['time']['datetime']
+        latitude = metadata['location']['latitude']
+        longitude = metadata['location']['longitude']
+        parameters = metadata['parameters']
 
-    # Extract data
-    data_list = data['data']
+        # Extract data
+        data_list = data['data']
 
-    # Convert data to a DataFrame
-    data_frame = pd.DataFrame(data_list)
+        # Convert data to a DataFrame
+        data_frame = pd.DataFrame(data_list)
 
-    # Find the "Z" parameter and extract the value at index
-    z_index = None
-    hold = np.inf
-    for item in data_list:
-        if item['parameter'] == 'Z':
-            for i in range(len(item['values'])):
-                if abs(float(item['values'][i]) - float(alt)) < hold:
-                    hold = abs(float(item['values'][i]) - float(alt))
-                    z_index = i
-
-    for item in data_list:
-        if item['parameter'] == 'T':
-            Tc = - 273.15 + float(item['values'][z_index])
-            temp = Tc
+        # Find the "Z" parameter and extract the value at index
+        z_index = None
+        hold = np.inf
+        for item in data_list:
+            if item['parameter'] == 'Z':
+                for i in range(len(item['values'])):
+                    if abs(float(item['values'][i]) - float(alt)) < hold:
+                        hold = abs(float(item['values'][i]) - float(alt))
+                        z_index = i
+        folder_spec = 'C185_spec_c_1o'
+        folder_spectrum = 'C185_spectrum_c_1o'
+        for item in data_list:
+            if item['parameter'] == 'T':
+                Tc = - 273.15 + float(item['values'][z_index])
+    else:
+        Tc = -2
+        folder_spec = 'C185_spec_cfc_1o'
+        folder_spectrum = 'C185_spectrum_cfc_1o'
     c = speed_of_sound(Tc)
     sound_speed = c
-    print(f"Speed of sound: {c} m/s")
 
-    #spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c_1o/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
+    spec_dir = '/scratch/irseppi/nodal_data/plane_info/' + folder_spec +'/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
     
-    #if os.path.exists(spec_dir):
-    #    continue
+    if os.path.exists(spec_dir):
+        continue
 
     flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date) + '_positions/' + str(date) + '_' + str(flight_num) + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")
@@ -291,11 +300,11 @@ for li in file_in.readlines():
         if arrive_time[i] < 0:
             arrive_time[i] = 0
 
-    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c_1o/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
+    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/' + folder_spec +'/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
     qnum = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, F_m, arrive_time, MDF, covm, flight_num, middle_index, tarrive-start_time, closest_time, BASE_DIR, plot_show=False)
 
-    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/C185_specrum_c_1o/20190'+str(month)+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
+    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/' + folder_spectrum +'/20190'+str(month)+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
     plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, fs, closest_index, closest_time, sta, BASE_DIR)
 
