@@ -506,7 +506,7 @@ def effective_sound_speed(c, v_wind):
 	"""
 
 	ceff = c + v_wind
-	
+
 	return ceff
 
 #################################################################################################################
@@ -521,8 +521,7 @@ def speed_of_sound(Tc):
 	Returns:
 	float: Speed of sound for temperature Tc (in m/s).
 	"""
-	#gama = 1.4 #typical adiabatic index for air
-	#c = np.sqrt(gama*R*T/M)
+
 	c = 331.3+0.6*Tc
 
 	return c
