@@ -499,19 +499,21 @@ def effective_sound_speed(c, v_wind):
 
 	Args:
 		c (float): Speed of sound.
-		v_wind (float): Wind speed.
+		v_wind (float): Vector component of wind speed in the direction of wave trave between aircraft and station.(Negative for wind blowing towards the aircraft)
 
 	Returns:
 		float: The effective sound speed.
 	"""
+
 	ceff = c + v_wind
+	
 	return ceff
 
 #################################################################################################################
 
 def speed_of_sound(Tc):
 	"""
-	Calculate the time at which the acoustic wave reaches the station.
+	Calculate the speed of sound for a given temperature.
 
 	Parameters:
 	Tc (float): Temperature in degrees celsius
@@ -522,6 +524,7 @@ def speed_of_sound(Tc):
 	#gama = 1.4 #typical adiabatic index for air
 	#c = np.sqrt(gama*R*T/M)
 	c = 331.3+0.6*Tc
+
 	return c
 
 ####################################################################################################################
