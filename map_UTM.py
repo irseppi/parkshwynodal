@@ -11,7 +11,7 @@ from prelude import load_flights, dist_less, make_base_dir
 flight_files,filenames = load_flights(2, 4, 11, 27)
 
 # Open output file for writing
-output = open('all_station_crossing_db_updated111.txt','w')
+output = open('all_station_crossing_db_updated.txt','w')
 
 utm_proj = pyproj.Proj(proj='utm', zone='6', ellps='WGS84')
 
