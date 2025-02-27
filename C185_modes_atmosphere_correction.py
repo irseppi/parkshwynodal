@@ -15,16 +15,6 @@ seismo_longitudes = seismo_data['Longitude']
 stations = seismo_data['Station']
 elevations = seismo_data['Elevation']
 
-def effective_sound_speed(c, v_wind):
-    ceff = c + v_wind
-    return ceff
-
-def speed_of_sound(Tc):
-    #Tc is the temperature in degrees celsius
-    #gama = 1.4 #typical adiabatic index for air
-    #c = np.sqrt(gama*R*T/M)
-    c = 331.3+0.6*Tc
-    return c
 utm_proj = Proj(proj='utm', zone='6', ellps='WGS84')
 sta_f = open('input/all_station_crossing_db_C185.txt','r')
 second_column = []
@@ -343,5 +333,5 @@ for li in file_in.readlines():
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/' + folder_spectrum + '/20190'+str(month)+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
     plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, fs, closest_index, closest_time, sta, BASE_DIR)
-    C185_output.write(str(date)+','+str(flight_num)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(Tc)+','+str(c)+','+str(F_m)+',\n') #+','+str(wind)+','+str(effective_sound_speed)+',\n')
+    C185_output.write(str(date)+','+str(flight_num)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(Tc)+','+str(c)+','+str(F_m)+',\n') 
 C185_output.close()
