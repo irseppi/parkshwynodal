@@ -3,7 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 #file = open('1o_atmc_v_2c.txt','r')
-file = open('temp_correction_1ovfull.txt','r')
+#file = open('temp_correction_1ovfull.txt','r')
+file = open('full_atmc_v_2c.txt','r')
 file2 = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_C185.csv', sep=",")
 tail_nums = file2['TAIL_NUM']
 flight = file2['FLIGHT_NUM']
@@ -90,16 +91,18 @@ fig,ax1 = plt.subplots(1, 1, sharex=False, figsize=(8,6))
 ax1.margins(x=0)
 ax2 = fig.add_axes([0.83, 0.11, 0.07, 0.77], sharey=ax1)
 
-#ax1.scatter(pppp_old, date_old, c='b', label='-2C')
-#ax1.scatter(pppp_new, date_new, c='r',label='Temperature Corrected')
-ax1.scatter(pppp_old, date_old, c='b', label='One Overtone')
-ax1.scatter(pppp_new, date_new, c='r',label='Full')
+ax1.scatter(pppp_old, date_old, c='b', label='-2C')
+ax1.scatter(pppp_new, date_new,c='r',label='Temperature Corrected')
+#ax1.scatter(pppp_old, date_old, c='b', label='One Overtone')
+#ax1.scatter(pppp_new, date_new, c='r',label='Full')
+
 ax2.scatter(med_old, date_all, c='b')
 ax2.scatter(med_new, date_all, c='r')
+
 ax1.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
 ax2.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
-#ax1.set_title('Diffrence in Frequency outcome between Temperature Correction vs Constant 2 degrees C (One overtone inversion)')
-ax1.set_title('Diffrence in Frequency between One Overtone Inversion and Full Inversion (Teperature Correction)')
+ax1.set_title('Diffrence in Frequency outcome between Temperature Correction vs Constant 2 degrees C (Full overtone inversion)')
+#ax1.set_title('Diffrence in Frequency between One Overtone Inversion and Full Inversion (Teperature Correction)')
 ax1.set_xlabel('Frequency')
 ax2.set_xlabel('\u0394'+'F')
 ax1.legend(loc='upper left',fontsize = 'x-small')

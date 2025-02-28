@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-file = open('old_new_invers.txt','r')
+file = open('full_atmc_v_2c.txt','r')
 
 date = []
 y=0
