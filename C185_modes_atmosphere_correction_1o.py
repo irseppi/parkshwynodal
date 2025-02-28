@@ -33,7 +33,7 @@ temp_correction = False
 #else:
 #    output = open('output/' + equip + 'data_1o_updated.csv', 'a')
 
-file_in = open('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db.txt','r')
+file_in = open('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_UTM.txt','r')
 for li in file_in.readlines():
     text = li.split(',')
     flight_num = text[1]
@@ -46,7 +46,7 @@ for li in file_in.readlines():
         continue
     time = float(text[5])
     start_time = time - 120
-
+    
     # Print the converted latitude and longitude
     ht = datetime.fromtimestamp(time, tz=timezone.utc)
     h = ht.hour
@@ -101,7 +101,7 @@ for li in file_in.readlines():
         folder_spectrum = equip + '_spectrum_cfc_1o'
     c = speed_of_sound(Tc)
     sound_speed = c
-
+    print('Sound speed: ', c)#
     #spec_dir = '/scratch/irseppi/nodal_data/plane_info/' + folder_spec +'/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
     
     #if os.path.exists(spec_dir):
@@ -155,7 +155,7 @@ for li in file_in.readlines():
 
     # Compute spectrogram
     frequencies, times, Sxx = spectrogram(data, fs, scaling='density', nperseg=fs, noverlap=fs * .9, detrend = 'constant') 
-    
+
     spec, MDF = remove_median(Sxx)
     
     middle_index =  len(times) // 2
@@ -169,7 +169,7 @@ for li in file_in.readlines():
 
     tf = np.arange(0, 240, 1)
 
-    coords = doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, make_picks=False) 
+    coords = doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, start_time, make_picks=False) 
 
     if len(coords) == 0:
         print('No picks for: ', date, flight_num, sta)
@@ -253,11 +253,11 @@ for li in file_in.readlines():
     mprior.append(l)
     mprior.append(tprime0)       
     
-    peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, tprime0, make_picks=True)
+    peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, start_time, tprime0, make_picks=True)
     w = len(peaks)
     tobs = coord_inv_array[:,0]
     fobs = coord_inv_array[:,1]
-    tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, equip, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos = False, make_picks=True)
+    tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, equip, tobs, fobs, closest_time, start_time, spec, times, frequencies, vmin, vmax, w, peaks_assos = False, make_picks=True)
     plt.figure()
     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r')
     plt.plot(tobs, fobs, 'x', color='black')

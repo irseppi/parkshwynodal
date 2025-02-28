@@ -202,7 +202,7 @@ def plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, f
 
 ##############################################################################################################################################################################################################
 
-def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, equip, closest_time, make_picks=True):
+def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, equip, closest_time, start_time, make_picks=True):
     """
     Pick the points for the doppler shift.
 
@@ -246,7 +246,7 @@ def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta,
                 plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
                 plt.draw() 
                 print('Clicked:', event.xdata, event.ydata)  
-                r1.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+                r1.write(str(event.xdata) + ',' + str(event.ydata) + ',' + str(start_time) + ',\n')
             cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
 
             plt.show(block=True)
@@ -258,7 +258,7 @@ def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta,
 
 ##############################################################################################################################################################################################################
 
-def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, equip, closest_time, tprime0, make_picks=True):
+def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, equip, closest_time, start_time, tprime0, make_picks=True):
     """
     Pick the points for the overtone shift.
 
@@ -310,7 +310,7 @@ def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta
                 plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
                 plt.draw() 
                 print('Clicked:', event.xdata, event.ydata)  
-                r2.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+                r2.write(str(event.xdata) + ',' + str(event.ydata) + ',' + str(start_time) + ',\n')
             cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
 
             plt.show(block=True)
@@ -323,7 +323,7 @@ def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta
 
 ##############################################################################################################################################################################################################
 
-def time_picks(month, day, flight, sta, equip, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=True):
+def time_picks(month, day, flight, sta, equip, tobs, fobs, closest_time, start_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=True):
     """
     Pick the points for the time shift.
 
@@ -406,7 +406,7 @@ def time_picks(month, day, flight, sta, equip, tobs, fobs, closest_time, spec, t
                 plt.scatter(event.xdata, event.ydata, color='red', marker='x')  # Add this line
                 plt.draw() 
                 print('Clicked:', event.xdata, event.ydata)  
-                r3.write(str(event.xdata) + ',' + str(event.ydata) + ',\n')
+                r3.write(str(event.xdata) + ',' + str(event.ydata) + ',' + str(start_time) + ',\n')
 
             cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
             plt.show(block=True)
