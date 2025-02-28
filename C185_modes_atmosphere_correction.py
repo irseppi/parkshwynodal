@@ -9,6 +9,7 @@ from prelude import *
 from scipy.signal import find_peaks, spectrogram
 from plot_func import *
 
+equip = 'C185'
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
 seismo_longitudes = seismo_data['Longitude']
@@ -16,7 +17,7 @@ stations = seismo_data['Station']
 elevations = seismo_data['Elevation']
 
 utm_proj = Proj(proj='utm', zone='6', ellps='WGS84')
-sta_f = open('input/all_station_crossing_db_C185.txt','r')
+sta_f = open('input/all_station_crossing_db_' + equip + '.txt','r')
 second_column = []
 for line in sta_f.readlines():
     val = line.split(',')
@@ -28,9 +29,9 @@ second_column_array = np.array(second_column)
 temp_correction = False
 
 if temp_correction == True:
-    C185_output = open('output/C185data_atmosphere_updated.csv', 'a')
+    output = open('output/' + equip + 'data_atmosphere_updated.csv', 'a')
 else:
-    C185_output = open('output/C185data_updated.csv', 'a')
+    output = open('output/' + equip + 'data_updated.csv', 'a')
 # Loop through each station in text file that we already know comes within 2km of the nodes
 
 file_in = open('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_UTM.txt','r')
@@ -86,15 +87,15 @@ for li in file_in.readlines():
                     if abs(float(item['values'][i]) - float(alt)) < hold:
                         hold = abs(float(item['values'][i]) - float(alt))
                         z_index = i
-        folder_spec = 'C185_spec_c'
-        folder_spectrum = 'C185_spectrum_c'
+        folder_spec = equip + '_spec_c'
+        folder_spectrum = equip + '_spectrum_c'
         for item in data_list:
             if item['parameter'] == 'T':
                 Tc = - 273.15 + float(item['values'][z_index])
     else:
         Tc = -2
-        folder_spec = 'C185_spec_cfc'
-        folder_spectrum = 'C185_spectrum_cfc'
+        folder_spec =  equip + '_spec_cfc'
+        folder_spectrum = equip + '_spectrum_cfc'
     c = speed_of_sound(Tc)
     sound_speed = c
 
@@ -167,7 +168,7 @@ for li in file_in.readlines():
 
     tf = np.arange(0, 240, 1)
 
-    coords = doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, closest_time, make_picks=False) 
+    coords = doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, make_picks=False) 
 
     if len(coords) == 0:
         print('No picks for: ', date, flight_num, sta)
@@ -242,7 +243,7 @@ for li in file_in.readlines():
     mprior.append(l)
     mprior.append(tprime0)       
 
-    peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, closest_time, tprime0, make_picks=False)
+    peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, tprime0, make_picks=False)
     f0_array = []
     w = len(peaks)
     for o in range(w):
@@ -315,7 +316,7 @@ for li in file_in.readlines():
         print('No picks for: ', date, flight_num, sta)
         continue
 
-    tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=False)
+    tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, equip, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=False)
 
     m, covm, f0_array, F_m = full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, f0_array, mprior, c, w, 20)
     covm = np.sqrt(np.diag(covm))
@@ -333,5 +334,5 @@ for li in file_in.readlines():
     BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/' + folder_spectrum + '/20190'+str(month)+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
     make_base_dir(BASE_DIR)
     plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, fs, closest_index, closest_time, sta, BASE_DIR)
-    C185_output.write(str(date)+','+str(flight_num)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(Tc)+','+str(c)+','+str(F_m)+',\n') 
-C185_output.close()
+    output.write(str(date)+','+str(flight_num)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(Tc)+','+str(c)+','+str(F_m)+',\n') 
+output.close()

@@ -202,7 +202,7 @@ def plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, f
 
 ##############################################################################################################################################################################################################
 
-def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, closest_time, make_picks=True):
+def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, equip, closest_time, make_picks=True):
     """
     Pick the points for the doppler shift.
 
@@ -221,7 +221,7 @@ def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta,
     Returns:
         list: The list of picks the user picked along the most prominent overtone.
     """
-    file_name = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/inversepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
+    file_name = '/home/irseppi/REPOSITORIES/parkshwynodal/output/' + equip + '_data_picks/inversepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
                 
     if Path(file_name).exists():
         coords = []
@@ -232,7 +232,7 @@ def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta,
         file.close()  
         return coords
     elif make_picks:
-        BASE_DIR = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/inversepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+        BASE_DIR = '/home/irseppi/REPOSITORIES/parkshwynodal/output/' + equip + '_data_picks/inversepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
         make_base_dir(BASE_DIR)
         pick_again = 'y'
         while pick_again == 'y':
@@ -258,7 +258,7 @@ def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta,
 
 ##############################################################################################################################################################################################################
 
-def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, closest_time, tprime0, make_picks=True):
+def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta, equip, closest_time, tprime0, make_picks=True):
     """
     Pick the points for the overtone shift.
 
@@ -279,7 +279,7 @@ def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta
         list: The list of peak amplitudes.
         list: The list of peak frequencies.
     """
-    output2 = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
+    output2 = '/home/irseppi/REPOSITORIES/parkshwynodal/output/' + equip + '_data_picks/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
     if Path(output2).exists():
 
         peaks = []
@@ -292,7 +292,7 @@ def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta
         file.close()  
         return peaks, freqpeak
     elif make_picks:
-        BASE_DIR = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+        BASE_DIR = '/home/irseppi/REPOSITORIES/parkshwynodal/output/' + equip + '_data_picks/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
         make_base_dir(BASE_DIR)
         pick_again = 'y'
         while pick_again == 'y':
@@ -323,7 +323,7 @@ def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta
 
 ##############################################################################################################################################################################################################
 
-def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=True):
+def time_picks(month, day, flight, sta, equip, tobs, fobs, closest_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=True):
     """
     Pick the points for the time shift.
 
@@ -347,7 +347,7 @@ def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, f
         list: The time array.
         list: The frequency array.
     """
-    output3 = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/timepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
+    output3 = '/home/irseppi/REPOSITORIES/parkshwynodal/output/' + equip + '_data_picks/timepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight)+'.csv'
     if Path(output3).exists():
         set_time = []
         with open(output3, 'r') as file:
@@ -390,7 +390,7 @@ def time_picks(month, day, flight, sta, tobs, fobs, closest_time, spec, times, f
         return tobs, fobs, peaks_assos
 
     elif make_picks:
-        BASE_DIR = '/home/irseppi/REPOSITORIES/parkshwynodal/output/C185_data_picks/timepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
+        BASE_DIR = '/home/irseppi/REPOSITORIES/parkshwynodal/output/' + equip + '_data_picks/timepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight)+'/'+str(sta)+'/'
         make_base_dir(BASE_DIR)
         
         pick_again = 'y'
