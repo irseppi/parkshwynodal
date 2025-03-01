@@ -240,14 +240,14 @@ def doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta,
             coords = []
             plt.figure()
             plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
-            def onclick(event):
-                global coords
+            def onclick(event, coords=coords):
+                #global coords
                 coords.append((event.xdata, event.ydata))
-                plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
+                plt.scatter(event.xdata, event.ydata, color='black', marker='x')  
                 plt.draw() 
                 print('Clicked:', event.xdata, event.ydata)  
                 r1.write(str(event.xdata) + ',' + str(event.ydata) + ',' + str(start_time) + ',\n')
-            cid = plt.gcf().canvas.mpl_connect('button_press_event', onclick)
+            plt.gcf().canvas.mpl_connect('button_press_event', onclick)
 
             plt.show(block=True)
             r1.close()
@@ -304,7 +304,7 @@ def overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight, sta
             plt.axvline(x=tprime0, c = '#377eb8', ls = '--')
             plt.axvline(x=120, c = '#e41a1c', ls = '--')
             def onclick(event):
-                global coords
+                #global coords
                 peaks.append(event.ydata)
                 freqpeak.append(event.xdata)
                 plt.scatter(event.xdata, event.ydata, color='black', marker='x')  # Add this line
@@ -401,7 +401,7 @@ def time_picks(month, day, flight, sta, equip, tobs, fobs, closest_time, start_t
             plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=vmin, vmax=vmax)
             plt.scatter(tobs,fobs, color='black', marker='x')
             def onclick(event):
-                global coords
+                #global coords
                 set_time.append(event.xdata) 
                 plt.scatter(event.xdata, event.ydata, color='red', marker='x')  # Add this line
                 plt.draw() 

@@ -168,7 +168,7 @@ for li in file_in.readlines():
 
     tf = np.arange(0, 240, 1)
 
-    coords = doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, start_time,make_picks=False) 
+    coords = doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, start_time,make_picks=True) 
 
     if len(coords) == 0:
         print('No picks for: ', date, flight_num, sta)
@@ -243,7 +243,7 @@ for li in file_in.readlines():
     mprior.append(l)
     mprior.append(tprime0)       
 
-    peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, start_time, tprime0, make_picks=False)
+    peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, start_time, tprime0, make_picks=True)
     f0_array = []
     w = len(peaks)
     for o in range(w):
@@ -316,7 +316,7 @@ for li in file_in.readlines():
         print('No picks for: ', date, flight_num, sta)
         continue
 
-    tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, equip, tobs, fobs, closest_time, start_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=False)
+    tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, equip, tobs, fobs, closest_time, start_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=True)
 
     m, covm, f0_array, F_m = full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, f0_array, mprior, c, w, 20)
     covm = np.sqrt(np.diag(covm))

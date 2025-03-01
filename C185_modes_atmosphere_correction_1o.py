@@ -28,10 +28,10 @@ second_column_array = np.array(second_column)
 
 temp_correction = False
 
-#if temp_correction == True:
-#    output = open('output/' + equip + 'data_atmosphere_1o_updated.csv', 'a')
-#else:
-#    output = open('output/' + equip + 'data_1o_updated.csv', 'a')
+if temp_correction == True:
+    output = open('output/' + equip + 'data_atmosphere_1o_updated.csv', 'a')
+else:
+    output = open('output/' + equip + 'data_1o_updated.csv', 'a')
 
 file_in = open('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_UTM.txt','r')
 for li in file_in.readlines():
@@ -102,10 +102,10 @@ for li in file_in.readlines():
     c = speed_of_sound(Tc)
     sound_speed = c
     print('Sound speed: ', c)#
-    #spec_dir = '/scratch/irseppi/nodal_data/plane_info/' + folder_spec +'/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
+    spec_dir = '/scratch/irseppi/nodal_data/plane_info/' + folder_spec +'/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
     
-    #if os.path.exists(spec_dir):
-    #    continue
+    if os.path.exists(spec_dir):
+        continue
 
     flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date) + '_positions/' + str(date) + '_' + str(flight_num) + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")
@@ -169,8 +169,8 @@ for li in file_in.readlines():
 
     tf = np.arange(0, 240, 1)
 
-    coords = doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, start_time, make_picks=False) 
-
+    coords = doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, start_time, make_picks=True) 
+    print(coords)
     if len(coords) == 0:
         print('No picks for: ', date, flight_num, sta)
         continue
@@ -254,6 +254,7 @@ for li in file_in.readlines():
     mprior.append(tprime0)       
     
     peaks, freqpeak =  overtone_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, start_time, tprime0, make_picks=True)
+    
     w = len(peaks)
     tobs = coord_inv_array[:,0]
     fobs = coord_inv_array[:,1]
@@ -293,13 +294,13 @@ for li in file_in.readlines():
         if arrive_time[i] < 0:
             arrive_time[i] = 0
 
-#    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/' + folder_spec +'/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
-#    make_base_dir(BASE_DIR)
-#    qnum = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, F_m, arrive_time, MDF, covm, flight_num, middle_index, tarrive-start_time, closest_time, BASE_DIR, plot_show=False)
+    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/' + folder_spec +'/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
+    make_base_dir(BASE_DIR)
+    qnum = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, F_m, arrive_time, MDF, covm, flight_num, middle_index, tarrive-start_time, closest_time, BASE_DIR, plot_show=False)
 
-#    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/' + folder_spectrum +'/20190'+str(month)+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
-#    make_base_dir(BASE_DIR)
-#    plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, fs, closest_index, closest_time, sta, BASE_DIR)
+    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/' + folder_spectrum +'/20190'+str(month)+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
+    make_base_dir(BASE_DIR)
+    plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, fs, closest_index, closest_time, sta, BASE_DIR)
 
-#    output.write(str(date)+','+str(flight_num)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(Tc)+','+str(c)+','+str(F_m)+',\n') 
-#output.close()
+    output.write(str(date)+','+str(flight_num)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(Tc)+','+str(c)+','+str(F_m)+',\n') 
+output.close()
