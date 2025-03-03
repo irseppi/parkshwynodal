@@ -45,6 +45,7 @@ for li in file_in.readlines():
     except:
         continue
     time = float(text[5])
+    start_time = time - 120 # this is not the actual start time, not corrected for temp
     
     # Print the converted latitude and longitude
     ht = datetime.fromtimestamp(time, tz=timezone.utc)
@@ -153,7 +154,7 @@ for li in file_in.readlines():
         continue
 
     tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - 120, tr[2].stats.starttime + (mins * 60) + secs + 120)
-    start_time = tr[2].stats.starttime + (mins * 60) + secs - 120
+    #start_time = tr[2].stats.starttime + (mins * 60) + secs - 120
     data = tr[2][:]
     fs = int(tr[2].stats.sampling_rate)
     title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'						

@@ -61,7 +61,7 @@ for li in file_in.readlines():
     closest_x, closest_y, dist_km, closest_time, tarrive, alt, sp, elevation, speed_mps, height_m, dist_m, tmid = closest_approach_UTM(seismo_latitudes, seismo_longitudes, flight_latitudes, flight_longitudes, timestamps, altitude, speed, stations, elevations, c, sta)
     if closest_x == None:
         continue
-
+    #tarrive is different each time, need a standard base time that in not changed by temperature and speed of sound
     ht = datetime.fromtimestamp(tarrive, tz=timezone.utc)
     mins = ht.minute
     secs = ht.second
