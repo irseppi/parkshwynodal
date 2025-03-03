@@ -26,12 +26,12 @@ for line in sta_f.readlines():
 sta_f.close()
 second_column_array = np.array(second_column)
 
-temp_correction = False
+temp_correction = True
 
 if temp_correction == True:
-    output = open('output/' + equip + 'data_atmosphere_1o_updated.csv', 'a')
+    output = open('output/' + equip + 'data_atmosphere_1o.csv', 'a')
 else:
-    output = open('output/' + equip + 'data_1o_updated.csv', 'a')
+    output = open('output/' + equip + 'data_1o.csv', 'a')
 
 file_in = open('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_UTM.txt','r')
 for li in file_in.readlines():
@@ -45,7 +45,6 @@ for li in file_in.readlines():
     except:
         continue
     time = float(text[5])
-    start_time = time - 120
     
     # Print the converted latitude and longitude
     ht = datetime.fromtimestamp(time, tz=timezone.utc)
@@ -101,11 +100,11 @@ for li in file_in.readlines():
         folder_spectrum = equip + '_spectrum_cfc_1o'
     c = speed_of_sound(Tc)
     sound_speed = c
-    print('Sound speed: ', c)#
+    print('Sound speed: ', c)
     spec_dir = '/scratch/irseppi/nodal_data/plane_info/' + folder_spec +'/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
     
-    if os.path.exists(spec_dir):
-        continue
+    #if os.path.exists(spec_dir):
+    #    continue
 
     flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date) + '_positions/' + str(date) + '_' + str(flight_num) + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")
@@ -119,7 +118,13 @@ for li in file_in.readlines():
     closest_x, closest_y, dist_km, closest_time, tarrive, alt, sp, elevation, speed_mps, height_m, dist_m, tmid = closest_approach_UTM(seismo_latitudes, seismo_longitudes, flight_latitudes, flight_longitudes, timestamps, altitude, speed, stations, elevations, c, sta)
     if closest_x == None:
         continue
-
+    if equip == 'C185':
+        #To set the initial window of arrival correct picks your start end Must use the tarrive time to get the correct data
+        ta_old = calc_time(tmid,dist_m,height_m,343)
+        ht = datetime.fromtimestamp(ta_old, tz=timezone.utc)
+    else:
+        ta_old = calc_time(tmid,dist_m,height_m,)
+        ht = datetime.fromtimestamp(tarrive, tz=timezone.utc)
     mins = ht.minute
     secs = ht.second
     month = ht.month
@@ -148,6 +153,7 @@ for li in file_in.readlines():
         continue
 
     tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - 120, tr[2].stats.starttime + (mins * 60) + secs + 120)
+    start_time = tr[2].stats.starttime + (mins * 60) + secs - 120
     data = tr[2][:]
     fs = int(tr[2].stats.sampling_rate)
     title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'						
@@ -170,7 +176,7 @@ for li in file_in.readlines():
     tf = np.arange(0, 240, 1)
 
     coords = doppler_picks(spec, times, frequencies, vmin, vmax, month, day, flight_num, sta, equip, closest_time, start_time, make_picks=True) 
-    print(coords)
+    
     if len(coords) == 0:
         print('No picks for: ', date, flight_num, sta)
         continue
@@ -259,11 +265,7 @@ for li in file_in.readlines():
     tobs = coord_inv_array[:,0]
     fobs = coord_inv_array[:,1]
     tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, equip, tobs, fobs, closest_time, start_time, spec, times, frequencies, vmin, vmax, w, peaks_assos = False, make_picks=True)
-    plt.figure()
-    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r')
-    plt.plot(tobs, fobs, 'x', color='black')
-    plt.plot(freqpeak, peaks, 'x', color='red')
-    plt.show()
+
     coord_inv = []
     for t_f in range(len(tobs)):
         coord_inv.append((tobs[t_f], fobs[t_f]))
@@ -287,7 +289,12 @@ for li in file_in.readlines():
             f0 = f0_inv
         f0_array.append(f0)
     f0_array = np.array(f0_array)
-
+    plt.figure()
+    plt.title(title)
+    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=0, vmax=vmax)
+    plt.plot(coords_array[:,0], coords_array[:,1], 'x', color='red')
+    plt.plot(freqpeak, peaks, 'x', color='red')
+    plt.show()
     closest_index = np.argmin(np.abs(tprime0 - times))
     arrive_time = spec[:,closest_index]
     for i in range(len(arrive_time)):

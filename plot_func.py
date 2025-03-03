@@ -58,8 +58,8 @@ def plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0
         str: The user assigned quality number.
     """
     # Plot settings and calculations
-    vmin = np.min(arrive_time) 
-    vmax = np.max(arrive_time)
+    vmin = np.min(tprime0) #arrive_time) 
+    vmax = np.max(tprime0) #arrive_time)
 
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=False, figsize=(8,6))     
 
