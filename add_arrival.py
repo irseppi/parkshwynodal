@@ -9,10 +9,10 @@ def add_arrival_time(file_path, arrival_time):
 
     with open(file_path, 'w') as file:
         for line in lines:
-            pick_data = line.split(',')
-            pick_data.append(str(arrival_time))
-            file.write(','.join(pick_data))
-    file.close()
+            line = line.strip()
+            if line:
+                file.write(line + str(arrival_time) + ',\n')
+        file.close()
 
 equip = 'C185'
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
@@ -58,6 +58,7 @@ for li in file_in.readlines():
         continue
 
     ta_old = calc_time(tmid,dist_m,height_m,343)
+    
     ht = datetime.fromtimestamp(ta_old, tz=timezone.utc)
     month = ht.month
     day = ht.day
@@ -65,14 +66,7 @@ for li in file_in.readlines():
     file_name = '/home/irseppi/REPOSITORIES/parkshwynodal/output/' + equip + '_data_picks/inversepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight_num)+'.csv'
 
     if Path(file_name).exists():
-
         add_arrival_time(file_name, ta_old)
-    else:
-        continue
-
-    output2 = '/home/irseppi/REPOSITORIES/parkshwynodal/output/' + equip + '_data_picks/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight_num)+'.csv'
-    if Path(output2).exists():
-       add_arrival_time(output2, ta_old)
     else:
         continue
 
