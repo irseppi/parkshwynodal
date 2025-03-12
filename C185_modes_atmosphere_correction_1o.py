@@ -123,9 +123,7 @@ for li in file_in.readlines():
         #To set the initial window of arrival correct picks your start end Must use the tarrive time to get the correct data
         ta_old = calc_time(tmid,dist_m,height_m,343)
         ht = datetime.fromtimestamp(ta_old, tz=timezone.utc)
-    else:
-        ta_old = calc_time(tmid,dist_m,height_m,)
-        ht = datetime.fromtimestamp(tarrive, tz=timezone.utc)
+
     mins = ht.minute
     secs = ht.second
     month = ht.month
@@ -295,7 +293,7 @@ for li in file_in.readlines():
     plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=0, vmax=vmax)
     plt.plot(coords_array[:,0], coords_array[:,1], 'x', color='red')
     plt.plot(freqpeak, peaks, 'x', color='red')
-    plt.show()
+
     closest_index = np.argmin(np.abs(tprime0 - times))
     arrive_time = spec[:,closest_index]
     for i in range(len(arrive_time)):

@@ -118,8 +118,14 @@ for li in file_in.readlines():
     closest_x, closest_y, dist_km, closest_time, tarrive, alt, sp, elevation, speed_mps, height_m, dist_m, tmid = closest_approach_UTM(seismo_latitudes, seismo_longitudes, flight_latitudes, flight_longitudes, timestamps, altitude, speed, stations, elevations, c, sta)
     if closest_x == None:
         continue
-    #Must use the tarrive time to get the correct data
-    ht = datetime.fromtimestamp(tarrive, tz=timezone.utc)
+    
+    if equip == 'C185':
+        #To set the initial window of arrival correct picks your start end Must use the tarrive time to get the correct data
+        ta_old = calc_time(tmid,dist_m,height_m,343)
+        ht = datetime.fromtimestamp(ta_old, tz=timezone.utc)
+    else:
+        #Must use the tarrive time to get the correct data
+        ht = datetime.fromtimestamp(tarrive, tz=timezone.utc)
     mins = ht.minute
     secs = ht.second
     month = ht.month

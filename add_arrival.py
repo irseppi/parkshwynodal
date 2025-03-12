@@ -54,30 +54,34 @@ for li in file_in.readlines():
     altitude = flight_data['altitude']
 
     closest_x, closest_y, dist_km, closest_time, tarrive, alt, sp, elevation, speed_mps, height_m, dist_m, tmid = closest_approach_UTM(seismo_latitudes, seismo_longitudes, flight_latitudes, flight_longitudes, timestamps, altitude, speed, stations, elevations, c, sta)
-    if closest_x == None:
-        continue
 
     ta_old = calc_time(tmid,dist_m,height_m,343)
     
     ht = datetime.fromtimestamp(ta_old, tz=timezone.utc)
     month = ht.month
-    day = ht.day
+    day = ht.day		
+
+    if len(str(day)) == 1:
+        day = '0'+str(day)
 
     file_name = '/home/irseppi/REPOSITORIES/parkshwynodal/output/' + equip + '_data_picks/inversepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight_num)+'.csv'
-
     if Path(file_name).exists():
         add_arrival_time(file_name, ta_old)
     else:
+        print(file_name)
         continue
 
     output2 = '/home/irseppi/REPOSITORIES/parkshwynodal/output/' + equip + '_data_picks/overtonepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight_num)+'.csv'
     if Path(output2).exists():
        add_arrival_time(output2, ta_old)
     else:
+        print(file_name)
         continue
 
     output3 = '/home/irseppi/REPOSITORIES/parkshwynodal/output/' + equip + '_data_picks/timepicks/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'+str(closest_time)+'_'+str(flight_num)+'.csv'
     if Path(output3).exists():
         add_arrival_time(output3, ta_old)
+
     else:
+        print(file_name)
         continue

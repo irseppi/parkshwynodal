@@ -171,24 +171,26 @@ def plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, f
             continue
         if ft0p > 250:
             continue
-        upper = int(ft0p + 10)
-        lower = int(ft0p - 10)
-        tt = spec[lower:upper, closest_index]
-        if upper > 250:
-            freqp = ft0p
-            ampp = np.interp(ft0p, frequencies, arrive_time)
-        elif lower < 0:
-            freqp = ft0p
-            ampp = np.interp(ft0p, frequencies, arrive_time)
-        else:
-            ampp = np.max(tt)
-            freqp = np.argmax(tt)+lower
-        plt.scatter(freqp, ampp, color='black', marker='x', s=100)
-        if isinstance(sta, int):
-            plt.text(freqp - 5, ampp + 0.8, freqp, fontsize=17, fontweight='bold')
-        else:
-            plt.text(freqp - 1, ampp + 0.8, freqp, fontsize=17, fontweight='bold')  
-
+        try:
+            upper = int(ft0p + 10)
+            lower = int(ft0p - 10)
+            tt = spec[lower:upper, closest_index]
+            if upper > 250:
+                freqp = ft0p
+                ampp = np.interp(ft0p, frequencies, arrive_time)
+            elif lower < 0:
+                freqp = ft0p
+                ampp = np.interp(ft0p, frequencies, arrive_time)
+            else:
+                ampp = np.max(tt)
+                freqp = np.argmax(tt)+lower
+            plt.scatter(freqp, ampp, color='black', marker='x', s=100)
+            if isinstance(sta, int):
+                plt.text(freqp - 5, ampp + 0.8, freqp, fontsize=17, fontweight='bold')
+            else:
+                plt.text(freqp - 1, ampp + 0.8, freqp, fontsize=17, fontweight='bold')  
+        except:
+            continue
     plt.xlim(0, int(fs/2))
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
