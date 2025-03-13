@@ -45,7 +45,6 @@ for li in file_in.readlines():
     except:
         continue
     time = float(text[5])
-    start_time = time - 120 # this is not the actual start time, not corrected for temp
     
     # Print the converted latitude and longitude
     ht = datetime.fromtimestamp(time, tz=timezone.utc)
@@ -104,8 +103,8 @@ for li in file_in.readlines():
     print('Sound speed: ', c)
     spec_dir = '/scratch/irseppi/nodal_data/plane_info/' + folder_spec +'/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
     
-    #if os.path.exists(spec_dir):
-    #    continue
+    if os.path.exists(spec_dir):
+        continue
 
     flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date) + '_positions/' + str(date) + '_' + str(flight_num) + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")
@@ -123,7 +122,7 @@ for li in file_in.readlines():
         #To set the initial window of arrival correct picks your start end Must use the tarrive time to get the correct data
         ta_old = calc_time(tmid,dist_m,height_m,343)
         ht = datetime.fromtimestamp(ta_old, tz=timezone.utc)
-
+        start_time = ta_old - 120 # this is not the actual start time, not corrected for temp
     mins = ht.minute
     secs = ht.second
     month = ht.month
@@ -288,11 +287,7 @@ for li in file_in.readlines():
             f0 = f0_inv
         f0_array.append(f0)
     f0_array = np.array(f0_array)
-    plt.figure()
-    plt.title(title)
-    plt.pcolormesh(times, frequencies, spec, shading='gouraud', cmap='pink_r', vmin=0, vmax=vmax)
-    plt.plot(coords_array[:,0], coords_array[:,1], 'x', color='red')
-    plt.plot(freqpeak, peaks, 'x', color='red')
+
 
     closest_index = np.argmin(np.abs(tprime0 - times))
     arrive_time = spec[:,closest_index]
