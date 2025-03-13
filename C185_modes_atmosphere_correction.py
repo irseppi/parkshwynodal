@@ -29,9 +29,9 @@ second_column_array = np.array(second_column)
 temp_correction = False
 
 if temp_correction == True:
-    output = open('output/' + equip + 'data_atmosphere_updated.csv', 'a')
+    output = open('output/' + equip + 'data_atmosphere_full.csv', 'a')
 else:
-    output = open('output/' + equip + 'data_updated.csv', 'a')
+    output = open('output/' + equip + 'data_full.csv', 'a')
 # Loop through each station in text file that we already know comes within 2km of the nodes
 
 file_in = open('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_UTM.txt','r')
@@ -325,7 +325,7 @@ for li in file_in.readlines():
 
     tobs, fobs, peaks_assos = time_picks(month, day, flight_num, sta, equip, tobs, fobs, closest_time, start_time, spec, times, frequencies, vmin, vmax, w, peaks_assos, make_picks=True)
 
-    m, covm, f0_array, F_m = full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, f0_array, mprior, c, w, 20)
+    m, covm, f0_array, F_m = full_inversion(fobs, tobs, freqpeak, peaks, peaks_assos, tprime, tprime0, ft0p, v0, l, f0_array, mprior, c, w, 5)
     covm = np.sqrt(np.diag(covm))
     print(covm)
     closest_index = np.argmin(np.abs(tprime0 - times))

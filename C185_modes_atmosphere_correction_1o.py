@@ -26,7 +26,7 @@ for line in sta_f.readlines():
 sta_f.close()
 second_column_array = np.array(second_column)
 
-temp_correction = True
+temp_correction = False
 
 if temp_correction == True:
     output = open('output/' + equip + 'data_atmosphere_1o.csv', 'a')
@@ -51,8 +51,8 @@ for li in file_in.readlines():
     h = ht.hour
 
     alt = float(text[4])*0.0003048 #convert between feet and km
-    x =  float(text[2])  # Replace with your UTM x-coordinate
-    y = float(text[3])  # Replace with your UTM y-coordinate
+    x =  float(text[2])  
+    y = float(text[3])  
 
     # Convert UTM coordinates to latitude and longitude
     lon, lat = utm_proj(x, y, inverse=True)
@@ -151,7 +151,6 @@ for li in file_in.readlines():
         continue
 
     tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - 120, tr[2].stats.starttime + (mins * 60) + secs + 120)
-    #start_time = tr[2].stats.starttime + (mins * 60) + secs - 120
     data = tr[2][:]
     fs = int(tr[2].stats.sampling_rate)
     title = f'{tr[2].stats.network}.{tr[2].stats.station}.{tr[2].stats.location}.{tr[2].stats.channel} − starting {tr[2].stats["starttime"]}'						
