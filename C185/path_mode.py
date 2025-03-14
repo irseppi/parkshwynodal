@@ -210,7 +210,7 @@ for flight_num in flights:
         continue
     tail_num = tail[flight_num][0]
     p = np.array(path[flight_num])
-    print(p)
+    print(p[:,0])
     point = np.array(points[flight_num])
 
     med = all_med[flight_num]
@@ -223,8 +223,9 @@ for flight_num in flights:
 
     fig.grdimage(grid=grid, projection="M15c", frame="a", cmap="geo")
     #fig.colorbar(frame=["a1000", "x+lElevation", "y+lm"])
-    #fig.plot(flight_latitudes, flight_longitudes, c='k')
-    yy = fig.plot(p[:,0], p[:,1], c=med, zorder=10, cmap='seismic', vmin=18, vmax=22, s=100)
+    fig.plot(x=flight_latitudes, y=flight_longitudes, c='k')
+
+    yy = fig.plot(x=p[:,0], y=p[:,1], c=med, cmap='seismic') #, vmin=18, vmax=22, s=100)
     fig.colorbar(yy, label= '\u0394'+'F')
     fig.show()
 '''
