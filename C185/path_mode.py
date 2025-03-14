@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pyproj
+import pygmt
 
 #Load seismometer data
 seismo_data = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_sta.txt', sep="|")
@@ -143,7 +144,7 @@ for line in file.readlines():
 
     closest_p, dist_km, index = find_closest_point(flight_path, seismometer)
     closest_x, closest_y = closest_p
-
+    closest_lon, closest_lat = utm_proj(closest_x * 1000, closest_y * 1000, inverse=True)
     # Convert altitude and speed to meters per second
     alt_m = alt[index] * 0.3048
     speed_mps = speed[index] * 0.514444
@@ -188,45 +189,61 @@ for line in file.readlines():
             tail_num = tail_nums[lp]
             if tail_num != 10512184:
                 continue
-            # Assign a color to the tail number if it doesn't already have one
-            #if tail_num not in color_dict:
-            #    color_dict[tail_num] = np.random.rand(3,)
+
             if flight_num not in path:
                 path[flight_num] = []
                 all_med[flight_num] = []
                 points[flight_num] = []
                 tail[flight_num] = []
             all_med[flight_num].extend([np.nanmedian(f1)])
-            points[flight_num].extend([closest_p])
+            #points[flight_num].extend([closest_p])
+            points[flight_num].extend([closest_lat, closest_lon])
             path[flight_num].extend(flight_path)
             tail[flight_num].extend([tail_num])
             flights.append(flight_num)
 flight_num2 = 0
-#plt.figure()
+
 for flight_num in flights:
     if flight_num2 == flight_num:
         continue
-    plt.figure()
     tail_num = tail[flight_num][0]
-    #color = color_dict[tail_num]
     p = np.array(path[flight_num])
+
     point = np.array(points[flight_num])
     med = all_med[flight_num]
-    plt.plot(p[:,0], p[:,1], c='k')  
-    for i in range(1, len(p)-1, 2):
-        direction = np.arctan2(p[i+1,0] - p[i,0], p[i+1,1] - p[i,1])
-        no = np.sqrt((p[i+1,0] - p[i,0])**2 + (p[i+1,1] - p[i,1])**2)
-        #np.cos(direction), np.sin(direction)
-        #print(direction)
-        #print(all_med[flight_num][i])
-        #m = (p[i+1,1] - p[i,1])/(p[i+1,0] - p[i,0])
-        #b = p[i,0] - m*p[i,0]
-        yy = plt.quiver(p[i,0], p[i,1], (p[i+1,0] - p[i,0])/no, (p[i+1,1] - p[i,1])/no, angles='xy', color = 'k', pivot = 'tail', headwidth = 5, scale = 100)
-    yy = plt.scatter(point[:,0], point[:,1], c=med, zorder=10, cmap='seismic', vmin=18, vmax=22, s=100)
+    #print([np.min(flight_longitudes), np.max(flight_longitudes), np.min(flight_latitudes), np.max(flight_latitudes)])
+
+
+    #grid = pygmt.datasets.load_earth_relief(resolution="03s", region=[-151.2, -150.1, 62.3, 63]) , data_source = 'igpp',use_srtm = True) , engine="scipy")
+    fig = pygmt.Figure()
+    grid = pygmt.datasets.load_earth_relief(resolution="01m", region=[-152, -150, 62, 64], registration="gridline") #, use_srtm = True)
+
+    fig.grdimage(grid=grid, projection="M15c", frame="a", cmap="geo")
+    #fig.colorbar(frame=["a1000", "x+lElevation", "y+lm"])
+    #fig.plot(flight_latitudes, flight_longitudes, c='k')
+    yy = fig.plot(point[:, 0], point[:, 1], c=med, zorder=10, cmap='seismic', vmin=18, vmax=22, s=100)
+    fig.colorbar(yy, label= '\u0394'+'F')
+    fig.show()
+'''
+    plt.figure()
+    plt.plot(p[:, 0], p[:, 1], c='k')
+
+    # Calculate the number of arrows to display
+    num_arrows = 4
+    arrow_step = len(p) // (num_arrows + 1)
+
+    for i in range(1, len(p) - 1, arrow_step):
+        direction = np.arctan2(p[i + 1, 0] - p[i, 0], p[i + 1, 1] - p[i, 1])
+        no = np.sqrt((p[i + 1, 0] - p[i, 0]) ** 2 + (p[i + 1, 1] - p[i, 1]) ** 2)
+        if i <= arrow_step * 2 or i >= len(p) - arrow_step * 2:
+            yy = plt.quiver(p[i, 0], p[i, 1], (p[i + 1, 0] - p[i, 0]) / no, (p[i + 1, 1] - p[i, 1]) / no, angles='xy',
+                            color='k', pivot='tail', headwidth=5, scale=100)
+    yy = plt.scatter(point[:, 0], point[:, 1], c=med, zorder=10, cmap='seismic', vmin=18, vmax=22, s=100)
     plt.title(str(flight_num))
     flight_num2 = flight_num
     plt.scatter(seismo_utm_x_km, seismo_utm_y_km, c='k', marker='x')
-    plt.scatter(x_airport/1000, y_airport/1000,c = 'pink', marker='x',zorder = 10)
+    #plt.scatter(x_airport/1000, y_airport/1000,c = 'pink', marker='x',zorder = 10)
     plt.colorbar(yy, label= '\u0394'+'F')
     plt.axis('equal')
     plt.show()
+'''
