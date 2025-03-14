@@ -26,7 +26,7 @@ for line in sta_f.readlines():
 sta_f.close()
 second_column_array = np.array(second_column)
 
-temp_correction = False
+temp_correction = True
 
 if temp_correction == True:
     output = open('output/' + equip + 'data_atmosphere_full.csv', 'a')
