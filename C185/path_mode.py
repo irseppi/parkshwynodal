@@ -219,15 +219,16 @@ for flight_num in flights:
 
     #grid = pygmt.datasets.load_earth_relief(resolution="03s", region=[-151.2, -150.1, 62.3, 63]) , data_source = 'igpp',use_srtm = True) , engine="scipy")
     fig = pygmt.Figure()
-    grid = pygmt.datasets.load_earth_relief(resolution="01m", region=[-152, -150, 62, 64], registration="gridline") #, use_srtm = True)
+    grid = pygmt.datasets.load_earth_relief(resolution="01m", region=[-152, -149, 62, 64], registration="gridline") #, use_srtm = True)
 
     fig.grdimage(grid=grid, projection="M15c", frame="a", cmap="geo")
     #fig.colorbar(frame=["a1000", "x+lElevation", "y+lm"])
-    fig.plot(x=flight_latitudes, y=flight_longitudes, c='k')
+    fig.plot(x=flight_latitudes, y=flight_longitudes,pen="20p,black") 
 
-    yy = fig.plot(x=p[:,0], y=p[:,1], c=med, cmap='seismic') #, vmin=18, vmax=22, s=100)
-    fig.colorbar(yy, label= '\u0394'+'F')
+    #yy = fig.plot(x=p[:,0], y=p[:,1], color=med, cmap='seismic') #, vmin=18, vmax=22, s=100)
+    #fig.colorbar(yy, label= '\u0394'+'F')
     fig.show()
+    fig.close()
 '''
     plt.figure()
     plt.plot(p[:, 0], p[:, 1], c='k')

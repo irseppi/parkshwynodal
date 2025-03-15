@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-file = open('full_atmc_v_2c.txt','r')
-
+#file = open('1o_atmc_v_2c.txt','r')
+file = open('2c_1o_v_full.txt','r')
 date = []
 y=0
 time_new = []
