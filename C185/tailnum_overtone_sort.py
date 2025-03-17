@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-file = open('C185data_atmosphere_1o.txt', 'r')
+file = open('C185data_atm_full.txt', 'r')
 file2 = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_C185.csv', sep=",")
 tail_nums = file2['TAIL_NUM']
 flight = file2['FLIGHT_NUM']
