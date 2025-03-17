@@ -78,7 +78,7 @@ if option == 1:
     plt.show()
 
     plt.figure()
-    plt.scatter(np.abs(np.array(v0_new) - np.array(v0_old)), date, c='b') 
+    plt.scatter((np.array(v0_new) - np.array(v0_old)), date, c='b') 
     plt.show()
 
     plt.figure()
@@ -88,7 +88,7 @@ if option == 1:
     plt.show()
 
     plt.figure()
-    plt.scatter(np.abs(np.array(distance_new) - np.array(distance_old)), date, c='b') 
+    plt.scatter((np.array(distance_new) - np.array(distance_old)), date, c='b') 
     plt.show()
 
     plt.figure()
@@ -99,7 +99,7 @@ if option == 1:
 
 
     plt.figure()
-    plt.scatter(np.abs(np.array(time_new) - np.array(time_old)), date, c='b') 
+    plt.scatter((np.array(time_new) - np.array(time_old)), date, c='b') 
     plt.title('time')
     plt.show()
 

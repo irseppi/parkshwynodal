@@ -101,7 +101,7 @@ ax2.scatter(med_new, date_all, c='r')
 
 ax1.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
 ax2.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
-#ax1.set_title('Diffrence in Frequency outcome between Temperature Correction vs Constant 2 degrees C (One Overtone inversion)')
+#ax1.set_title('Diffrence in Frequency outcome between Temperature Correction vs Constant -2 degrees C (One Overtone inversion)')
 ax1.set_title('Diffrence in Frequency between One Overtone Inversion and Full Inversion (-2C)')
 ax1.set_xlabel('Frequency')
 ax2.set_xlabel('\u0394'+'F')
