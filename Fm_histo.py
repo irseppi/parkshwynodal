@@ -7,10 +7,10 @@ import pandas as pd
 data = []
 
 # Define the directory where your files are located
-file = 'output/C185data_atmosphere_1o_updated.csv'
+file = 'C185data_atm_1o.txt'
 
 # Read the CSV file using pandas
-df = pd.read_csv(file)
+df = pd.read_csv(file, sep=",", header=None)
 
 # Extract the 13th column
 column = df.iloc[:, 12]
