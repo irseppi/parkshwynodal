@@ -100,13 +100,15 @@ file = open('output3.txt', 'r')
 file2 = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_C185.csv', sep=",")
 tail_nums = file2['TAIL_NUM']
 flight = file2['FLIGHT_NUM']
-#x_airport, y_airport = utm_proj(-150.0987984075305,62.32351451135649)
+
 x_airport, y_airport = utm_proj(-150.1072713049972,62.30091781635389)
+
 # Create a dictionary to store the color for each tail number
 color_dict = {}
 all_med = {}
 points = {}
-
+points_lat = {}
+points_lon = {}
 path ={}
 flights = []
 tail = {}
@@ -195,11 +197,13 @@ for line in file.readlines():
                 path[flight_num] = []
                 all_med[flight_num] = []
                 points[flight_num] = []
+                points_lat[flight_num] = []
+                points_lon[flight_num] = []
                 tail[flight_num] = []
             all_med[flight_num].extend([np.nanmedian(f1)])
             #points[flight_num].extend([closest_p])
-            points[flight_num].extend([closest_lat, closest_lon])
-
+            points_lat[flight_num].extend([closest_lat])
+            points_lon[flight_num].extend([closest_lon])
             path[flight_num].extend(flight_path)
             tail[flight_num].extend([tail_num])
             flights.append(flight_num)
@@ -210,25 +214,36 @@ for flight_num in flights:
         continue
     tail_num = tail[flight_num][0]
     p = np.array(path[flight_num])
-    print(p[:,0])
+
     point = np.array(points[flight_num])
-
+    lat = np.array(points_lat[flight_num])
+    lon = np.array(points_lon[flight_num])
     med = all_med[flight_num]
-    #print([np.min(flight_longitudes), np.max(flight_longitudes), np.min(flight_latitudes), np.max(flight_latitudes)])
 
-
-    #grid = pygmt.datasets.load_earth_relief(resolution="03s", region=[-151.2, -150.1, 62.3, 63]) , data_source = 'igpp',use_srtm = True) , engine="scipy")
     fig = pygmt.Figure()
-    grid = pygmt.datasets.load_earth_relief(resolution="01m", region=[-152, -149, 62, 64], registration="gridline") #, use_srtm = True)
-
+    #grid = pygmt.datasets.load_earth_relief(resolution="30s", region=[-151.5, -150, 62.2, 63.3], registration="gridline") 
+    grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.5, -150, 62.2, 63.3], registration="pixel")
     fig.grdimage(grid=grid, projection="M15c", frame="a", cmap="geo")
     #fig.colorbar(frame=["a1000", "x+lElevation", "y+lm"])
-    fig.plot(x=flight_latitudes, y=flight_longitudes,pen="20p,black") 
+    fig.plot(x=np.array(flight_longitudes), y=np.array(flight_latitudes),pen="02p,black") 
+    num_arrows = 4
+    arrow_step = len(flight_latitudes) % (num_arrows)
+    print(arrow_step)
+    for i in range(1, len(flight_latitudes) - 1, arrow_step):
+        angle = np.arctan2(np.array(flight_latitudes)[i + 1] - np.array(flight_latitudes)[i],np.array(flight_longitudes)[i + 1] - np.array(flight_longitudes)[i])
+        angle = np.degrees(angle)
+        no = np.sqrt((np.array(flight_longitudes)[i + 1] - np.array(flight_longitudes)[i]) ** 2 + (np.array(flight_latitudes)[i + 1] - np.array(flight_latitudes)[i]) ** 2)
 
-    #yy = fig.plot(x=p[:,0], y=p[:,1], color=med, cmap='seismic') #, vmin=18, vmax=22, s=100)
-    #fig.colorbar(yy, label= '\u0394'+'F')
+        if i <= arrow_step * 2 or i >= len(flight_latitudes) - arrow_step * 2:
+            fig.plot(x=[np.array(flight_longitudes)[i]],y=[np.array(flight_latitudes)[i]],style="v0.9c+e",direction=[[angle], [no]],color='black',pen="10p,black")
+
+    pygmt.makecpt(cmap="gmt/split", series=[18,22]) 
+    fig.plot(x=seismo_longitudes, y=seismo_latitudes, style="x0.2c",pen="01p,black")
+
+    yy = fig.plot(x=lon, y=lat, style="c0.3c",fill=med, pen="black", cmap=True) 
+    fig.colorbar(frame = 'xaf+l\u0394'+'F')
     fig.show()
-    fig.close()
+    break
 '''
     plt.figure()
     plt.plot(p[:, 0], p[:, 1], c='k')
