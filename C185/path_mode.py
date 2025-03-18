@@ -124,7 +124,7 @@ for line in file.readlines():
     speed = flight_data['speed']
     alt = flight_data['altitude']
     flight_num = int(flight_num)
-    flight_latitudes = flight_data['latitude']
+    flight_latitudes = flight_data['latitude'] 
     flight_longitudes = flight_data['longitude']
 
     # Convert flight latitude and longitude to UTM coordinates
@@ -225,17 +225,17 @@ for flight_num in flights:
     grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.5, -150, 62.2, 63.3], registration="pixel")
     fig.grdimage(grid=grid, projection="M15c", frame="a", cmap="geo")
     #fig.colorbar(frame=["a1000", "x+lElevation", "y+lm"])
-    fig.plot(x=np.array(flight_longitudes), y=np.array(flight_latitudes),pen="02p,black") 
-    num_arrows = 4
+    fig.plot(x=np.array(flight_longitudes), y=np.array(flight_latitudes),pen="01p,black") 
+    num_arrows = 6
     arrow_step = len(flight_latitudes) % (num_arrows)
     print(arrow_step)
-    for i in range(1, len(flight_latitudes) - 1, arrow_step):
+    for i in range(len(flight_latitudes) - 1):
         angle = np.arctan2(np.array(flight_latitudes)[i + 1] - np.array(flight_latitudes)[i],np.array(flight_longitudes)[i + 1] - np.array(flight_longitudes)[i])
         angle = np.degrees(angle)
         no = np.sqrt((np.array(flight_longitudes)[i + 1] - np.array(flight_longitudes)[i]) ** 2 + (np.array(flight_latitudes)[i + 1] - np.array(flight_latitudes)[i]) ** 2)
 
-        if i <= arrow_step * 2 or i >= len(flight_latitudes) - arrow_step * 2:
-            fig.plot(x=[np.array(flight_longitudes)[i]],y=[np.array(flight_latitudes)[i]],style="v0.9c+e",direction=[[angle], [no]],color='black',pen="10p,black")
+        if i == 0 or i == len(flight_latitudes)-2:
+            fig.plot(x=[np.array(flight_longitudes)[i]],y=[np.array(flight_latitudes)[i]],style="v0.2c+e",direction=[[angle], [0.4]],fill='black',pen="01p,black")
 
     pygmt.makecpt(cmap="gmt/split", series=[18,22]) 
     fig.plot(x=seismo_longitudes, y=seismo_latitudes, style="x0.2c",pen="01p,black")
