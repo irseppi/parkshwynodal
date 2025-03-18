@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
 option = 'Temp'
 #option = 'Type'
+
 if option == 'Temp':
     file = open('1o_atmc_v_2c.txt','r')
 elif option == 'Type':
@@ -32,11 +34,10 @@ distance_new = []
 med_old = []
 med_new = []
 
-# Iterate over each line in the file
 for line in file.readlines():
     y += 1
     counts = []
-#ax1.set_title('Diffrence in Frequency outcome between Temperature Correction vs Constant -2 degrees C (One Overtone inversion)'
+
     lines = line.split(',')
     time_old.append(float(lines[3]))
     time_new.append(float(lines[8]))
