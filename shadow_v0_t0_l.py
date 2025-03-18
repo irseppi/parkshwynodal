@@ -137,7 +137,23 @@ for line in file.readlines():
         if not np.isnan(np.median(f1)):
             delf0_old.append(np.median(f1))
             v0_old.append(float(lines[5]))
-        
+
+plt.figure()
+plt.scatter((np.array(distance_new) - np.array(distance_old)), (np.array(v0_new) - np.array(v0_old)), c=temp_c, cmap='coolwarm') 
+plt.colorbar(label='Temperature (°C)')
+plt.ylabel('velocity residual')
+plt.xlabel('distance residual')
+plt.grid()
+
+# Fit a line to the data
+coefficients = np.polyfit((np.array(distance_new) - np.array(distance_old)), (np.array(v0_new) - np.array(v0_old)), 1)
+line = np.poly1d(coefficients)
+plt.plot((np.array(distance_new) - np.array(distance_old)), line((np.array(distance_new) - np.array(distance_old))), color='black')
+plt.title('Slope: '+ str(np.round(coefficients[0],3)) + ' Intercept: '+str(np.round(coefficients[1],3)))
+
+#plt.axis('equal')
+plt.show()
+
 if option == 1:
     plt.figure()
     plt.scatter(v0_old, date, c='b')
@@ -174,6 +190,14 @@ if option == 1:
     plt.scatter((np.array(time_new) - np.array(time_old)), date, c=temp_c, cmap='coolwarm') 
     plt.colorbar(label='Temperature (°C)')
     plt.title("Time Residuals Between Fixed and Corrected Temeratures")
+    plt.show()
+
+    plt.figure()
+    plt.scatter( (np.array(distance_new) - np.array(distance_old)),(np.array(v0_new) - np.array(v0_old)), c=temp_c, cmap='coolwarm') 
+    plt.colorbar(label='Temperature (°C)')
+    plt.ylabel('velocity residual')
+    plt.xlabel('distance residual')
+    plt.grid()
     plt.show()
 
 elif option == 2:
