@@ -225,17 +225,15 @@ for flight_num in flights:
     grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.5, -150, 62.2, 63.3], registration="pixel")
     fig.grdimage(grid=grid, projection="M15c", frame="a", cmap="geo")
     #fig.colorbar(frame=["a1000", "x+lElevation", "y+lm"])
-    fig.plot(x=np.array(flight_longitudes), y=np.array(flight_latitudes),pen="01p,black") 
-    num_arrows = 6
-    arrow_step = len(flight_latitudes) % (num_arrows)
-    print(arrow_step)
+    fig.plot(x=np.array(flight_longitudes), y=np.array(flight_latitudes),pen="0.5p,black") 
+
     for i in range(len(flight_latitudes) - 1):
         angle = np.arctan2(np.array(flight_latitudes)[i + 1] - np.array(flight_latitudes)[i],np.array(flight_longitudes)[i + 1] - np.array(flight_longitudes)[i])
         angle = np.degrees(angle)
         no = np.sqrt((np.array(flight_longitudes)[i + 1] - np.array(flight_longitudes)[i]) ** 2 + (np.array(flight_latitudes)[i + 1] - np.array(flight_latitudes)[i]) ** 2)
 
         if i == 0 or i == len(flight_latitudes)-2:
-            fig.plot(x=[np.array(flight_longitudes)[i]],y=[np.array(flight_latitudes)[i]],style="v0.2c+e",direction=[[angle], [0.4]],fill='black',pen="01p,black")
+            fig.plot(x=[np.array(flight_longitudes)[i]],y=[np.array(flight_latitudes)[i]],style="v0.1c+e",direction=[[angle], [0.2]],fill='black',pen="0.5p,black")
 
     pygmt.makecpt(cmap="gmt/split", series=[18,22]) 
     fig.plot(x=seismo_longitudes, y=seismo_latitudes, style="x0.2c",pen="01p,black")
@@ -244,26 +242,3 @@ for flight_num in flights:
     fig.colorbar(frame = 'xaf+l\u0394'+'F')
     fig.show()
     break
-'''
-    plt.figure()
-    plt.plot(p[:, 0], p[:, 1], c='k')
-
-    # Calculate the number of arrows to display
-    num_arrows = 4
-    arrow_step = len(p) // (num_arrows + 1)
-
-    for i in range(1, len(p) - 1, arrow_step):
-        direction = np.arctan2(p[i + 1, 0] - p[i, 0], p[i + 1, 1] - p[i, 1])
-        no = np.sqrt((p[i + 1, 0] - p[i, 0]) ** 2 + (p[i + 1, 1] - p[i, 1]) ** 2)
-        if i <= arrow_step * 2 or i >= len(p) - arrow_step * 2:
-            yy = plt.quiver(p[i, 0], p[i, 1], (p[i + 1, 0] - p[i, 0]) / no, (p[i + 1, 1] - p[i, 1]) / no, angles='xy',
-                            color='k', pivot='tail', headwidth=5, scale=100)
-    yy = plt.scatter(point[:, 0], point[:, 1], c=med, zorder=10, cmap='seismic', vmin=18, vmax=22, s=100)
-    plt.title(str(flight_num))
-    flight_num2 = flight_num
-    plt.scatter(seismo_utm_x_km, seismo_utm_y_km, c='k', marker='x')
-    #plt.scatter(x_airport/1000, y_airport/1000,c = 'pink', marker='x',zorder = 10)
-    plt.colorbar(yy, label= '\u0394'+'F')
-    plt.axis('equal')
-    plt.show()
-'''
