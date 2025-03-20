@@ -225,7 +225,7 @@ for flight_num in flights:
     grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.35, -150, 62.3, 63.15], registration="pixel")
     pygmt.config(MAP_FRAME_TYPE = 'plain',FORMAT_GEO_MAP="ddd.x")
     fig.grdimage(grid=grid, projection="M15c",frame="a",cmap="geo")
-    fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR+o0c/0.5c+w4c/0.5c")
+    fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR+o0c")
     #fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR") #"jTR+o0c/0.5c+w4c/0.5c")
 
 
@@ -246,6 +246,7 @@ for flight_num in flights:
     #fig.colorbar(frame=["a1", 'xaf+l\u0394'+'F'], position="JMR+o0c/0.5c+w4c/0.5c")
     #fig.colorbar(frame = ["a1", 'xaf+l\u0394'+'F', "y+lm"])
     #fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR+o0c/0.5c+w4c/0.5c")
-    fig.colorbar(frame=["a1", 'xaf+l\u0394'+'F'], position="JMR+o4c/0.5c+w4c/0.5c")
+    fig.colorbar(frame=["a1", 'xaf+l\u0394'+'F'], position="JMR+o4c")
+
     fig.show()
     break
