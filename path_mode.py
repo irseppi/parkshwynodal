@@ -127,7 +127,7 @@ for flight_num in flights:
     lat = np.array(points_lat[flight_num])
     lon = np.array(points_lon[flight_num])
     med = np.array(all_med[flight_num])
-    print(med)
+
     fig = pygmt.Figure()
 
     grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.35, -150.05, 62.3, 63.15], registration="pixel")
@@ -151,5 +151,13 @@ for flight_num in flights:
 
     fig.colorbar(frame=["a1", 'xaf+l\u0394'+'F (Hz)'], position="JMR+o0.5c/-5.5c+w10c/0.5c")
 
+    # Add a zoomed-in map in the lower left corner
+    fig.inset(data=[np.min(lon)-0.01, np.max(lon)+0.01, np.min(lat)-0.01, np.max(lat)+0.01], width="2c", height="1c", position="jBL+w2c/1c+o0.5c/0.5c", box="+pblack")
+    fig.grdimage(grid=grid, projection="M5c", region=[np.min(lon)-0.01, np.max(lon)+0.01, np.min(lat)-0.01, np.max(lat)+0.01], frame=False, cmap="geo")
+    fig.plot(x=np.array(f_lon), y=np.array(f_lat), pen="1p,black")
+    pygmt.makecpt(cmap="gmt/seis", series=[np.min(med) - 0.1, np.max(med) + 0.1])
+    fig.plot(x=lon, y=lat, style="c0.3c", fill=med, pen="black", cmap=True)
+    
     fig.show()
 
+    break
