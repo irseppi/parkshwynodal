@@ -225,9 +225,7 @@ for flight_num in flights:
     grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.35, -150.05, 62.3, 63.15], registration="pixel")
     pygmt.config(MAP_FRAME_TYPE = 'plain',FORMAT_GEO_MAP="ddd.x")
     fig.grdimage(grid=grid, projection="M15c",frame="a",cmap="geo")
-    fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR+o1c/0.5c+w10c/0.5c")
-    #fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR") #"jTR+o0c/0.5c+w4c/0.5c")
-
+    fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR+o0.5c/5.5c+w10c/0.5c")
 
     fig.plot(x=np.array(flight_longitudes), y=np.array(flight_latitudes),pen="1p,black") 
 
@@ -243,10 +241,8 @@ for flight_num in flights:
 
     pygmt.makecpt(cmap="gmt/seis", series=[18.5,21.5]) 
     yy = fig.plot(x=lon, y=lat, style="c0.3c",fill=med, pen="black", cmap=True) 
-    #fig.colorbar(frame=["a1", 'xaf+l\u0394'+'F'], position="JMR+o0c/0.5c+w4c/0.5c")
-    #fig.colorbar(frame = ["a1", 'xaf+l\u0394'+'F', "y+lm"])
-    #fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR+o0c/0.5c+w4c/0.5c")
-    fig.colorbar(frame=["a1", 'xaf+l\u0394'+'F (Hz)'], position="JMR+o4c/0.5c+w10c/0.5c")
+
+    fig.colorbar(frame=["a1", 'xaf+l\u0394'+'F (Hz)'], position="JMR+o0.5c/-5.5c+w10c/0.5c")
 
     fig.show()
     break
