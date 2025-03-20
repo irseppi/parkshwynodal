@@ -221,10 +221,14 @@ for flight_num in flights:
     med = all_med[flight_num]
 
     fig = pygmt.Figure()
-    #grid = pygmt.datasets.load_earth_relief(resolution="30s", region=[-151.5, -150, 62.2, 63.3], registration="gridline") 
-    grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.5, -150, 62.2, 63.3], registration="pixel")
-    fig.grdimage(grid=grid, projection="M15c", frame="a", cmap="geo")
-    #fig.colorbar(frame=["a1000", "x+lElevation", "y+lm"])
+
+    grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.35, -150, 62.3, 63.15], registration="pixel")
+    pygmt.config(MAP_FRAME_TYPE = 'plain',FORMAT_GEO_MAP="ddd.x")
+    fig.grdimage(grid=grid, projection="M15c",frame="a",cmap="geo")
+    fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR+o0c/0.5c+w4c/0.5c")
+    #fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR") #"jTR+o0c/0.5c+w4c/0.5c")
+
+
     fig.plot(x=np.array(flight_longitudes), y=np.array(flight_latitudes),pen="0.5p,black") 
 
     for i in range(len(flight_latitudes) - 1):
@@ -235,10 +239,13 @@ for flight_num in flights:
         if i == 0 or i == len(flight_latitudes)-2:
             fig.plot(x=[np.array(flight_longitudes)[i]],y=[np.array(flight_latitudes)[i]],style="v0.1c+e",direction=[[angle], [0.2]],fill='black',pen="0.5p,black")
 
-    pygmt.makecpt(cmap="gmt/split", series=[18,22]) 
     fig.plot(x=seismo_longitudes, y=seismo_latitudes, style="x0.2c",pen="01p,black")
 
+    pygmt.makecpt(cmap="gmt/seis", series=[18.5,21.5]) 
     yy = fig.plot(x=lon, y=lat, style="c0.3c",fill=med, pen="black", cmap=True) 
-    fig.colorbar(frame = 'xaf+l\u0394'+'F')
+    #fig.colorbar(frame=["a1", 'xaf+l\u0394'+'F'], position="JMR+o0c/0.5c+w4c/0.5c")
+    #fig.colorbar(frame = ["a1", 'xaf+l\u0394'+'F', "y+lm"])
+    #fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR+o0c/0.5c+w4c/0.5c")
+    fig.colorbar(frame=["a1", 'xaf+l\u0394'+'F'], position="JMR+o4c/0.5c+w4c/0.5c")
     fig.show()
     break
