@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pyproj
 import pygmt
-
+from prelude import *
 #Load seismometer data
 seismo_data = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -20,98 +20,6 @@ seismo_utm_x, seismo_utm_y = zip(*seismo_utm)
 # Convert UTM coordinates to kilometers
 seismo_utm_x_km = [x / 1000 for x in seismo_utm_x]
 seismo_utm_y_km = [y / 1000 for y in seismo_utm_y]
-
-#Load seismometer data
-seismo_data = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_sta.txt', sep="|")
-seismo_latitudes = seismo_data['Latitude']
-seismo_longitudes = seismo_data['Longitude']
-stations = seismo_data['Station']
-elevations = seismo_data['Elevation']
-
-# Define the UTM projection with zone 6 and WGS84 ellipsoid
-utm_proj = pyproj.Proj(proj='utm', zone='6', ellps='WGS84')
-
-#Convert to UTM coordinates
-seismo_utm = [utm_proj(lon, lat) for lat, lon in zip(seismo_latitudes, seismo_longitudes)]
-seismo_utm_x, seismo_utm_y = zip(*seismo_utm)
-
-# Convert UTM coordinates to kilometers
-seismo_utm_x_km = [x / 1000 for x in seismo_utm_x]
-seismo_utm_y_km = [y / 1000 for y in seismo_utm_y]
-
-######################################################################################################################################
-
-def closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight_utm_y2, seismo_utm_x, seismo_utm_y):
-
-    closest_point = None
-    dist_lim = np.inf
-
-    x = [flight_utm_x1, flight_utm_x2]
-    y = [flight_utm_y1, flight_utm_y2]
-
-    if (x[1] - x[0]) == 0:
-        if (y[1]-y[0]) <= 0:
-            ggg = -0.001
-        else:
-            ggg = 0.001
-        for point in np.arange(y[0], y[1], ggg):
-            xx = x[0]
-            yy = point
-            dist_km = np.sqrt((seismo_utm_y-yy)**2 +(seismo_utm_x-xx)**2)
-            
-            if dist_km < dist_lim:
-                dist_lim = dist_km
-                closest_point = (xx,yy)
-            else:
-                continue
-
-    else: 
-        m = (y[1]-y[0])/(x[1]-x[0])
-        b = y[0] - m*x[0]
-
-        if (x[1] - x[0]) <= 0:
-            ggg = -0.001
-        else:
-            ggg = 0.001
-        for point in np.arange(x[0], x[1], ggg):
-            xx = point
-        
-            yy = m*xx + b
-            dist_km = np.sqrt((seismo_utm_y-yy)**2 +(seismo_utm_x-xx)**2)
-            
-            if dist_km < dist_lim:
-                dist_lim = dist_km
-                closest_point = (xx,yy)
-            else:
-                continue
-
-    return closest_point, dist_lim
-
-#######################################################################################################################################
-
-def find_closest_point(flight_utm, seismo_utm):
-
-    min_distance = np.inf
-    closest_point = None
-
-    for i in range(len(flight_utm) - 1):
-        flight_utm_x1, flight_utm_y1 = flight_utm[i]
-        flight_utm_x2, flight_utm_y2 = flight_utm[i + 1]
-        seismo_utm_x, seismo_utm_y = seismo_utm
-        point, d = closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight_utm_y2, seismo_utm_x, seismo_utm_y)
-        
-        if point == None:
-            continue
-        elif d < min_distance:
-            min_distance = d
-            closest_point = point
-            index = i
-        else:
-            continue
-   
-    return closest_point, min_distance, index
-
-##################################################################################################################################################
 
 file = open('C185data_atm_1o.txt', 'r')
 file2 = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_C185.csv', sep=",")
@@ -120,6 +28,7 @@ flight = file2['FLIGHT_NUM']
 
 x_airport, y_airport = utm_proj(-150.1072713049972,62.30091781635389)
 
+# Create a dictionary to store the color for each tail number
 all_med = {}
 points_lat = {}
 points_lon = {}
