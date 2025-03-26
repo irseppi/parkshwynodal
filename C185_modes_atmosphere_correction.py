@@ -8,7 +8,8 @@ from pyproj import Proj
 from prelude import *
 from scipy.signal import find_peaks, spectrogram
 from plot_func import *
-
+from obspy.clients.nrl import NRL
+nrl = NRL()
 equip = 'C185'
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -28,10 +29,10 @@ second_column_array = np.array(second_column)
 
 temp_correction = True
 
-if temp_correction == True:
-    output = open('output/' + equip + 'data_atmosphere_full.csv', 'a')
-else:
-    output = open('output/' + equip + 'data_full.csv', 'a')
+#if temp_correction == True:
+#    output = open('output/' + equip + 'data_atmosphere_full.csv', 'a')
+#else:
+#    output = open('output/' + equip + 'data_full.csv', 'a')
 # Loop through each station in text file that we already know comes within 2km of the nodes
 
 file_in = open('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_UTM.txt','r')
@@ -103,8 +104,8 @@ for li in file_in.readlines():
 
     spec_dir = '/scratch/irseppi/nodal_data/plane_info/' + folder_spec +'/2019-0'+str(date[5])+'-'+str(date[6:8])+'/'+str(flight_num)+'/'+str(sta)+'/'
     
-    if os.path.exists(spec_dir):
-        continue
+    #if os.path.exists(spec_dir):
+    #    continue
 
     flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date) + '_positions/' + str(date) + '_' + str(flight_num) + '.csv'
     flight_data = pd.read_csv(flight_file, sep=",")
@@ -151,8 +152,15 @@ for li in file_in.readlines():
         p = "/scratch/naalexeev/NODAL/2019-0"+str(month)+"-"+str(day)+"T"+str(h)+":00:00.000000Z.2019-0"+str(month)+"-"+str(day2)+"T"+str(h_u)+":00:00.000000Z."+str(sta)+".mseed"
         tr = obspy.read(p)
     except:
-        continue
+        continue 
 
+    # The following lists describe the instrument and datalogger response inform
+    node_response = nrl.get_response(sensor_keys = ["Magseis Fairfield", "Generation 2", "5 Hz"],datalogger_keys = ["Magseis Fairfield", "Zland 1C or 3C", "18 dB (8)", ")
+    node_response.plot(output="VEL", min_freq=1E-4)
+    #obspy.io.stationtxt.core.read_fdsn_station_text_file("stations.txt")
+    #inv = obspy.read_inventory("query?net=ZE.xml")
+    print(inv)
+    tr.remove_response(inventory=inv,output="DISP") # inventory=
     tr[2].trim(tr[2].stats.starttime + (mins * 60) + secs - 120, tr[2].stats.starttime + (mins * 60) + secs + 120)
     data = tr[2][:]
     fs = int(tr[2].stats.sampling_rate)
@@ -271,7 +279,6 @@ for li in file_in.readlines():
         tprime = freqpeak[pp]
         ft0p = peaks[pp]
         f0 = calc_f0(tprime, tprime0, ft0p, v0, l, c)
-        
         ft = calc_ft(times,  tprime0, f0, v0, l, c)
         
         maxfreq = []
@@ -334,12 +341,12 @@ for li in file_in.readlines():
         if arrive_time[i] < 0:
             arrive_time[i] = 0
 
-    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/' + folder_spec + '/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
-    make_base_dir(BASE_DIR)
-    qnum = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, F_m, arrive_time, MDF, covm, flight_num, middle_index, tarrive-start_time, closest_time, BASE_DIR, plot_show=False)
+    #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/' + folder_spec + '/2019-0'+str(month)+'-'+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
+    #make_base_dir(BASE_DIR)
+    #qnum = plot_spectrgram(data, fs, torg, title, spec, times, frequencies, tprime0, v0, l, c, f0_array, F_m, arrive_time, MDF, covm, flight_num, middle_index, tarrive-start_time, closest_time, BASE_DIR, plot_show=False)
 
-    BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/' + folder_spectrum + '/20190'+str(month)+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
-    make_base_dir(BASE_DIR)
-    plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, fs, closest_index, closest_time, sta, BASE_DIR)
-    output.write(str(date)+','+str(flight_num)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(Tc)+','+str(c)+','+str(F_m)+',\n') 
-output.close()
+    #BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/' + folder_spectrum + '/20190'+str(month)+str(day)+'/'+str(flight_num)+'/'+str(sta)+'/'
+    #make_base_dir(BASE_DIR)
+    #plot_spectrum(spec, frequencies, tprime0, v0, l, c, f0_array, arrive_time, fs, closest_index, closest_time, sta, BASE_DIR)
+    #output.write(str(date)+','+str(flight_num)+','+str(sta)+','+str(closest_time)+','+str(tprime0)+','+str(v0)+','+str(l)+','+str(f0_array)+','+str(covm)+','+str(qnum)+','+str(Tc)+','+str(c)+','+str(F_m)+',\n') 
+#output.close()
