@@ -4,6 +4,7 @@ import pandas as pd
 import pyproj
 import pygmt
 from prelude import *
+
 #Load seismometer data
 seismo_data = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -130,7 +131,7 @@ for flight_num in flights:
 
     fig = pygmt.Figure()
 
-    grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.35, -150.05, 62.3, 63.15], registration="pixel")
+    grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.35, -150.05, 62.29, 63.15], registration="pixel")
     pygmt.config(MAP_FRAME_TYPE = 'plain',FORMAT_GEO_MAP="ddd.x")
     fig.grdimage(grid=grid, projection="M15c",frame="a",cmap="geo")
     fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR+o0.5c/5.5c+w10c/0.5c")
@@ -145,7 +146,7 @@ for flight_num in flights:
             fig.plot(x=[np.array(flight_longitudes)[i]],y=[np.array(flight_latitudes)[i]],style="v0.1c+e",direction=[[angle], [0.2]],fill='black',pen="0.5p,black")
 
     fig.plot(x=seismo_longitudes, y=seismo_latitudes, style="x0.2c",pen="01p,black")
-
+    fig.plot(x=-150.1072713049972, y=62.30091781635389, style="x0.3c",pen="02p,pink")
     pygmt.makecpt(cmap="gmt/seis", series=[np.min(med)-0.1,np.max(med)+0.1]) 
     yy = fig.plot(x=lon, y=lat, style="c0.3c",fill=med, pen="black", cmap=True) 
 

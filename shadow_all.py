@@ -182,7 +182,9 @@ for gg, file in enumerate(file_list):
     ax1 = fig.add_subplot(gs[0, 0])
     ax2 = fig.add_subplot(gs[0, 1], sharey=ax1)
 
-    # Scatter plot for old and new peaks
+    # Scatter plot to compare old and new peaks (ax1) and their median frequency differences (ax2)
+    # ax1: Visualizes the old and new peaks with their respective indices
+    # ax2: Shows the median frequency differences for old and new peaks
     ax1.margins(x=0)
     ax1.scatter(pppp_old, date_old, c='b', label='Old Peaks')
     ax1.scatter(pppp_new, date_new, c='r', label='New Peaks')
