@@ -167,8 +167,8 @@ for gg, file in enumerate(file_list):
     ax1.scatter(pppp_old, date_old, c='b', label='Old Peaks')
     ax1.scatter(pppp_new, date_new, c='r', label='New Peaks')
 
-    ax2.scatter(med_old, date_all, c='b', label='Median Old')
-    ax2.scatter(med_new, date_all, c='r', label='Median New')
+    ax2.scatter(med_old, date_all, c='b')
+    ax2.scatter(med_new, date_all, c='r')
 
     ax1.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
     ax2.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
@@ -182,10 +182,9 @@ for gg, file in enumerate(file_list):
     axs = fig.subplots(2, 3, gridspec_kw={'height_ratios': [1, 1], 'top': 0.55, 'hspace': 0.3, 'wspace': 0.15})
 
     # First subplot
-    axs[0, 0].scatter(v0_old, date, c='b', label='v0_old')
-    axs[0, 0].scatter(v0_new, date, c='r', label='v0_new')
+    axs[0, 0].scatter(v0_old, date, c='b')
+    axs[0, 0].scatter(v0_new, date, c='r')
     axs[0, 0].set_title('v0')
-    axs[0, 0].legend()
     axs[0, 0].set_ylabel('Index')
 
     # Second subplot
@@ -194,10 +193,9 @@ for gg, file in enumerate(file_list):
     axs[1, 0].set_ylabel('Index')
 
     # Third subplot
-    axs[0, 1].scatter(distance_old, date, c='b', label='distance_old')
-    axs[0, 1].scatter(distance_new, date, c='r', label='distance_new')
+    axs[0, 1].scatter(distance_old, date, c='b')
+    axs[0, 1].scatter(distance_new, date, c='r')
     axs[0, 1].set_title('Distance')
-    axs[0, 1].legend()
     axs[0, 1].tick_params(left=False, labelleft=False)
 
     # Fourth subplot
@@ -206,10 +204,9 @@ for gg, file in enumerate(file_list):
     axs[1, 1].tick_params(left=False, labelleft=False)
 
     # Fifth subplot
-    axs[0, 2].scatter(time_old, date, c='b', label='time_old')
-    axs[0, 2].scatter(time_new, date, c='r', label='time_new')
+    axs[0, 2].scatter(time_old, date, c='b')
+    axs[0, 2].scatter(time_new, date, c='r')
     axs[0, 2].set_title('Time')
-    axs[0, 2].legend()
     axs[0, 2].tick_params(left=False, labelleft=False)
 
     # Sixth subplot
