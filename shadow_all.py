@@ -3,6 +3,7 @@ import pandas as pd
 import json
 import matplotlib.pyplot as plt
 from pyproj import Proj
+from matplotlib.gridspec import GridSpec
 
 utm_proj = Proj(proj='utm', zone='6', ellps='WGS84')
 
@@ -68,7 +69,6 @@ for gg, file in enumerate(file_list):
         try:
             file =  open(input_files, 'r') #as file:
         except:
-            print('No file for: ', date, flight_num)
             continue
         data = json.load(file)
 
@@ -152,30 +152,34 @@ for gg, file in enumerate(file_list):
             f2.append(diff)
         med_new.append(np.nanmedian(f2))
         date_all.append(y)
-    fig, ax1 = plt.subplots(1, 1, sharex=False, figsize=(8, 6))
+
+    fig = plt.figure(figsize=(10, 12))
     fig.suptitle(title[gg], fontsize=16)
 
+    # First plot (ax1 and ax2)
+
+    # Create a GridSpec layout to control the width of ax1 and ax2
+    gs = GridSpec(3, 2, figure=fig, width_ratios=[5, 1])  # ax1 is 3x wider than ax2
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax2 = fig.add_subplot(gs[0, 1], sharey=ax1)
+
     ax1.margins(x=0)
-    ax2 = fig.add_axes([0.83, 0.11, 0.07, 0.77], sharey=ax1)
+    ax1.scatter(pppp_old, date_old, c='b', label='Old Peaks')
+    ax1.scatter(pppp_new, date_new, c='r', label='New Peaks')
 
-    ax1.scatter(pppp_old, date_old, c='b')
-    ax1.scatter(pppp_new, date_new,c='r')
-
-    ax2.scatter(med_old, date_all, c='b')
-    ax2.scatter(med_new, date_all, c='r')
+    ax2.scatter(med_old, date_all, c='b', label='Median Old')
+    ax2.scatter(med_new, date_all, c='r', label='Median New')
 
     ax1.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
     ax2.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
 
     ax1.set_xlabel('Frequency')
     ax2.set_xlabel('\u0394'+'F')
-    ax1.legend(loc='upper left',fontsize = 'x-small')
+    ax1.legend(loc='upper left', fontsize='x-small')
     ax1.set_xlim(0, 300)
-    ax1.set_xticks(range(0, 251, 25)) 
-    
-    plt.show()
-
-    fig, axs = plt.subplots(2, 3, figsize=(8, 10), sharey=True)
+    ax1.set_xticks(range(0, 251, 25))
+    # Adjust the layout to give more space to the top plot
+    axs = fig.subplots(2, 3, gridspec_kw={'height_ratios': [1, 1], 'top': 0.55, 'hspace': 0.3, 'wspace': 0.15})
 
     # First subplot
     axs[0, 0].scatter(v0_old, date, c='b', label='v0_old')
@@ -185,32 +189,34 @@ for gg, file in enumerate(file_list):
     axs[0, 0].set_ylabel('Index')
 
     # Second subplot
-    scatter = axs[1,0].scatter((np.array(v0_new) - np.array(v0_old)), date, c=temp_c, cmap='coolwarm', label='Velocity Residuals')
+    scatter = axs[1, 0].scatter((np.array(v0_new) - np.array(v0_old)), date, c=temp_c, cmap='coolwarm', label='Velocity Residuals')
     axs[1, 0].set_title("Velocity Residuals")
+    axs[1, 0].set_ylabel('Index')
 
-    axs[0, 0].set_ylabel('Index')
     # Third subplot
     axs[0, 1].scatter(distance_old, date, c='b', label='distance_old')
     axs[0, 1].scatter(distance_new, date, c='r', label='distance_new')
     axs[0, 1].set_title('Distance')
     axs[0, 1].legend()
-
+    axs[0, 1].tick_params(left=False, labelleft=False)
 
     # Fourth subplot
     scatter = axs[1, 1].scatter((np.array(distance_new) - np.array(distance_old)), date, c=temp_c, cmap='coolwarm', label='Distance Residuals')
     axs[1, 1].set_title("Distance Residuals")
+    axs[1, 1].tick_params(left=False, labelleft=False)
 
     # Fifth subplot
     axs[0, 2].scatter(time_old, date, c='b', label='time_old')
     axs[0, 2].scatter(time_new, date, c='r', label='time_new')
     axs[0, 2].set_title('Time')
     axs[0, 2].legend()
+    axs[0, 2].tick_params(left=False, labelleft=False)
 
     # Sixth subplot
     scatter = axs[1, 2].scatter((np.array(time_new) - np.array(time_old)), date, c=temp_c, cmap='coolwarm', label='Time Residuals')
     axs[1, 2].set_title("Time Residuals")
+    axs[1, 2].tick_params(left=False, labelleft=False)
     fig.colorbar(scatter, ax=axs[1, 2], orientation='vertical', label='Temperature (°C)')
 
-
-    plt.tight_layout()
+    plt.tight_layout(rect=[0.05, 0.05, 0.95, 0.95], h_pad=0.5, w_pad=0.5)
     plt.show()
