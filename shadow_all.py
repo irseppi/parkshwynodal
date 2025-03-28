@@ -262,7 +262,7 @@ for gg, file in enumerate(file_list):
     axs[0, 2].set_axisbelow(True)
     axs[0, 2].grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5)
     axs[0, 2].set_xlim(110, 120)
-    axs[0, 2].scatter(time_old, date, c='cyan', s=15, marker='s', edgecolors='black', linewidth=0.5)
+    axs[0, 2].scatter(time_old, date, c='cyan', s=15, marker='s', edgecolors='black', linewidth=0.3)
     axs[0, 2].scatter(time_new, date, c='orange', s=15, marker='^', edgecolors='black', linewidth=0.3)
     axs[0, 2].set_xlabel('Time ($t_0$)')
     axs[0, 2].tick_params(left=False, labelleft=False)
