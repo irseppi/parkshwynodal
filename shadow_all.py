@@ -180,9 +180,9 @@ for gg, file in enumerate(file_list):
     # Create plots for the current file
     fig = plt.figure(figsize=(10, 12))
     fig.suptitle(title[gg], fontsize=16)
-    plt.figtext(0.40, 0.94, "(A: Triangle)", fontsize=16, color='cyan', weight="bold",ha='right')
+    plt.figtext(0.40, 0.94, "(A: Square)", fontsize=16, color='cyan', weight="bold",ha='right')
     #plt.figtext(0.50, 0.93, '/', fontsize=16, color='k', weight="bold", ha ='center')
-    plt.figtext(0.60, 0.94, "(B: Circle)", fontsize=16, color='orange', weight="bold", ha='left')
+    plt.figtext(0.60, 0.94, "(B: Triangle)", fontsize=16, color='orange', weight="bold", ha='left')
     # Define grid layout for subplots
     gs = GridSpec(3, 2, figure=fig, width_ratios=[5, 1])
     ax1 = fig.add_subplot(gs[0, 0])
@@ -192,13 +192,15 @@ for gg, file in enumerate(file_list):
     # ax1: Visualizes the old and new peaks with their respective indices
     # ax2: Shows the median frequency differences for old and new peaks
     ax1.margins(x=0)
-    ax1.scatter(pppp_old, date_old, c='cyan', s=15, edgecolors='black', linewidth=0.3)
+    ax1.set_axisbelow(True)
+    ax1.scatter(pppp_old, date_old, c='cyan', s=15, marker='s', edgecolors='black', linewidth=0.3)
     ax1.scatter(pppp_new, date_new, c='orange', s=15, marker='^', edgecolors='black', linewidth=0.3)
-    ax1.grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
+    ax1.grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5)
     # Scatter plot for median frequency differences
-    ax2.scatter(med_old, date_all, c='cyan', s=15,edgecolors='black', linewidth=0.3)
+    ax2.set_axisbelow(True)
+    ax2.scatter(med_old, date_all, c='cyan', s=15, marker='s',edgecolors='black', linewidth=0.3)
     ax2.scatter(med_new, date_all, c='orange', s=15, marker='^',edgecolors='black', linewidth=0.3)
-    ax2.grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
+    ax2.grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5)
     # Configure axis labels and limits
     ax1.set_ylabel('Index')
     ax2.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
@@ -212,42 +214,48 @@ for gg, file in enumerate(file_list):
     axs = fig.subplots(2, 3, gridspec_kw={'height_ratios': [1, 1], 'top': 0.6, 'hspace': 0.3, 'wspace': 0.15})
 
     # Velocity scatter plots
-    axs[0, 0].scatter(v0_old, date,  c='cyan', s=15,edgecolors='black', linewidth=0.3)
+    axs[0, 0].set_axisbelow(True)
+    axs[0, 0].scatter(v0_old, date,  c='cyan', s=15,marker='s',edgecolors='black', linewidth=0.3)
     axs[0, 0].scatter(v0_new, date, c='orange', s=15, marker='^',edgecolors='black', linewidth=0.3)
     axs[0, 0].set_xlabel('Velocity ($v_0$)')
-    axs[0, 0].grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
+    axs[0, 0].grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5)
     axs[0, 0].set_xlim(45,85)
     axs[0, 0].set_ylabel('Index')
 
-    axs[1, 0].grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
+    axs[1, 0].set_axisbelow(True)
+    axs[1, 0].grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5)
     scatter = axs[1, 0].scatter((np.array(v0_new) - np.array(v0_old)), date, c=temp_c, s =15, cmap='coolwarm', label='Velocity Residuals')
     axs[1, 0].set_xlabel("$v_0^A - v_0^B$")
     axs[1, 0].set_xlim(-1.5, 1)
     axs[1, 0].set_ylabel('Index')
 
     # Distance scatter plots
-    axs[0, 1].scatter(distance_old, date,  c='cyan', s=15,edgecolors='black', linewidth=0.3)
+    axs[0, 1].set_axisbelow(True)
+    axs[0, 1].scatter(distance_old, date,  c='cyan', s=15,marker='s',edgecolors='black', linewidth=0.3)
     axs[0, 1].scatter(distance_new, date, c='orange', s=15, marker='^',edgecolors='black', linewidth=0.3)
     axs[0, 1].set_xlabel('Distance ($l$)')
-    axs[0, 1].grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
+    axs[0, 1].grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5)
     axs[0, 1].set_xlim(0, 3500)
     axs[0, 1].tick_params(left=False, labelleft=False)
 
-    axs[1, 1].grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
+    axs[1, 1].set_axisbelow(True)
+    axs[1, 1].grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5)
     scatter = axs[1, 1].scatter((np.array(distance_new) - np.array(distance_old)), date, s =15,c=temp_c, cmap='coolwarm', label='Distance Residuals')
     axs[1, 1].set_xlabel("$l^A - l^B$")
     axs[1, 1].set_xlim(-50, 30)
     axs[1, 1].tick_params(left=False, labelleft=False)
 
     # Time scatter plots
-    axs[0, 2].scatter(time_old, date,  c='cyan', s=15,edgecolors='black', linewidth=0.5)
+    axs[0, 2].set_axisbelow(True)
+    axs[0, 2].grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5)
+    axs[0, 2].set_xlim(110, 120)
+    axs[0, 2].scatter(time_old, date,  c='cyan', s=15,marker='s',edgecolors='black', linewidth=0.5)
     axs[0, 2].scatter(time_new, date, c='orange', s=15, marker='^',edgecolors='black', linewidth=0.3)
     axs[0, 2].set_xlabel('Time ($t_0$)')
-    axs[0, 2].grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
-    axs[0, 2].set_xlim(110, 120)
     axs[0, 2].tick_params(left=False, labelleft=False)
 
-    axs[1, 2].grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5, zorder=10)
+    axs[1, 2].set_axisbelow(True)
+    axs[1, 2].grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5, zorder=-1)
     scatter = axs[1, 2].scatter((np.array(time_new) - np.array(time_old)), date, s =15,c=temp_c, cmap='coolwarm', label='Time Residuals')
     axs[1, 2].set_xlabel("$t_0^A - t_0^B$")
     axs[1, 2].tick_params(left=False, labelleft=False)
