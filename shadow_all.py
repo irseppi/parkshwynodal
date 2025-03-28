@@ -209,7 +209,7 @@ for gg, file in enumerate(file_list):
     ax1.set_xticks(range(0, 251, 25))
 
     # Create additional subplots for velocity, distance, and time
-    axs = fig.subplots(2, 3, gridspec_kw={'height_ratios': [1, 1], 'top': 0.55, 'hspace': 0.3, 'wspace': 0.15})
+    axs = fig.subplots(2, 3, gridspec_kw={'height_ratios': [1, 1], 'top': 0.6, 'hspace': 0.3, 'wspace': 0.15})
 
     # Velocity scatter plots
     axs[0, 0].scatter(v0_old, date,  c='cyan', s=15,edgecolors='black', linewidth=0.3)
@@ -219,6 +219,7 @@ for gg, file in enumerate(file_list):
     axs[0, 0].set_xlim(45,85)
     axs[0, 0].set_ylabel('Index')
 
+    axs[1, 0].grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
     scatter = axs[1, 0].scatter((np.array(v0_new) - np.array(v0_old)), date, c=temp_c, s =15, cmap='coolwarm', label='Velocity Residuals')
     axs[1, 0].set_xlabel("$v_0^A - v_0^B$")
     axs[1, 0].set_xlim(-1.5, 1)
@@ -232,6 +233,7 @@ for gg, file in enumerate(file_list):
     axs[0, 1].set_xlim(0, 3500)
     axs[0, 1].tick_params(left=False, labelleft=False)
 
+    axs[1, 1].grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
     scatter = axs[1, 1].scatter((np.array(distance_new) - np.array(distance_old)), date, s =15,c=temp_c, cmap='coolwarm', label='Distance Residuals')
     axs[1, 1].set_xlabel("$l^A - l^B$")
     axs[1, 1].set_xlim(-50, 30)
@@ -245,6 +247,7 @@ for gg, file in enumerate(file_list):
     axs[0, 2].set_xlim(110, 120)
     axs[0, 2].tick_params(left=False, labelleft=False)
 
+    axs[1, 2].grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5, zorder=10)
     scatter = axs[1, 2].scatter((np.array(time_new) - np.array(time_old)), date, s =15,c=temp_c, cmap='coolwarm', label='Time Residuals')
     axs[1, 2].set_xlabel("$t_0^A - t_0^B$")
     axs[1, 2].tick_params(left=False, labelleft=False)
