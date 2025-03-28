@@ -182,9 +182,9 @@ for gg, file in enumerate(file_list):
 
     # Create plots for the current file
     fig = plt.figure(figsize=(10, 12))
-    fig.suptitle(title[gg], fontsize=16)
-    plt.figtext(0.40, 0.94, "(A: Square)", fontsize=16, color='cyan', weight="bold", ha='right')
-    plt.figtext(0.60, 0.94, "(B: Triangle)", fontsize=16, color='orange', weight="bold", ha='left')
+    fig.suptitle(title[gg], fontsize=16, y=0.95)
+    plt.figtext(0.40, 0.91, "(A: Square)", fontsize=16, color='cyan', weight="bold", ha='right')
+    plt.figtext(0.60, 0.91, "(B: Triangle)", fontsize=16, color='orange', weight="bold", ha='left')
     # Define grid layout for subplots
     gs = GridSpec(3, 3, figure=fig, width_ratios=[5, 1, 1])
     ax1 = fig.add_subplot(gs[0, 0])
@@ -279,5 +279,5 @@ for gg, file in enumerate(file_list):
     fig.colorbar(scatter, ax=axs[1, 2], orientation='vertical', label='Temperature (°C)')
 
     # Adjust layout and display the plot
-    plt.tight_layout(rect=[0.05, 0.05, 0.95, 0.95], h_pad=0.5, w_pad=0.5)
+    plt.tight_layout(rect=[0.01, 0.05, 0.95, 0.95], h_pad=0, w_pad=0)
     plt.show()
