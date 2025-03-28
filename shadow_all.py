@@ -65,6 +65,8 @@ for gg, file in enumerate(file_list):
     pppp_new = []  # List for new peaks
     med_old = []  # List for median old frequency differences
     med_new = []  # List for median new frequency differences
+    mad_old = []  # List for median absolute deviation of old frequency differences
+    mad_new = []  # List for median absolute deviation of new frequency differences
     date_old = []  # List for old peak indices
     date_new = []  # List for new peak indices
     date_all = []  # List for all indices
@@ -161,7 +163,7 @@ for gg, file in enumerate(file_list):
                 continue
             f1.append(diff)
         med_old.append(np.nanmedian(f1))
-
+        mad_old.append([np.median(np.absolute(f1 - np.median(f1)))])
         # Calculate median frequency differences for new peaks
         f2 = []
         for i in range(len(peaks_new)):
@@ -175,6 +177,7 @@ for gg, file in enumerate(file_list):
                 continue
             f2.append(diff)
         med_new.append(np.nanmedian(f2))
+        mad_new.append([np.median(np.absolute(f2 - np.median(f2)))])
         date_all.append(y)
 
     # Create plots for the current file
@@ -183,10 +186,10 @@ for gg, file in enumerate(file_list):
     plt.figtext(0.40, 0.94, "(A: Square)", fontsize=16, color='cyan', weight="bold", ha='right')
     plt.figtext(0.60, 0.94, "(B: Triangle)", fontsize=16, color='orange', weight="bold", ha='left')
     # Define grid layout for subplots
-    gs = GridSpec(3, 2, figure=fig, width_ratios=[5, 1])
+    gs = GridSpec(3, 3, figure=fig, width_ratios=[5, 1, 1])
     ax1 = fig.add_subplot(gs[0, 0])
     ax2 = fig.add_subplot(gs[0, 1], sharey=ax1)
-
+    ax3 = fig.add_subplot(gs[0, 2], sharey=ax1)
     # Scatter plot to compare old and new peaks (ax1) and their median frequency differences (ax2)
     ax1.margins(x=0)
     ax1.set_axisbelow(True)
@@ -207,8 +210,17 @@ for gg, file in enumerate(file_list):
     ax2.set_xlabel('\u0394' + '$f_{median}$')
     ax2.text(-0.1, 1.05, 'b)', transform=ax2.transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
 
+    # Add subplot for MAD values
+    ax3.set_axisbelow(True)
+    ax3.scatter(mad_old, date_all, c='cyan', s=15, marker='s', edgecolors='black', linewidth=0.3)
+    ax3.scatter(mad_new, date_all, c='orange', s=15, marker='^', edgecolors='black', linewidth=0.3)
+    ax3.grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5)
+    ax3.tick_params(left=False, right=False, labelleft=False, labelbottom=True, bottom=True)
+    ax3.set_xlabel('\u0394' + '$f_{MAD}$')
+    ax3.text(-0.1, 1.05, 'c)', transform=ax3.transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
+
     # Create additional subplots for velocity, distance, and time
-    axs = fig.subplots(2, 3, gridspec_kw={'height_ratios': [1, 1], 'top': 0.6, 'hspace': 0.3, 'wspace': 0.15})
+    axs = fig.subplots(2, 3, gridspec_kw={'height_ratios': [1, 1], 'top': 0.59, 'hspace': 0.3, 'wspace': 0.15})
 
     # Velocity scatter plots
     axs[0, 0].set_axisbelow(True)
@@ -218,7 +230,7 @@ for gg, file in enumerate(file_list):
     axs[0, 0].grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5)
     axs[0, 0].set_xlim(45, 85)
     axs[0, 0].set_ylabel('Index')
-    axs[0, 0].text(-0.1, 1.05, 'c)', transform=axs[0, 0].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
+    axs[0, 0].text(-0.1, 1.05, 'd)', transform=axs[0, 0].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
 
     axs[1, 0].set_axisbelow(True)
     axs[1, 0].grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5)
@@ -226,7 +238,7 @@ for gg, file in enumerate(file_list):
     axs[1, 0].set_xlabel("$v_0^A - v_0^B$")
     axs[1, 0].set_xlim(-1.5, 1)
     axs[1, 0].set_ylabel('Index')
-    axs[1, 0].text(-0.1, 1.05, 'f)', transform=axs[1, 0].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
+    axs[1, 0].text(-0.1, 1.05, 'g)', transform=axs[1, 0].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
 
     # Distance scatter plots
     axs[0, 1].set_axisbelow(True)
@@ -236,7 +248,7 @@ for gg, file in enumerate(file_list):
     axs[0, 1].grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5)
     axs[0, 1].set_xlim(0, 3500)
     axs[0, 1].tick_params(left=False, labelleft=False)
-    axs[0, 1].text(-0.1, 1.05, 'd)', transform=axs[0, 1].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
+    axs[0, 1].text(-0.1, 1.05, 'e)', transform=axs[0, 1].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
 
     axs[1, 1].set_axisbelow(True)
     axs[1, 1].grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5)
@@ -244,7 +256,7 @@ for gg, file in enumerate(file_list):
     axs[1, 1].set_xlabel("$l^A - l^B$")
     axs[1, 1].set_xlim(-50, 30)
     axs[1, 1].tick_params(left=False, labelleft=False)
-    axs[1, 1].text(-0.1, 1.05, 'g)', transform=axs[1, 1].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
+    axs[1, 1].text(-0.1, 1.05, 'h)', transform=axs[1, 1].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
 
     # Time scatter plots
     axs[0, 2].set_axisbelow(True)
@@ -254,14 +266,14 @@ for gg, file in enumerate(file_list):
     axs[0, 2].scatter(time_new, date, c='orange', s=15, marker='^', edgecolors='black', linewidth=0.3)
     axs[0, 2].set_xlabel('Time ($t_0$)')
     axs[0, 2].tick_params(left=False, labelleft=False)
-    axs[0, 2].text(-0.1, 1.05, 'e)', transform=axs[0, 2].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
+    axs[0, 2].text(-0.1, 1.05, 'f)', transform=axs[0, 2].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
 
     axs[1, 2].set_axisbelow(True)
     axs[1, 2].grid(which='major', axis='both', color='gray', linestyle='--', linewidth=0.5, zorder=-1)
     scatter = axs[1, 2].scatter((np.array(time_new) - np.array(time_old)), date, s=15, c=temp_c, cmap='coolwarm', label='Time Residuals')
     axs[1, 2].set_xlabel("$t_0^A - t_0^B$")
     axs[1, 2].tick_params(left=False, labelleft=False)
-    axs[1, 2].text(-0.1, 1.05, 'h)', transform=axs[1, 2].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
+    axs[1, 2].text(-0.1, 1.05, 'i)', transform=axs[1, 2].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
 
     # Add colorbar for temperature
     fig.colorbar(scatter, ax=axs[1, 2], orientation='vertical', label='Temperature (°C)')
