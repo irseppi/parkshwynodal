@@ -192,12 +192,12 @@ for gg, file in enumerate(file_list):
     # ax1: Visualizes the old and new peaks with their respective indices
     # ax2: Shows the median frequency differences for old and new peaks
     ax1.margins(x=0)
-    ax1.scatter(pppp_old, date_old, c='cyan', s=15, edgecolors='black', linewidth=0.5)
-    ax1.scatter(pppp_new, date_new, c='orange', s=15, marker='^', edgecolors='black', linewidth=0.5)
+    ax1.scatter(pppp_old, date_old, c='cyan', s=15, edgecolors='black', linewidth=0.3)
+    ax1.scatter(pppp_new, date_new, c='orange', s=15, marker='^', edgecolors='black', linewidth=0.3)
     ax1.grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
     # Scatter plot for median frequency differences
-    ax2.scatter(med_old, date_all, c='cyan', s=15,edgecolors='black', linewidth=0.5)
-    ax2.scatter(med_new, date_all, c='orange', s=15, marker='^',edgecolors='black', linewidth=0.5)
+    ax2.scatter(med_old, date_all, c='cyan', s=15,edgecolors='black', linewidth=0.3)
+    ax2.scatter(med_new, date_all, c='orange', s=15, marker='^',edgecolors='black', linewidth=0.3)
     ax2.grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
     # Configure axis labels and limits
     ax1.set_ylabel('Index')
@@ -212,8 +212,8 @@ for gg, file in enumerate(file_list):
     axs = fig.subplots(2, 3, gridspec_kw={'height_ratios': [1, 1], 'top': 0.55, 'hspace': 0.3, 'wspace': 0.15})
 
     # Velocity scatter plots
-    axs[0, 0].scatter(v0_old, date,  c='cyan', s=15,edgecolors='black', linewidth=0.5)
-    axs[0, 0].scatter(v0_new, date, c='orange', s=15, marker='^',edgecolors='black', linewidth=0.5)
+    axs[0, 0].scatter(v0_old, date,  c='cyan', s=15,edgecolors='black', linewidth=0.3)
+    axs[0, 0].scatter(v0_new, date, c='orange', s=15, marker='^',edgecolors='black', linewidth=0.3)
     axs[0, 0].set_xlabel('Velocity ($v_0$)')
     axs[0, 0].grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
     axs[0, 0].set_xlim(45,85)
@@ -225,8 +225,8 @@ for gg, file in enumerate(file_list):
     axs[1, 0].set_ylabel('Index')
 
     # Distance scatter plots
-    axs[0, 1].scatter(distance_old, date,  c='cyan', s=15,edgecolors='black', linewidth=0.5)
-    axs[0, 1].scatter(distance_new, date, c='orange', s=15, marker='^',edgecolors='black', linewidth=0.5)
+    axs[0, 1].scatter(distance_old, date,  c='cyan', s=15,edgecolors='black', linewidth=0.3)
+    axs[0, 1].scatter(distance_new, date, c='orange', s=15, marker='^',edgecolors='black', linewidth=0.3)
     axs[0, 1].set_xlabel('Distance ($l$)')
     axs[0, 1].grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
     axs[0, 1].set_xlim(0, 3500)
@@ -239,7 +239,7 @@ for gg, file in enumerate(file_list):
 
     # Time scatter plots
     axs[0, 2].scatter(time_old, date,  c='cyan', s=15,edgecolors='black', linewidth=0.5)
-    axs[0, 2].scatter(time_new, date, c='orange', s=15, marker='^',edgecolors='black', linewidth=0.5)
+    axs[0, 2].scatter(time_new, date, c='orange', s=15, marker='^',edgecolors='black', linewidth=0.3)
     axs[0, 2].set_xlabel('Time ($t_0$)')
     axs[0, 2].grid(which='major', axis='x', color='gray', linestyle='--', linewidth=0.5)
     axs[0, 2].set_xlim(110, 120)
