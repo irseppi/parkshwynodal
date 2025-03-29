@@ -132,7 +132,7 @@ for idx, fil in enumerate(file_list):
         time_relative = True
         if time_relative:
             time_new.append(float(lines[4]))
-            times_org.append(tarrive - ta_old)
+            times_org.append(tarrive - (ta_old-120))
         else:
             time_new.append(float(lines[3]))
             times_org.append(tarrive)
@@ -169,7 +169,7 @@ for idx, fil in enumerate(file_list):
         axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
         axs[idx, 2].set_xscale('log')
         axs[idx, 2].set_yscale('log')
-    axs[idx, 2].set_aspect('equal', adjustable='box')
+    #axs[idx, 2].set_aspect('equal', adjustable='box')
 
     # Add a single colorbar for the entire figure
     cbar = fig.colorbar(scatter1, ax=axs[idx, 2], orientation='vertical', pad=0.1)
