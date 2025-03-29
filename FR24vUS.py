@@ -3,6 +3,13 @@ import pandas as pd
 import json
 import matplotlib.pyplot as plt
 from pyproj import Proj
+from prelude import *
+
+seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
+seismo_latitudes = seismo_data['Latitude']
+seismo_longitudes = seismo_data['Longitude']
+stations = seismo_data['Station']
+elevations = seismo_data['Elevation']
 
 utm_proj = Proj(proj='utm', zone='6', ellps='WGS84')
 
@@ -14,7 +21,7 @@ altc = []
 times_list = []
 speeds_list = []
 dists_list = []
-
+stat_list = []
 for line in file_in.readlines():
     text = line.split(',')
     x =  float(text[2])  
@@ -29,6 +36,7 @@ for line in file_in.readlines():
     times_list.append(float(text[5]))
     speeds_list.append(float(text[7]))
     dists_list.append(float(text[4]))
+    stat_list.append(text[9])
 file_in.close()
 
 file_list = ['C185data_1o.txt','C185data_atm_1o.txt','C185data_full.txt','C185data_atm_full.txt']
@@ -39,7 +47,7 @@ fig.suptitle("Flight Radar (Y-axis) vs Nodal Data Inversion (X_axis)")
 
 for idx, fil in enumerate(file_list):
     data = open(fil, 'r')
-
+ 
     time_new = []
     v0_new = []
     distance_new = []
@@ -55,15 +63,17 @@ for idx, fil in enumerate(file_list):
     for line in data.readlines():
         y += 1
         counts = []
-
         lines = line.split(',')
         time = float(lines[3])
+        flight_num = lines[1]
+        date_lab = lines[0]
         for i in range(len(latc)):
             if times_list[i] == time:
                 index_UTC = i
                 lat = latc[i]
                 lon = lonc[i]
                 alt = altc[i]
+                sta = stat_list[i]
                 break
 
         input_files = '/scratch/irseppi/nodal_data/plane_info/atmosphere_data/' + str(time) + '_' + str(lat) + '_' + str(lon) + '.dat'
@@ -100,14 +110,32 @@ for idx, fil in enumerate(file_list):
         for item in data_list:
             if item['parameter'] == 'T':
                 Tc = - 273.15 + float(item['values'][z_index])
+        c = speed_of_sound(Tc)
+
+        flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date_lab) + '_positions/' + str(date_lab) + '_' + str(flight_num) + '.csv'
+        flight_data = pd.read_csv(flight_file, sep=",")
+        flight_latitudes = flight_data['latitude']
+        flight_longitudes = flight_data['longitude']
+        time = flight_data['snapshot_id']
+        timestamps = flight_data['snapshot_id']
+        speed = flight_data['speed']
+        altitude = flight_data['altitude']
+
+        closest_x, closest_y, dist_km, closest_time, tarrive, alt, sp, elevation, speed_mps, height_m, dist_m, tmid = closest_approach_UTM(seismo_latitudes, seismo_longitudes, flight_latitudes, flight_longitudes, timestamps, altitude, speed, stations, elevations, c, sta)
+        if closest_x == None:
+            continue
+        
+        #To set the initial window of arrival correct picks your start end Must use the tarrive time to get the correct data
+        ta_old = calc_time(tmid,dist_m,height_m,343)
+
         temp_c.append(Tc)
-        time_relative = False
+        time_relative = True
         if time_relative:
             time_new.append(float(lines[4]))
-            times_org.append(120)
-        elif not time_relative:
-            time_new.append((float(lines[3])-120) + float(lines[4]))
-            times_org.append(times_list[index_UTC])
+            times_org.append(tarrive - ta_old)
+        else:
+            time_new.append(float(lines[3]))
+            times_org.append(tarrive)
 
         v0_new.append(float(lines[5]))
         distance_new.append(float(lines[6]))
@@ -115,42 +143,37 @@ for idx, fil in enumerate(file_list):
         speeds_org.append(speeds_list[index_UTC])
         dists_org.append(dists_list[index_UTC])
         date.append(y)
-
-
     scatter1 = axs[idx, 0].scatter(v0_new, speeds_org, c=temp_c, cmap='coolwarm')
     axs[idx, 0].set_title(f"{title[idx]}: Velocity", fontsize=10)
-    axs[idx, 0].set_xlim(40, 80)
-    axs[idx, 0].set_ylim(40, 80)
-    #axs[idx, 0].set_xlabel("Velocity New (m/s)", fontsize=8)
-    #axs[idx, 0].set_ylabel("Speeds Org (m/s)", fontsize=8)
+    axs[idx, 0].set_xlim(50, 80)
+    axs[idx, 0].axline((0, 0), slope=1, color='black', linestyle='--')
+    axs[idx, 0].set_ylim(50, 80)
+    axs[idx, 0].set_aspect('equal')
+    axs[idx, 0].set_xticks(np.arange(50, 81, 10))
+    axs[idx, 0].set_yticks(np.arange(50, 81, 10))
 
     scatter2 = axs[idx, 1].scatter(distance_new, dists_org, c=temp_c, cmap='coolwarm')
     axs[idx, 1].set_title(f"{title[idx]}: Distance", fontsize=10)
-    axs[idx, 1].set_xlim(0, 3000)
+    axs[idx, 1].set_xlim(0, 2000)
     axs[idx, 1].set_ylim(0, 2000)
-    #axs[idx, 1].set_xlabel("Distance New (m)", fontsize=8)
-    #axs[idx, 1].set_ylabel("Dists Org (m)", fontsize=8)
-    tryT = 'no'
-    if tryT == 'yes':
-        scatter3 = axs[idx, 2].scatter(np.array(time_new) - (1.55*(10**9)), np.array(times_org) - (1.55*(10**9)), c=temp_c, cmap='coolwarm')
+    axs[idx, 1].axline((0, 0), slope=1, color='black', linestyle='--')
+    axs[idx, 1].set_aspect('equal', adjustable='box')
+    axs[idx, 1].set_xticks(np.arange(0, 2001, 1000))
+    axs[idx, 1].set_yticks(np.arange(0, 2001, 1000))
+
+    if time_relative:
+        scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm')
         axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
-        axs[idx, 2].set_xscale('log')
-        axs[idx, 2].set_yscale('log')
-    elif tryT == 'no':
-        scatter3 = axs[idx, 2].scatter(np.array(time_new) - np.array(times_org), date, c=temp_c, cmap='coolwarm')
-        axs[idx, 2].set_title(f"{title[idx]}: Diff in Time", fontsize=10)
-        axs[idx, 2].set_xlim(-10.5, 0)
     else:
         scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm')
         axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
-    #axs[idx, 2].set_xlabel("Time New (s)", fontsize=8)
-    #axs[idx, 2].set_ylabel("Times Org  (s)", fontsize=8)
+        axs[idx, 2].set_xscale('log')
+        axs[idx, 2].set_yscale('log')
+    axs[idx, 2].set_aspect('equal', adjustable='box')
 
     # Add a single colorbar for the entire figure
     cbar = fig.colorbar(scatter1, ax=axs[idx, 2], orientation='vertical', pad=0.1)
     cbar.set_label('Temperature (°C)')
-
-
 
 plt.tight_layout(rect=[0, 0, 1, 0.96])
 plt.subplots_adjust(hspace=0.3, wspace=0.4)
