@@ -164,12 +164,14 @@ for idx, fil in enumerate(file_list):
     if time_relative:
         scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm')
         axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
+        axs[idx, 2].set_xlim(110, 119)
+        axs[idx, 2].set_ylim(110, 119)
     else:
         scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm')
         axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
         axs[idx, 2].set_xscale('log')
         axs[idx, 2].set_yscale('log')
-    #axs[idx, 2].set_aspect('equal', adjustable='box')
+    axs[idx, 2].set_aspect('equal')
 
     # Add a single colorbar for the entire figure
     cbar = fig.colorbar(scatter1, ax=axs[idx, 2], orientation='vertical', pad=0.1)
