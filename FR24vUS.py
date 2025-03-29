@@ -136,7 +136,6 @@ for idx, fil in enumerate(file_list):
         if time_relative:
             time_new.append(float(lines[4]))
             times_org.append(tarrive - (ta_old-120))
-            times_org.append(tarrive - (ta_old-120))
         else:
             time_new.append(float(lines[3]))
             times_org.append(tarrive)
