@@ -83,34 +83,37 @@ for idx, fil in enumerate(file_list):
         except:
             continue
         data = json.load(file)
+        if idx == 0 or idx == 2:
+            Tc = -2
+            c = speed_of_sound(Tc)
+        else:
+            # Extract metadata
+            metadata = data['metadata']
+            sourcefile = metadata['sourcefile']
+            datetim = metadata['time']['datetime']
+            latitude = metadata['location']['latitude']
+            longitude = metadata['location']['longitude']
+            parameters = metadata['parameters']
 
-        # Extract metadata
-        metadata = data['metadata']
-        sourcefile = metadata['sourcefile']
-        datetim = metadata['time']['datetime']
-        latitude = metadata['location']['latitude']
-        longitude = metadata['location']['longitude']
-        parameters = metadata['parameters']
+            # Extract data
+            data_list = data['data']
 
-        # Extract data
-        data_list = data['data']
+            # Convert data to a DataFrame
+            data_frame = pd.DataFrame(data_list)
 
-        # Convert data to a DataFrame
-        data_frame = pd.DataFrame(data_list)
-
-        # Find the "Z" parameter and extract the value at index
-        z_index = None
-        hold = np.inf
-        for item in data_list:
-            if item['parameter'] == 'Z':
-                for i in range(len(item['values'])):
-                    if abs(float(item['values'][i]) - float(alt)) < hold:
-                        hold = abs(float(item['values'][i]) - float(alt))
-                        z_index = i
-        for item in data_list:
-            if item['parameter'] == 'T':
-                Tc = - 273.15 + float(item['values'][z_index])
-        c = speed_of_sound(Tc)
+            # Find the "Z" parameter and extract the value at index
+            z_index = None
+            hold = np.inf
+            for item in data_list:
+                if item['parameter'] == 'Z':
+                    for i in range(len(item['values'])):
+                        if abs(float(item['values'][i]) - float(alt)) < hold:
+                            hold = abs(float(item['values'][i]) - float(alt))
+                            z_index = i
+            for item in data_list:
+                if item['parameter'] == 'T':
+                    Tc = - 273.15 + float(item['values'][z_index])
+            c = speed_of_sound(Tc)
 
         flight_file = '/scratch/irseppi/nodal_data/flightradar24/' + str(date_lab) + '_positions/' + str(date_lab) + '_' + str(flight_num) + '.csv'
         flight_data = pd.read_csv(flight_file, sep=",")
@@ -132,6 +135,7 @@ for idx, fil in enumerate(file_list):
         time_relative = True
         if time_relative:
             time_new.append(float(lines[4]))
+            times_org.append(tarrive - (ta_old-120))
             times_org.append(tarrive - (ta_old-120))
         else:
             time_new.append(float(lines[3]))
@@ -164,8 +168,8 @@ for idx, fil in enumerate(file_list):
     if time_relative:
         scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm')
         axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
-        axs[idx, 2].set_xlim(110, 119)
-        axs[idx, 2].set_ylim(110, 119)
+        axs[idx, 2].set_xlim(110, 122)
+        axs[idx, 2].set_ylim(110, 122)
     else:
         scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm')
         axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
