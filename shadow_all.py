@@ -273,6 +273,7 @@ for gg, file in enumerate(file_list):
     scatter = axs[1, 2].scatter((np.array(time_new) - np.array(time_old)), date, s=15, c=temp_c, cmap='coolwarm', label='Time Residuals')
     axs[1, 2].set_xlabel("$t_0^A - t_0^B$")
     axs[1, 2].tick_params(left=False, labelleft=False)
+    axs[1, 2].set_xlim(-2, 1)
     axs[1, 2].text(-0.1, 1.05, 'i)', transform=axs[1, 2].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
 
     # Add colorbar for temperature
