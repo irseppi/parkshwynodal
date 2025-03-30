@@ -39,11 +39,11 @@ for line in file_in.readlines():
     stat_list.append(text[9])
 file_in.close()
 
-file_list = ['C185data_1o.txt','C185data_atm_1o.txt','C185data_full.txt','C185data_atm_full.txt']
-title = ['One Harmonic/Fixed Atmosphere Correction','One Harmonic/Time Varying Atmosphere Correction','Full Harmonics/Fixed Atmosphere Correction','Full Harmonics/Time Varying Atmosphere Correction']
+file_list = ['C185data_atm_1o.txt','C185data_atm_full.txt','C185data_1o.txt','C185data_full.txt']
+title = ['OH/FT','OH/VT','FH/FT','FH/VT']
 
 fig, axs = plt.subplots(4, 3, figsize=(18, 24), sharey=False)
-fig.suptitle("Flight Radar (Y-axis) vs Nodal Data Inversion (X_axis)")
+#fig.suptitle("Flight Radar (Y-axis) vs Nodal Data Inversion (X_axis)")
 
 for idx, fil in enumerate(file_list):
     data = open(fil, 'r')
@@ -83,7 +83,7 @@ for idx, fil in enumerate(file_list):
         except:
             continue
         data = json.load(file)
-        if idx == 0 or idx == 2:
+        if idx == 2 or idx == 3:
             Tc = -2
             c = speed_of_sound(Tc)
         else:
@@ -146,40 +146,76 @@ for idx, fil in enumerate(file_list):
         speeds_org.append(speeds_list[index_UTC])
         dists_org.append(dists_list[index_UTC])
         date.append(y)
-    scatter1 = axs[idx, 0].scatter(v0_new, speeds_org, c=temp_c, cmap='coolwarm')
-    axs[idx, 0].set_title(f"{title[idx]}: Velocity", fontsize=10)
-    axs[idx, 0].set_xlim(50, 80)
-    axs[idx, 0].axline((0, 0), slope=1, color='black', linestyle='--')
-    axs[idx, 0].set_ylim(50, 80)
-    axs[idx, 0].set_aspect('equal')
-    axs[idx, 0].set_xticks(np.arange(50, 81, 10))
-    axs[idx, 0].set_yticks(np.arange(50, 81, 10))
+    if idx == 0 or idx == 1:
+        scatter1 = axs[idx, 0].scatter(v0_new, speeds_org, c=temp_c, cmap='coolwarm')
+        axs[idx, 0].set_title(f"{title[idx]}: Velocity", fontsize=10)
+        axs[idx, 0].set_xlim(50, 80)
+        axs[idx, 0].axline((0, 0), slope=1, color='black', linestyle='--')
+        axs[idx, 0].set_ylim(50, 80)
+        axs[idx, 0].set_aspect('equal')
+        axs[idx, 0].set_xticks(np.arange(50, 81, 10))
+        axs[idx, 0].set_yticks(np.arange(50, 81, 10))
 
-    scatter2 = axs[idx, 1].scatter(distance_new, dists_org, c=temp_c, cmap='coolwarm')
-    axs[idx, 1].set_title(f"{title[idx]}: Distance", fontsize=10)
-    axs[idx, 1].set_xlim(0, 2000)
-    axs[idx, 1].set_ylim(0, 2000)
-    axs[idx, 1].axline((0, 0), slope=1, color='black', linestyle='--')
-    axs[idx, 1].set_aspect('equal', adjustable='box')
-    axs[idx, 1].set_xticks(np.arange(0, 2001, 1000))
-    axs[idx, 1].set_yticks(np.arange(0, 2001, 1000))
+        scatter2 = axs[idx, 1].scatter(distance_new, dists_org, c=temp_c, cmap='coolwarm')
+        axs[idx, 1].set_title(f"{title[idx]}: Distance", fontsize=10)
+        axs[idx, 1].set_xlim(0, 2000)
+        axs[idx, 1].set_ylim(0, 2000)
+        axs[idx, 1].axline((0, 0), slope=1, color='black', linestyle='--')
+        axs[idx, 1].set_aspect('equal', adjustable='box')
+        axs[idx, 1].set_xticks(np.arange(0, 2001, 1000))
+        axs[idx, 1].set_yticks(np.arange(0, 2001, 1000))
 
-    if time_relative:
-        scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm')
-        axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
-        axs[idx, 2].set_xlim(110, 122)
-        axs[idx, 2].set_ylim(110, 122)
+        if time_relative:
+            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm')
+            axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
+            axs[idx, 2].set_xlim(110, 122)
+            #axs[idx, 2].set_ylim(110, 122)
+        else:
+            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm')
+            axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
+            axs[idx, 2].set_xscale('log')
+            axs[idx, 2].set_yscale('log')
+        #axs[idx, 2].set_aspect('equal')
+
+        # Add a single colorbar for the entire figure
+        cbar = fig.colorbar(scatter1, ax=axs[idx, 2], orientation='vertical', pad=0.1)
+        cbar.set_label('Temperature (°C)')
+        color_at_minus_2 = cbar.cmap(cbar.norm(-2))
+        c_temp_array = scatter2
     else:
-        scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm')
-        axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
-        axs[idx, 2].set_xscale('log')
-        axs[idx, 2].set_yscale('log')
-    axs[idx, 2].set_aspect('equal')
+        scatter1 = axs[idx, 0].scatter(v0_new, speeds_org, c=color_at_minus_2)
+        axs[idx, 0].set_title(f"{title[idx]}: Velocity", fontsize=10)
+        axs[idx, 0].set_xlim(50, 80)
+        axs[idx, 0].axline((0, 0), slope=1, color='black', linestyle='--')
+        axs[idx, 0].set_ylim(50, 80)
+        axs[idx, 0].set_aspect('equal')
+        axs[idx, 0].set_xticks(np.arange(50, 81, 10))
+        axs[idx, 0].set_yticks(np.arange(50, 81, 10))
 
-    # Add a single colorbar for the entire figure
-    cbar = fig.colorbar(scatter1, ax=axs[idx, 2], orientation='vertical', pad=0.1)
-    cbar.set_label('Temperature (°C)')
+        scatter2 = axs[idx, 1].scatter(distance_new, dists_org, c=color_at_minus_2)
+        axs[idx, 1].set_title(f"{title[idx]}: Distance", fontsize=10)
+        axs[idx, 1].set_xlim(0, 2000)
+        axs[idx, 1].set_ylim(0, 2000)
+        axs[idx, 1].axline((0, 0), slope=1, color='black', linestyle='--')
+        axs[idx, 1].set_aspect('equal', adjustable='box')
+        axs[idx, 1].set_xticks(np.arange(0, 2001, 1000))
+        axs[idx, 1].set_yticks(np.arange(0, 2001, 1000))
 
+        if time_relative:
+            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=color_at_minus_2)
+            axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
+            axs[idx, 2].set_xlim(110, 122)
+            #axs[idx, 2].set_ylim(110, 122)
+        else:
+            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=color_at_minus_2)
+            axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
+            axs[idx, 2].set_xscale('log')
+            axs[idx, 2].set_yscale('log')
+        #axs[idx, 2].set_aspect('equal')
+
+        # Add a single colorbar for the entire figure
+        cbar = fig.colorbar(c_temp_array, ax=axs[idx, 2], orientation='vertical', pad=0.1)
+        cbar.set_label('Temperature (°C)')
 plt.tight_layout(rect=[0, 0, 1, 0.96])
 plt.subplots_adjust(hspace=0.3, wspace=0.4)
 plt.show()
