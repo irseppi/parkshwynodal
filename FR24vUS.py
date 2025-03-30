@@ -216,6 +216,6 @@ for idx, fil in enumerate(file_list):
         # Add a single colorbar for the entire figure
         cbar = fig.colorbar(c_temp_array, ax=axs[idx, 2], orientation='vertical', pad=0.1)
         cbar.set_label('Temperature (°C)')
-plt.tight_layout(rect=[0, 0, 1, 0.96])
-plt.subplots_adjust(hspace=0.3, wspace=0.4)
+plt.tight_layout(rec=[0.122,0.1,0.544,0.989])# Adjust the bottom margin to prevent x-tick labels from being cut off
+plt.subplots_adjust(hspace=0.33, wspace=0.15)
 plt.show()
