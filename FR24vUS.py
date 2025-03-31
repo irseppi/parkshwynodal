@@ -4,6 +4,45 @@ import json
 import matplotlib.pyplot as plt
 from pyproj import Proj
 from prelude import *
+from scipy.optimize import minimize
+
+# Function to calculate L1 norm and produce best fit line for plot
+def fit_l1_line(x, y, bounds=None):
+    """
+    Fits a line to the given data points (x, y) using the L1 norm (minimizing absolute deviations).
+
+    Parameters:
+        x (list or np.array): Independent variable data points.
+        y (list or np.array): Dependent variable data points.
+        bounds (tuple, optional): A tuple (min_val, max_val) specifying the range of values to consider for both x and y.
+
+    Returns:
+        tuple: Slope (m) and intercept (b) of the best fit line.
+    """
+    # Apply bounds if provided
+    if bounds is not None:
+        min_val, max_val = bounds
+        x = np.array(x)  # Ensure x is a NumPy array
+        y = np.array(y)  # Ensure y is a NumPy array
+        mask = (x >= min_val) & (x <= max_val) & (y >= min_val) & (y <= max_val)
+        x = np.array(x)[mask]
+        y = np.array(y)[mask]
+
+    # Define the objective function for L1 norm
+    def L1(params):
+        m, b = params
+        x_array = np.array(x)  # Ensure x is a NumPy array
+        return np.sum(np.abs(y - (m * x_array + b)))
+
+    # Initial guess for slope and intercept
+    initial_guess = [0, 0]
+
+    # Minimize the L1 norm
+    result = minimize(L1, initial_guess)
+
+    # Extract the slope and intercept from the result
+    m, b = result.x
+    return m, b
 
 seismo_data = pd.read_csv('input/all_sta.txt', sep="|")
 seismo_latitudes = seismo_data['Latitude']
@@ -47,7 +86,10 @@ fig, axs = plt.subplots(4, 3, figsize=(18, 24), sharey=False)
 
 for idx, fil in enumerate(file_list):
     data = open(fil, 'r')
- 
+
+    # Define time_relative with a default value (True or False based on your requirement)
+    time_relative = True
+
     time_new = []
     v0_new = []
     distance_new = []
@@ -132,7 +174,6 @@ for idx, fil in enumerate(file_list):
         ta_old = calc_time(tmid,dist_m,height_m,343)
 
         temp_c.append(Tc)
-        time_relative = True
         if time_relative:
             time_new.append(float(lines[4]))
             times_org.append(tarrive - (ta_old-120))
@@ -147,7 +188,7 @@ for idx, fil in enumerate(file_list):
         dists_org.append(dists_list[index_UTC])
         date.append(y)
     if idx == 0 or idx == 1:
-        scatter1 = axs[idx, 0].scatter(v0_new, speeds_org, c=temp_c, cmap='coolwarm')
+        scatter1 = axs[idx, 0].scatter(v0_new, speeds_org, c=temp_c, cmap='coolwarm', s=15)
         axs[idx, 0].set_title(f"{title[idx]}: Velocity", fontsize=10)
         axs[idx, 0].set_xlim(50, 80)
         axs[idx, 0].axline((0, 0), slope=1, color='black', linestyle='--')
@@ -155,8 +196,12 @@ for idx, fil in enumerate(file_list):
         axs[idx, 0].set_aspect('equal')
         axs[idx, 0].set_xticks(np.arange(50, 81, 10))
         axs[idx, 0].set_yticks(np.arange(50, 81, 10))
+        axs[idx, 0].tick_params(axis='both', labelsize=8)
+        m, b = fit_l1_line(v0_new, speeds_org, bounds=(50, 80))
+        x = np.linspace(min(v0_new), max(v0_new), 100)
+        axs[idx, 0].plot(x, m * x + b, color='k')
 
-        scatter2 = axs[idx, 1].scatter(distance_new, dists_org, c=temp_c, cmap='coolwarm')
+        scatter2 = axs[idx, 1].scatter(distance_new, dists_org, c=temp_c, cmap='coolwarm', s=15)
         axs[idx, 1].set_title(f"{title[idx]}: Distance", fontsize=10)
         axs[idx, 1].set_xlim(0, 2000)
         axs[idx, 1].set_ylim(0, 2000)
@@ -164,26 +209,28 @@ for idx, fil in enumerate(file_list):
         axs[idx, 1].set_aspect('equal', adjustable='box')
         axs[idx, 1].set_xticks(np.arange(0, 2001, 1000))
         axs[idx, 1].set_yticks(np.arange(0, 2001, 1000))
+        axs[idx, 1].tick_params(axis='both', labelsize=8)
+        m, b = fit_l1_line(distance_new, dists_org, bounds=(0, 2000))
+        x = np.linspace(min(distance_new), max(dists_org), 100)
+        axs[idx, 1].plot(x, m * x + b, color='k')
 
         if time_relative:
-            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm')
+            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm', s=15)
             axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
             axs[idx, 2].set_xlim(110, 122)
-            #axs[idx, 2].set_ylim(110, 122)
         else:
             scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm')
             axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
             axs[idx, 2].set_xscale('log')
             axs[idx, 2].set_yscale('log')
-        #axs[idx, 2].set_aspect('equal')
+        axs[idx, 2].tick_params(axis='both', labelsize=8)
 
-        # Add a single colorbar for the entire figure
         cbar = fig.colorbar(scatter1, ax=axs[idx, 2], orientation='vertical', pad=0.1)
         cbar.set_label('Temperature (°C)')
         color_at_minus_2 = cbar.cmap(cbar.norm(-2))
         c_temp_array = scatter2
     else:
-        scatter1 = axs[idx, 0].scatter(v0_new, speeds_org, c=color_at_minus_2)
+        scatter1 = axs[idx, 0].scatter(v0_new, speeds_org, c=color_at_minus_2, s=15)
         axs[idx, 0].set_title(f"{title[idx]}: Velocity", fontsize=10)
         axs[idx, 0].set_xlim(50, 80)
         axs[idx, 0].axline((0, 0), slope=1, color='black', linestyle='--')
@@ -191,8 +238,12 @@ for idx, fil in enumerate(file_list):
         axs[idx, 0].set_aspect('equal')
         axs[idx, 0].set_xticks(np.arange(50, 81, 10))
         axs[idx, 0].set_yticks(np.arange(50, 81, 10))
+        axs[idx, 0].tick_params(axis='both', labelsize=8)
+        m, b = fit_l1_line(v0_new, speeds_org, bounds=(50, 80))
+        x = np.linspace(min(v0_new), max(v0_new), 100)
+        axs[idx, 0].plot(x, m * x + b, color='k')
 
-        scatter2 = axs[idx, 1].scatter(distance_new, dists_org, c=color_at_minus_2)
+        scatter2 = axs[idx, 1].scatter(distance_new, dists_org, c=color_at_minus_2, s=15)
         axs[idx, 1].set_title(f"{title[idx]}: Distance", fontsize=10)
         axs[idx, 1].set_xlim(0, 2000)
         axs[idx, 1].set_ylim(0, 2000)
@@ -200,17 +251,20 @@ for idx, fil in enumerate(file_list):
         axs[idx, 1].set_aspect('equal', adjustable='box')
         axs[idx, 1].set_xticks(np.arange(0, 2001, 1000))
         axs[idx, 1].set_yticks(np.arange(0, 2001, 1000))
-
+        axs[idx, 1].tick_params(axis='both', labelsize=8)
+        m, b = fit_l1_line(distance_new, dists_org, bounds=(0, 2000))
+        x = np.linspace(min(distance_new), max(dists_org), 100)
+        axs[idx, 1].plot(x, m * x + b, color='k')
         if time_relative:
-            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=color_at_minus_2)
+            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=color_at_minus_2, s=15)
             axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
             axs[idx, 2].set_xlim(110, 122)
-            #axs[idx, 2].set_ylim(110, 122)
         else:
-            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=color_at_minus_2)
+            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=color_at_minus_2, s=15)
             axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
             axs[idx, 2].set_xscale('log')
             axs[idx, 2].set_yscale('log')
+        axs[idx, 2].tick_params(axis='both', labelsize=8)
         #axs[idx, 2].set_aspect('equal')
 
         # Add a single colorbar for the entire figure
