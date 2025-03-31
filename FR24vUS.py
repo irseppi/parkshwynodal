@@ -82,13 +82,9 @@ file_list = ['C185data_atm_1o.txt','C185data_atm_full.txt','C185data_1o.txt','C1
 title = ['OH/FT','OH/VT','FH/FT','FH/VT']
 
 fig, axs = plt.subplots(4, 3, figsize=(18, 24), sharey=False)
-#fig.suptitle("Flight Radar (Y-axis) vs Nodal Data Inversion (X_axis)")
 
 for idx, fil in enumerate(file_list):
     data = open(fil, 'r')
-
-    # Define time_relative with a default value (True or False based on your requirement)
-    time_relative = True
 
     time_new = []
     v0_new = []
@@ -174,12 +170,9 @@ for idx, fil in enumerate(file_list):
         ta_old = calc_time(tmid,dist_m,height_m,343)
 
         temp_c.append(Tc)
-        if time_relative:
-            time_new.append(float(lines[4]))
-            times_org.append(tarrive - (ta_old-120))
-        else:
-            time_new.append(float(lines[3]))
-            times_org.append(tarrive)
+
+        time_new.append(float(lines[4]))
+        times_org.append(tarrive - (ta_old-120))
 
         v0_new.append(float(lines[5]))
         distance_new.append(float(lines[6]))
@@ -189,40 +182,41 @@ for idx, fil in enumerate(file_list):
         date.append(y)
     if idx == 0 or idx == 1:
         scatter1 = axs[idx, 0].scatter(v0_new, speeds_org, c=temp_c, cmap='coolwarm', s=15)
-        axs[idx, 0].set_title(f"{title[idx]}: Velocity", fontsize=10)
+        axs[idx, 0].set_title(f"{title[idx]}: Velocity (m/s)", fontsize=10)
         axs[idx, 0].set_xlim(50, 80)
         axs[idx, 0].axline((0, 0), slope=1, color='black', linestyle='--')
         axs[idx, 0].set_ylim(50, 80)
         axs[idx, 0].set_aspect('equal')
         axs[idx, 0].set_xticks(np.arange(50, 81, 10))
         axs[idx, 0].set_yticks(np.arange(50, 81, 10))
+        axs[idx, 0].set_xlabel('Nodal Data', fontsize=8)
+        axs[idx, 0].set_ylabel('Flightradar24 Data', fontsize=8)
         axs[idx, 0].tick_params(axis='both', labelsize=8)
         m, b = fit_l1_line(v0_new, speeds_org, bounds=(50, 80))
         x = np.linspace(min(v0_new), max(v0_new), 100)
         axs[idx, 0].plot(x, m * x + b, color='k')
 
         scatter2 = axs[idx, 1].scatter(distance_new, dists_org, c=temp_c, cmap='coolwarm', s=15)
-        axs[idx, 1].set_title(f"{title[idx]}: Distance", fontsize=10)
+        axs[idx, 1].set_title(f"{title[idx]}: Distance (m)", fontsize=10)
         axs[idx, 1].set_xlim(0, 2000)
         axs[idx, 1].set_ylim(0, 2000)
         axs[idx, 1].axline((0, 0), slope=1, color='black', linestyle='--')
         axs[idx, 1].set_aspect('equal', adjustable='box')
         axs[idx, 1].set_xticks(np.arange(0, 2001, 1000))
         axs[idx, 1].set_yticks(np.arange(0, 2001, 1000))
+        axs[idx, 1].set_xlabel('Nodal Data', fontsize=8)
+        axs[idx, 1].set_ylabel('Flightradar24 Data', fontsize=8)
         axs[idx, 1].tick_params(axis='both', labelsize=8)
         m, b = fit_l1_line(distance_new, dists_org, bounds=(0, 2000))
         x = np.linspace(min(distance_new), max(dists_org), 100)
         axs[idx, 1].plot(x, m * x + b, color='k')
 
-        if time_relative:
-            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm', s=15)
-            axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
-            axs[idx, 2].set_xlim(110, 122)
-        else:
-            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm')
-            axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
-            axs[idx, 2].set_xscale('log')
-            axs[idx, 2].set_yscale('log')
+
+        scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=temp_c, cmap='coolwarm', s=15)
+        axs[idx, 2].set_title(f"{title[idx]}: Time (s)", fontsize=10)
+        axs[idx, 2].set_xlim(110, 120)
+        axs[idx, 2].set_xlabel('Nodal Data', fontsize=8)
+        axs[idx, 2].set_ylabel('Flightradar24 Data', fontsize=8)
         axs[idx, 2].tick_params(axis='both', labelsize=8)
 
         cbar = fig.colorbar(scatter1, ax=axs[idx, 2], orientation='vertical', pad=0.1)
@@ -231,45 +225,54 @@ for idx, fil in enumerate(file_list):
         c_temp_array = scatter2
     else:
         scatter1 = axs[idx, 0].scatter(v0_new, speeds_org, c=color_at_minus_2, s=15)
-        axs[idx, 0].set_title(f"{title[idx]}: Velocity", fontsize=10)
+        axs[idx, 0].set_title(f"{title[idx]}: Velocity (m/s)", fontsize=10)
         axs[idx, 0].set_xlim(50, 80)
         axs[idx, 0].axline((0, 0), slope=1, color='black', linestyle='--')
         axs[idx, 0].set_ylim(50, 80)
         axs[idx, 0].set_aspect('equal')
         axs[idx, 0].set_xticks(np.arange(50, 81, 10))
         axs[idx, 0].set_yticks(np.arange(50, 81, 10))
+        axs[idx, 0].set_xlabel('Nodal Data', fontsize=8)
+        axs[idx, 0].set_ylabel('Flightradar24 Data', fontsize=8)
         axs[idx, 0].tick_params(axis='both', labelsize=8)
         m, b = fit_l1_line(v0_new, speeds_org, bounds=(50, 80))
         x = np.linspace(min(v0_new), max(v0_new), 100)
         axs[idx, 0].plot(x, m * x + b, color='k')
 
         scatter2 = axs[idx, 1].scatter(distance_new, dists_org, c=color_at_minus_2, s=15)
-        axs[idx, 1].set_title(f"{title[idx]}: Distance", fontsize=10)
+        axs[idx, 1].set_title(f"{title[idx]}: Distance (m)", fontsize=10)
         axs[idx, 1].set_xlim(0, 2000)
         axs[idx, 1].set_ylim(0, 2000)
         axs[idx, 1].axline((0, 0), slope=1, color='black', linestyle='--')
         axs[idx, 1].set_aspect('equal', adjustable='box')
         axs[idx, 1].set_xticks(np.arange(0, 2001, 1000))
         axs[idx, 1].set_yticks(np.arange(0, 2001, 1000))
+        axs[idx, 1].set_xlabel('Nodal Data', fontsize=8)
+        axs[idx, 1].set_ylabel('Flightradar24 Data', fontsize=8)
         axs[idx, 1].tick_params(axis='both', labelsize=8)
         m, b = fit_l1_line(distance_new, dists_org, bounds=(0, 2000))
         x = np.linspace(min(distance_new), max(dists_org), 100)
         axs[idx, 1].plot(x, m * x + b, color='k')
-        if time_relative:
-            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=color_at_minus_2, s=15)
-            axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
-            axs[idx, 2].set_xlim(110, 122)
-        else:
-            scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=color_at_minus_2, s=15)
-            axs[idx, 2].set_title(f"{title[idx]}: Time", fontsize=10)
-            axs[idx, 2].set_xscale('log')
-            axs[idx, 2].set_yscale('log')
+
+        scatter3 = axs[idx, 2].scatter(np.array(time_new), np.array(times_org), c=color_at_minus_2, s=15)
+        axs[idx, 2].set_title(f"{title[idx]}: Time (s)", fontsize=10)
+        axs[idx, 2].set_xlim(110, 120)
+        axs[idx, 2].set_xlabel('Nodal Data', fontsize=8)
+        axs[idx, 2].set_ylabel('Flightradar24 Data', fontsize=8)
         axs[idx, 2].tick_params(axis='both', labelsize=8)
-        #axs[idx, 2].set_aspect('equal')
 
         # Add a single colorbar for the entire figure
         cbar = fig.colorbar(c_temp_array, ax=axs[idx, 2], orientation='vertical', pad=0.1)
         cbar.set_label('Temperature (°C)')
-plt.tight_layout(rect=[0.122,0.1,0.544,0.989])# Adjust the bottom margin to prevent x-tick labels from being cut off
-plt.subplots_adjust(hspace=0.33, wspace=0.15)
+plt.tight_layout(rect=[0.1, 0.1, 0.9, 0.95])  # Adjust margins for better spacing
+plt.subplots_adjust(hspace=0.4, wspace=0.3)  # Increase spacing between subplots
+
+# Ensure all plots are square, with equal aspect ratio for Velocity and Distance plots
+for ax_row in axs:
+    for i, ax in enumerate(ax_row):
+        if i != 2:  # Velocity and Distance plots
+            ax.set_aspect('equal', adjustable='box')
+        else:  # Time plots
+            ax.set_aspect('auto')  # Allow auto aspect ratio for Time plots
+            ax.set_box_aspect(1)  # Make Time plots square
 plt.show()
