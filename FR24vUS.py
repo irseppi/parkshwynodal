@@ -181,6 +181,16 @@ for idx, fil in enumerate(file_list):
         dists_org.append(dists_list[index_UTC])
         date.append(y)
     if idx == 0 or idx == 1:
+        # Sort the arrays by temperature in descending order
+        sorted_indices = np.argsort(temp_c)[::-1]  # Get indices for sorting by temperature (highest to lowest)
+        v0_new = np.array(v0_new)[sorted_indices]  # Sort x values
+        speeds_org = np.array(speeds_org)[sorted_indices]  # Sort y values
+        distance_new = np.array(distance_new)[sorted_indices]
+        dists_org = np.array(dists_org)[sorted_indices]
+        times_org = np.array(times_org)[sorted_indices]
+        time_new = np.array(time_new)[sorted_indices]
+        temp_c = np.array(temp_c)[sorted_indices]  # Sort temperature values
+        
         scatter1 = axs[idx, 0].scatter(v0_new, speeds_org, c=temp_c, cmap='coolwarm', s=15)
         axs[idx, 0].set_title(f"{title[idx]}: Velocity (m/s)", fontsize=10)
         axs[idx, 0].set_xlim(50, 80)
@@ -190,7 +200,7 @@ for idx, fil in enumerate(file_list):
         axs[idx, 0].set_xticks(np.arange(50, 81, 10))
         axs[idx, 0].set_yticks(np.arange(50, 81, 10))
         axs[idx, 0].set_xlabel('Nodal Data', fontsize=8)
-        axs[idx, 0].set_ylabel('Flightradar24 Data', fontsize=8)
+        axs[idx, 0].set_ylabel('Flightradar24', fontsize=8)
         axs[idx, 0].tick_params(axis='both', labelsize=8)
         m, b = fit_l1_line(v0_new, speeds_org, bounds=(50, 80))
         x = np.linspace(min(v0_new), max(v0_new), 100)
@@ -205,7 +215,7 @@ for idx, fil in enumerate(file_list):
         axs[idx, 1].set_xticks(np.arange(0, 2001, 1000))
         axs[idx, 1].set_yticks(np.arange(0, 2001, 1000))
         axs[idx, 1].set_xlabel('Nodal Data', fontsize=8)
-        axs[idx, 1].set_ylabel('Flightradar24 Data', fontsize=8)
+        axs[idx, 1].set_ylabel('Flightradar24', fontsize=8)
         axs[idx, 1].tick_params(axis='both', labelsize=8)
         m, b = fit_l1_line(distance_new, dists_org, bounds=(0, 2000))
         x = np.linspace(min(distance_new), max(dists_org), 100)
@@ -216,7 +226,7 @@ for idx, fil in enumerate(file_list):
         axs[idx, 2].set_title(f"{title[idx]}: Time (s)", fontsize=10)
         axs[idx, 2].set_xlim(110, 120)
         axs[idx, 2].set_xlabel('Nodal Data', fontsize=8)
-        axs[idx, 2].set_ylabel('Flightradar24 Data', fontsize=8)
+        axs[idx, 2].set_ylabel('Flightradar24', fontsize=8)
         axs[idx, 2].tick_params(axis='both', labelsize=8)
 
         cbar = fig.colorbar(scatter1, ax=axs[idx, 2], orientation='vertical', pad=0.1)
@@ -233,7 +243,7 @@ for idx, fil in enumerate(file_list):
         axs[idx, 0].set_xticks(np.arange(50, 81, 10))
         axs[idx, 0].set_yticks(np.arange(50, 81, 10))
         axs[idx, 0].set_xlabel('Nodal Data', fontsize=8)
-        axs[idx, 0].set_ylabel('Flightradar24 Data', fontsize=8)
+        axs[idx, 0].set_ylabel('Flightradar24', fontsize=8)
         axs[idx, 0].tick_params(axis='both', labelsize=8)
         m, b = fit_l1_line(v0_new, speeds_org, bounds=(50, 80))
         x = np.linspace(min(v0_new), max(v0_new), 100)
@@ -248,7 +258,7 @@ for idx, fil in enumerate(file_list):
         axs[idx, 1].set_xticks(np.arange(0, 2001, 1000))
         axs[idx, 1].set_yticks(np.arange(0, 2001, 1000))
         axs[idx, 1].set_xlabel('Nodal Data', fontsize=8)
-        axs[idx, 1].set_ylabel('Flightradar24 Data', fontsize=8)
+        axs[idx, 1].set_ylabel('Flightradar24', fontsize=8)
         axs[idx, 1].tick_params(axis='both', labelsize=8)
         m, b = fit_l1_line(distance_new, dists_org, bounds=(0, 2000))
         x = np.linspace(min(distance_new), max(dists_org), 100)
@@ -258,13 +268,13 @@ for idx, fil in enumerate(file_list):
         axs[idx, 2].set_title(f"{title[idx]}: Time (s)", fontsize=10)
         axs[idx, 2].set_xlim(110, 120)
         axs[idx, 2].set_xlabel('Nodal Data', fontsize=8)
-        axs[idx, 2].set_ylabel('Flightradar24 Data', fontsize=8)
+        axs[idx, 2].set_ylabel('Flightradar24', fontsize=8)
         axs[idx, 2].tick_params(axis='both', labelsize=8)
 
         # Add a single colorbar for the entire figure
         cbar = fig.colorbar(c_temp_array, ax=axs[idx, 2], orientation='vertical', pad=0.1)
         cbar.set_label('Temperature (°C)')
-plt.tight_layout(rect=[0.1, 0.1, 0.9, 0.95])  # Adjust margins for better spacing
+plt.tight_layout() #rect=[0.1, 0.1, 0.9, 0.95])  # Adjust margins for better spacing
 plt.subplots_adjust(hspace=0.4, wspace=0.3)  # Increase spacing between subplots
 
 # Ensure all plots are square, with equal aspect ratio for Velocity and Distance plots
