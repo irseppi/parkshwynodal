@@ -128,10 +128,10 @@ for flight_num in flights:
     lat = np.array(points_lat[flight_num])
     lon = np.array(points_lon[flight_num])
     med = np.array(all_med[flight_num])
-
+    print(lat,lon)
     fig = pygmt.Figure()
 
-    grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.35, -150.05, 62.29, 63.15], registration="pixel")
+    grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.3, -150.05, 62.29, 63.15], registration="pixel")
     pygmt.config(MAP_FRAME_TYPE = 'plain',FORMAT_GEO_MAP="ddd.x")
 
     fig.grdimage(grid=grid, projection="M15c",frame="WSne",cmap="geo")
@@ -139,28 +139,36 @@ for flight_num in flights:
     fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR+o0.5c/5.5c+w10c/0.5c")
     fig.plot(x=np.array(f_lon), y=np.array(f_lat),pen="1p,black") 
 
-    for i in range(len(flight_latitudes) - 1):
-        angle = np.arctan2(np.array(flight_latitudes)[i + 1] - np.array(flight_latitudes)[i],np.array(flight_longitudes)[i + 1] - np.array(flight_longitudes)[i])
-        angle = np.degrees(angle)
-        no = np.sqrt((np.array(flight_longitudes)[i + 1] - np.array(flight_longitudes)[i]) ** 2 + (np.array(flight_latitudes)[i + 1] - np.array(flight_latitudes)[i]) ** 2)
-
-        if i == 0 or i == len(flight_latitudes)-2:
-            fig.plot(x=[np.array(flight_longitudes)[i]],y=[np.array(flight_latitudes)[i]],style="v0.1c+e",direction=[[angle], [0.2]],fill='black',pen="0.5p,black")
+    for i in range(len(f_lat) - 1):
+        if i == 0 or i == len(f_lat)-2:
+            angle = np.arctan2(np.array(f_lat)[i + 1] - np.array(f_lat)[i],np.array(f_lon)[i + 1] - np.array(f_lon)[i])
+            angle = np.degrees(angle)
+            no = np.sqrt((np.array(f_lon)[i + 1] - np.array(f_lon)[i]) ** 2 + (np.array(f_lat)[i + 1] - np.array(f_lat)[i]) ** 2)
+            fig.plot(x=[np.array(f_lon)[i]],y=[np.array(f_lat)[i]],style="v0.1c+e",direction=[[angle], [0.2]],fill='black',pen="0.5p,black")
 
     fig.plot(x=seismo_longitudes, y=seismo_latitudes, style="x0.2c",pen="01p,black")
     fig.plot(x=-150.1072713049972, y=62.30091781635389, style="x0.3c",pen="02p,pink")
     pygmt.makecpt(cmap="gmt/seis", series=[np.min(med)-0.1,np.max(med)+0.1]) 
     yy = fig.plot(x=lon, y=lat, style="c0.3c",fill=med, pen="black", cmap=True) 
-
     fig.colorbar(frame=["a1", 'xaf+l\u0394'+'F (Hz)'], position="JMR+o0.5c/-5.5c+w10c/0.5c")
 
-    # Add a zoomed-in map in the lower left corner
-    fig.inset(data=[np.min(lon)-0.01, np.max(lon)+0.01, np.min(lat)-0.01, np.max(lat)+0.01], width="2c", height="1c", position="jBL+w2c/1c+o0.5c/0.5c", box="+pblack")
-    fig.grdimage(grid=grid, projection="M5c", region=[np.min(lon)-0.01, np.max(lon)+0.01, np.min(lat)-0.01, np.max(lat)+0.01], frame=False, cmap="geo")
-    fig.plot(x=np.array(f_lon), y=np.array(f_lat), pen="1p,black")
-    pygmt.makecpt(cmap="gmt/seis", series=[np.min(med) - 0.1, np.max(med) + 0.1])
-    fig.plot(x=lon, y=lat, style="c0.3c", fill=med, pen="black", cmap=True)
-    
-    fig.show()
+    pygmt.config(MAP_FRAME_TYPE = 'plain',FORMAT_GEO_MAP="ddd.xxx")
+    zoom_region = [np.min(lon) - 0.01, np.max(lon) + 0.01, np.min(lat) - 0.01, np.max(lat)+ 0.01]
+    grid_inset = pygmt.datasets.load_earth_relief(resolution="15s", region=zoom_region, registration="pixel")
 
+    cmap_limits = [float(np.min(grid)), float(np.max(grid))]  # Get min and max elevation values
+    pygmt.makecpt(cmap="geo", series=cmap_limits, continuous=True)
+
+    with fig.inset(position="JML+o0.5i/0i+w3i/3i", region=zoom_region):
+        fig.grdimage(grid=grid_inset, region=zoom_region, projection="M4c", frame="WSne", cmap=True)
+        #fig.basemap(frame=["WSne", "xaf+lx-axis", "yaf+ly-axis"], region=zoom_region, )
+        fig.plot(x=np.array(f_lon), y=np.array(f_lat), pen="1p,black") 
+
+        fig.plot(x=seismo_longitudes, y=seismo_latitudes, style="x0.2c",pen="01p,black")
+
+        pygmt.makecpt(cmap="gmt/seis", series=[np.min(med) - 0.1, np.max(med) + 0.1]) 
+        yy = fig.plot(x=lon, y=lat, style="c0.3c",fill=med, pen="black", cmap=True) 
+
+    fig.savefig("output.png", crop=True, dpi=300)
+    fig.show(method="external") 
     break
