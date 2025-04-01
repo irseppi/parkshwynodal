@@ -138,30 +138,32 @@ for flight_num in flights:
     ): 
         with fig.set_panel(panel=[0,1]):
             grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.2, -150.05, 62.29, 63.15], registration="pixel")
-            pygmt.config(MAP_FRAME_TYPE = 'plain',FORMAT_GEO_MAP="ddd.x")
+            pygmt.config(MAP_FRAME_TYPE='plain', FORMAT_GEO_MAP="ddd.xx")
             proj = "M15c"
-            fig.grdimage(grid=grid, projection=proj,frame="WSne",cmap="geo")
-            fig.basemap(frame=["WSne", "xaf+lx-axis", "yaf+ly-axis"], projection=proj)
+            fig.grdimage(grid=grid, projection=proj, frame="a", cmap="geo")
+            #fig.basemap(frame=["WS", "xaf+lx-axis", "yaf+ly-axis"], projection=proj)
             fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR+o8c/6c+w11.5c/0.5c")
-            fig.plot(x=np.array(f_lon), y=np.array(f_lat),pen="1p,black", projection=proj) 
+            fig.plot(x=np.array(f_lon), y=np.array(f_lat), pen="1p,black", projection=proj)
 
             for i in range(len(f_lat) - 1):
-                if i == 0 or i == len(f_lat)-2:
-                    angle = np.arctan2(np.array(f_lat)[i + 1] - np.array(f_lat)[i],np.array(f_lon)[i + 1] - np.array(f_lon)[i])
+                if i == 0 or i == len(f_lat) - 2:
+                    angle = np.arctan2(np.array(f_lat)[i + 1] - np.array(f_lat)[i], np.array(f_lon)[i + 1] - np.array(f_lon)[i])
                     angle = np.degrees(angle)
                     no = np.sqrt((np.array(f_lon)[i + 1] - np.array(f_lon)[i]) ** 2 + (np.array(f_lat)[i + 1] - np.array(f_lat)[i]) ** 2)
-                    fig.plot(x=[np.array(f_lon)[i]],y=[np.array(f_lat)[i]],style="v0.1c+e",direction=[[angle], [0.2]],fill='black',pen="0.5p,black", projection=proj)
+                    fig.plot(x=[np.array(f_lon)[i]], y=[np.array(f_lat)[i]], style="v0.1c+e", direction=[[angle], [0.2]], fill='black', pen="0.5p,black", projection=proj)
 
-            fig.plot(x=seismo_longitudes, y=seismo_latitudes, style="x0.2c",pen="01p,black", projection=proj)
-            fig.plot(x=-150.1072713049972, y=62.30091781635389, style="x0.3c",pen="02p,pink", projection=proj)
-            pygmt.makecpt(cmap="gmt/seis", series=[np.min(med)-0.1,np.max(med)+0.1]) 
-            yy = fig.plot(x=lon, y=lat, style="c0.3c",fill=med, pen="black", cmap=True, projection=proj) 
-            fig.colorbar(frame=["a1", 'xaf+l\u0394'+'F (Hz)'], position="JMR+o8c/-6.5c+w11.5c/0.5c")
+            fig.plot(x=seismo_longitudes, y=seismo_latitudes, style="x0.2c", pen="01p,black", projection=proj)
+            fig.plot(x=-150.1072713049972, y=62.30091781635389, style="x0.3c", pen="02p,pink", projection=proj)
+            pygmt.makecpt(cmap="gmt/seis", series=[np.min(med), np.max(med)])
+            yy = fig.plot(x=lon, y=lat, style="c0.3c", fill=med, pen="black", cmap=True, projection=proj)
+            fig.colorbar(frame=["a0.5f0.1", 'xaf+l\u0394'+'F (Hz)'], position="JMR+o8c/-6.5c+w11.5c/0.5c")
 
-            zoom_region = [np.min(lon) - 0.01, np.max(lon) + 0.01, np.min(lat) - 0.01, np.max(lat)+ 0.01]
+            zoom_region = [np.min(lon) - 0.01, np.max(lon) + 0.01, np.min(lat) - 0.01, np.max(lat) + 0.01]
             rectangle = [[zoom_region[0], zoom_region[2], zoom_region[1], zoom_region[3]]]
             fig.plot(data=rectangle, style="r+s", pen="0.5p,black", projection=proj)
 
+            # Adjust tick formatting to avoid repeated ticks
+            pygmt.config(FORMAT_GEO_MAP="ddd.x", MAP_TICK_PEN_PRIMARY="0.5p,black", MAP_ANNOT_OFFSET_PRIMARY="0.2c")
 
         with fig.set_panel(panel=[0,0]):
             zoom_region = [np.min(lon) - 0.01, np.max(lon) + 0.01, np.min(lat) - 0.01, np.max(lat)+ 0.01]
@@ -174,7 +176,7 @@ for flight_num in flights:
             pygmt.makecpt(cmap="geo", series=cmap_limits, continuous=True)
         
             fig.grdimage(grid=grid_inset, region=zoom_region, projection=proj, frame="a", cmap=True)
-            fig.basemap(frame=["WSne", "xaf+lx-axis", "yaf+ly-axis"], region=zoom_region, projection=proj)
+            #fig.basemap(frame=["WS", "xaf+lx-axis", "yaf+ly-axis"], region=zoom_region, projection=proj)
             fig.plot(x=np.array(f_lon), y=np.array(f_lat), projection=proj, pen="1p,black") 
 
             fig.plot(x=seismo_longitudes, y=seismo_latitudes, projection=proj, style="x0.2c", pen="01p,black")
