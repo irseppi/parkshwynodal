@@ -159,9 +159,9 @@ for flight_num in flights:
     cmap_limits = [float(np.min(grid)), float(np.max(grid))]  # Get min and max elevation values
     pygmt.makecpt(cmap="geo", series=cmap_limits, continuous=True)
 
-    with fig.inset(position="JML+o0.5i/0i+w3i/3i", region=zoom_region):
-        fig.grdimage(grid=grid_inset, region=zoom_region, projection="M4c", frame="WSne", cmap=True)
-        #fig.basemap(frame=["WSne", "xaf+lx-axis", "yaf+ly-axis"], region=zoom_region, )
+    with fig.inset(position="JML+o0.5i/0i+w4i/4i", region=zoom_region):
+        fig.grdimage(grid=grid_inset, region=zoom_region, projection="T15c/-145/0", frame="a", cmap=True) #M4c
+        fig.basemap(frame=["WSne", "xaf+lx-axis", "yaf+ly-axis"], region=zoom_region )
         fig.plot(x=np.array(f_lon), y=np.array(f_lat), pen="1p,black") 
 
         fig.plot(x=seismo_longitudes, y=seismo_latitudes, style="x0.2c",pen="01p,black")
