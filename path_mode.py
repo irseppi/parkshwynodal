@@ -154,7 +154,7 @@ for flight_num in flights:
 
                     fig.plot(x=seismo_longitudes, y=seismo_latitudes, style="x0.2c", pen="01p,black", projection=proj)
                     fig.plot(x=-150.1072713049972, y=62.30091781635389, style="x0.3c", pen="02p,pink", projection=proj)
-                    pygmt.makecpt(cmap="gmt/seis", series=[np.min(med), np.max(med)])
+                    pygmt.makecpt(cmap="gmt/seis", series=[np.min(med)-0.01, np.max(med)+0.01])
                     yy = fig.plot(x=lon, y=lat, style="c0.3c", fill=med, pen="black", cmap=True, projection=proj)
                     fig.colorbar(frame=["a0.5f0.1", 'xaf+l\u0394'+'F (Hz)'], position="JMR+o8c/-6.5c+w11.5c/0.5c")
 
@@ -177,16 +177,13 @@ for flight_num in flights:
 
                     fig.plot(x=seismo_longitudes, y=seismo_latitudes, projection=proj, style="x0.2c", pen="01p,black")
 
-                    pygmt.makecpt(cmap="gmt/seis", series=[np.min(med) - 0.1, np.max(med) + 0.1]) 
+                    pygmt.makecpt(cmap="gmt/seis", series=[np.min(med)-0.01, np.max(med)+0.01]) 
                     yy = fig.plot(x=lon, y=lat, style="c0.3c", fill=med, projection=proj, pen="black", cmap=True) 
-        fig.shift_origin(yshift="-4c")
-        with fig.subplot(nrows=1, ncols=1, figsize=("20c", "5c"), margins=["0.1c", "0.1c"],autolabel=False):
+        fig.shift_origin(yshift="-5c")
+        with fig.subplot(nrows=1, ncols=1, figsize=("27c", "10c"), margins=["0.1c", "0.1c"],autolabel=False):
             fig.basemap(
                 region=[0, 30, 0, 6000],  # x_min, x_max, y_min, y_max
-                # Cartesian projection with a width of 12 centimeters and a height of 3 centimeters
-                projection="X16c/3c",
-                # Add annotations ("a") and ticks ("f") as well as labels ("+l") at the west or
-                # left and south or bottom sides ("WSrt")
+                projection="X24.5c/4c",
                 frame=["WSrt", "xa2f1+lDistance / m", "ya4000+lElevation / m"],
             )
 
