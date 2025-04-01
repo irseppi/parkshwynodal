@@ -133,16 +133,16 @@ for flight_num in flights:
     with fig.subplot(
         nrows=1,
         ncols=2,
-        subsize=("8c", "4c"),
-        margins=["0.5c", "0.75c"],
-    ):
-        with fig.set_panel(panel=1, height="15c"):
+        figsize=("16c", "25c"),
+        margins=["0.1c", "0.1c"],autolabel=False,
+    ): 
+        with fig.set_panel(panel=[0,1]):
             grid = pygmt.datasets.load_earth_relief(resolution="15s", region=[-151.2, -150.05, 62.29, 63.15], registration="pixel")
             pygmt.config(MAP_FRAME_TYPE = 'plain',FORMAT_GEO_MAP="ddd.x")
             proj = "M15c"
             fig.grdimage(grid=grid, projection=proj,frame="WSne",cmap="geo")
             fig.basemap(frame=["WSne", "xaf+lx-axis", "yaf+ly-axis"], projection=proj)
-            fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR+o0.5c/5.5c+w10c/0.5c")
+            fig.colorbar(frame=["a1000", "x+lElevation (m)"], position="JMR+o8c/6c+w11.5c/0.5c")
             fig.plot(x=np.array(f_lon), y=np.array(f_lat),pen="1p,black", projection=proj) 
 
             for i in range(len(f_lat) - 1):
@@ -156,22 +156,23 @@ for flight_num in flights:
             fig.plot(x=-150.1072713049972, y=62.30091781635389, style="x0.3c",pen="02p,pink", projection=proj)
             pygmt.makecpt(cmap="gmt/seis", series=[np.min(med)-0.1,np.max(med)+0.1]) 
             yy = fig.plot(x=lon, y=lat, style="c0.3c",fill=med, pen="black", cmap=True, projection=proj) 
-            fig.colorbar(frame=["a1", 'xaf+l\u0394'+'F (Hz)'], position="JMR+o0.5c/-5.5c+w10c/0.5c")
+            fig.colorbar(frame=["a1", 'xaf+l\u0394'+'F (Hz)'], position="JMR+o8c/-6.5c+w11.5c/0.5c")
 
             zoom_region = [np.min(lon) - 0.01, np.max(lon) + 0.01, np.min(lat) - 0.01, np.max(lat)+ 0.01]
             rectangle = [[zoom_region[0], zoom_region[2], zoom_region[1], zoom_region[3]]]
             fig.plot(data=rectangle, style="r+s", pen="0.5p,black", projection=proj)
-        with fig.set_panel(panel=0, height="15c"):
+
+
+        with fig.set_panel(panel=[0,0]):
             zoom_region = [np.min(lon) - 0.01, np.max(lon) + 0.01, np.min(lat) - 0.01, np.max(lat)+ 0.01]
             pygmt.config(MAP_FRAME_TYPE = 'plain',FORMAT_GEO_MAP="ddd.xxx")
             grid_inset = pygmt.datasets.load_earth_relief(resolution="15s", region=zoom_region, registration="pixel")
             cent_lon =  str(((np.max(lon) + 0.01) - np.min(lon) - 0.01)/2 + (np.min(lon) - 0.01))
             cent_lat = str(((np.max(lat) + 0.01) - np.min(lat) - 0.01)/2 + (np.min(lat) - 0.01))
-            proj = "M3c" #"T"+cent_lon+"/"+cent_lat + "/3c"
+            proj = "M6.8c"
             cmap_limits = [float(np.min(grid)), float(np.max(grid))]  # Get min and max elevation values
             pygmt.makecpt(cmap="geo", series=cmap_limits, continuous=True)
         
-            #with fig.inset(position="JML+o0.5c/0c+w5c", margin = 0, region=zoom_region):
             fig.grdimage(grid=grid_inset, region=zoom_region, projection=proj, frame="a", cmap=True)
             fig.basemap(frame=["WSne", "xaf+lx-axis", "yaf+ly-axis"], region=zoom_region, projection=proj)
             fig.plot(x=np.array(f_lon), y=np.array(f_lat), projection=proj, pen="1p,black") 
@@ -180,6 +181,7 @@ for flight_num in flights:
 
             pygmt.makecpt(cmap="gmt/seis", series=[np.min(med) - 0.1, np.max(med) + 0.1]) 
             yy = fig.plot(x=lon, y=lat, style="c0.3c", fill=med, projection=proj, pen="black", cmap=True) 
-
-            fig.show() 
+    fig.savefig("output.png")
+    fig.show(verbose="i") 
+        
     break
