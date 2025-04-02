@@ -260,11 +260,11 @@ for flight_num in flights:
             color_fill = np.full_like(distance_grid, 0)  # Initialize with NaN
             for i,value_1 in enumerate(distance_grid):
                 for j,value_2 in enumerate(elevation_grid):
-                    if value_2 < elevation_grid[j]:
+                    if value_2 < ev[j]:
                         ev[i,j] = value_2
-                        color_fill[:, i] = ev[i]  # Fill with elevation values
+                        color_fill[i, j] = elevation_grid[j]  # Fill with elevation values
                     else:
-                        color_fill[:, i] = np.nan  # Leave as NaN for areas outside interpolated points
+                        color_fill[i, j] = -4  # Leave as NaN for areas outside interpolated points
             print(color_fill)
     fig.savefig("output.png")
     fig.show(verbose="i") 
