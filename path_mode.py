@@ -37,6 +37,9 @@ flights = []
 tail = {}
 flight_lat = {}
 flight_lon = {}
+flight_alt = {}
+UTM_km_x = {}
+UTM_km_y = {}
 # Iterate over each line in the file
 for line in file.readlines():
     lines = line.split(',')
@@ -46,6 +49,7 @@ for line in file.readlines():
     flight_data = pd.read_csv(flight_file, sep=",")
     flight_latitudes = flight_data['latitude'] 
     flight_longitudes = flight_data['longitude']
+    alt = flight_data['altitude'] * 0.3048  # Convert altitude from feet to meters
 
     # Convert flight latitude and longitude to UTM coordinates
     flight_utm = [utm_proj(lon, lat) for lat, lon in zip(flight_latitudes, flight_longitudes)]
@@ -108,8 +112,14 @@ for line in file.readlines():
         tail[flight_num] = []
         flight_lat[flight_num] = []
         flight_lon[flight_num] = []
+        flight_alt[flight_num] = []
+        UTM_km_x[flight_num] = []
+        UTM_km_y[flight_num] = []
         flight_lat[flight_num].extend(flight_latitudes)
         flight_lon[flight_num].extend(flight_longitudes)
+        UTM_km_x[flight_num].extend(flight_utm_x_km)
+        UTM_km_y[flight_num].extend(flight_utm_y_km)
+        flight_alt[flight_num].extend(alt)
         tail[flight_num].extend([tail_num])
     all_med[flight_num].extend([np.nanmedian(f1)])
     points_lat[flight_num].extend([closest_lat])
@@ -125,10 +135,23 @@ for flight_num in flights:
     tail_num = tail[flight_num][0]
     f_lat = flight_lat[flight_num]
     f_lon = flight_lon[flight_num]
+    alt_t = flight_alt[flight_num]
     lat = np.array(points_lat[flight_num])
     lon = np.array(points_lon[flight_num])
     med = np.array(all_med[flight_num])
-
+    fxx = np.array(UTM_km_x[flight_num])
+    fyy = np.array(UTM_km_y[flight_num])
+    print(len(fxx))
+    print(len(alt_t))
+    #Create array of distance along path 
+    dist_p = np.zeros(len(fxx))
+    print(len(dist_p))
+    
+    dist_hold = 0
+    for i in range(len(fxx)-2):
+        dist_p[i] = np.sqrt((np.array(fxx)[i+1] - np.array(fxx)[i]) ** 2 + (np.array(fyy)[i + 1] - np.array(fyy)[i]) ** 2) + dist_hold
+        dist_hold = dist_p[i]
+    
     fig = pygmt.Figure()
     with pygmt.config(MAP_DEGREE_SYMBOL= "none"):
         with fig.subplot(
@@ -179,15 +202,70 @@ for flight_num in flights:
 
                     pygmt.makecpt(cmap="gmt/seis", series=[np.min(med)-0.01, np.max(med)+0.01]) 
                     yy = fig.plot(x=lon, y=lat, style="c0.3c", fill=med, projection=proj, pen="black", cmap=True) 
-        fig.shift_origin(yshift="-5c")
+        fig.shift_origin(yshift="-8c")
+        proj = "X24.5c/6c"
         with fig.subplot(nrows=1, ncols=1, figsize=("27c", "10c"), margins=["0.1c", "0.1c"],autolabel=False):
             fig.basemap(
-                region=[0, 30, 0, 6000],  # x_min, x_max, y_min, y_max
-                projection="X24.5c/4c",
-                frame=["WSrt", "xa2f1+lDistance / m", "ya4000+lElevation / m"],
+                region=[0, np.max(dist_p), 0,np.max(alt_t)+100],  # x_min, x_max, y_min, y_max
+                projection=proj,
+                frame=["WSrt", "xa20+lDistance / m", "ya1000+lElevation / m"], 
             )
 
 
+            points = pd.DataFrame({'longitude': [], 'latitude': []})
+            for i in range(len(f_lon[:-2]) - 1):
+                lon_segment = np.linspace(f_lon[i], f_lon[i + 1], 100)  # 10 intermediate points + start and end
+                lat_segment = np.linspace(f_lat[i], f_lat[i + 1], 100)
+                points = pd.concat([points, pd.DataFrame({'longitude': lon_segment, 'latitude': lat_segment})], ignore_index=True)
+            elevation_data = pygmt.grdtrack(
+                grid=grid,
+                points=points,
+                newcolname="elevation",
+            )      
+            ev = elevation_data['elevation'].values   
+            fig.plot(
+                x=[0, np.max(dist_p), np.max(dist_p), 0],
+                y=[0, 0, np.max(alt_t)+100, np.max(alt_t)+100],
+                fill="lightblue",
+                projection=proj,
+                close=True
+            )
+            print(dist_p)
+            print(alt_t)
+            fig.plot(x=np.array(dist_p[:-2]), y=np.array(alt_t[:-2]), pen="1p,black",projection=proj) #, projection="X24.5c/4c",pen="1p,black")
+
+            # Interpolate 10 evenly spaced points between each pair of dist_p and ev
+            interpolated_dist_p = []
+            for i in range(len(dist_p[:-2]) - 1):
+                dist_segment = np.linspace(dist_p[i], dist_p[i + 1], 100)  # 10 intermediate points + start and end
+                interpolated_dist_p.extend(dist_segment)
+   
+            cmap_limits = [float(np.min(grid)), float(np.max(grid))]  # Get min and max elevation values
+            pygmt.makecpt(cmap="geo", series=cmap_limits, continuous=True)
+            fig.plot(
+                x=np.array(interpolated_dist_p),
+                y=np.array(ev),
+                pen="1p,black",
+                fill=ev,  # Fill based on elevation values
+                projection=proj,
+                cmap=True
+            )
+            # Create a mesh grid for distance and elevation
+            distance_grid, elevation_grid = np.meshgrid(
+                np.linspace(0, np.max(dist_p), len(interpolated_dist_p)),
+                np.linspace(0, np.max(ev) + 100, 100)
+            )
+            
+            # Fill the mesh grid with elevation values for color mapping
+            color_fill = np.full_like(distance_grid, 0)  # Initialize with NaN
+            for i,value_1 in enumerate(distance_grid):
+                for j,value_2 in enumerate(elevation_grid):
+                    if value_2 < elevation_grid[j]:
+                        ev[i,j] = value_2
+                        color_fill[:, i] = ev[i]  # Fill with elevation values
+                    else:
+                        color_fill[:, i] = np.nan  # Leave as NaN for areas outside interpolated points
+            print(color_fill)
     fig.savefig("output.png")
     fig.show(verbose="i") 
         
