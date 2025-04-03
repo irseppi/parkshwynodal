@@ -4,6 +4,7 @@ import pandas as pd
 import pyproj
 import pygmt
 from prelude import *
+from scipy.interpolate import interp1d
 
 #Load seismometer data
 seismo_data = pd.read_csv('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_sta.txt', sep="|")
@@ -198,87 +199,108 @@ for flight_num in flights:
 
                     pygmt.makecpt(cmap="gmt/seis", series=[np.min(med)-0.01, np.max(med)+0.01]) 
                     yy = fig.plot(x=lon, y=lat, style="c0.3c", fill=med, projection=proj, pen="black", cmap=True) 
+
         fig.shift_origin(yshift="-8c")
         proj = "X24.5c/6c"
         with fig.subplot(nrows=1, ncols=1, figsize=("27c", "10c"), margins=["0.1c", "0.1c"],autolabel=False):
-            fig.basemap(
-                region=[0, np.max(dist_p), 0,np.max(alt_t)+100],  # x_min, x_max, y_min, y_max
-                projection=proj,
-                frame=["WSrt", "xa20+lDistance / m", "ya1000+lElevation / m"], 
-            )
 
             points = pd.DataFrame({'longitude': [], 'latitude': []})
             for i in range(len(f_lon[:-2]) - 1):
-                lon_segment = np.linspace(f_lon[i], f_lon[i + 1], 10)  # 10 intermediate points + start and end
-                lat_segment = np.linspace(f_lat[i], f_lat[i + 1], 10)
+                lon_segment = np.linspace(f_lon[i], f_lon[i + 1])  # 10 intermediate points + start and end
+                lat_segment = np.linspace(f_lat[i], f_lat[i + 1])
                 points = pd.concat([points, pd.DataFrame({'longitude': lon_segment, 'latitude': lat_segment})], ignore_index=True)
-            
+
             elevation_data = pygmt.grdtrack(
                 grid=grid,
                 points=points,
                 newcolname="elevation",
+                resample="r",
             )      
-            ev = elevation_data['elevation'].values   
+
+            ev = elevation_data['elevation'].values  
+            ev_lat = elevation_data['latitude'].values
+            ev_lon = elevation_data['longitude'].values
+
+            # Convert flight latitude and longitude to UTM coordinates
+            ev_utm = [utm_proj(lon, lat) for lat, lon in zip(ev_lat, ev_lon)]
+            ev_utm_x, ev_utm_y = zip(*ev_utm)
+
+            ev_utm_x_km = [x / 1000 for x in ev_utm_x]
+            ev_utm_y_km = [y / 1000 for y in ev_utm_y]
+
+            interpolated_dist_p = np.zeros(len(ev_utm_x_km))
+            dist_hold = 0
+            for i in range(len(ev_utm_x_km)-2):
+                interpolated_dist_p[i] = np.sqrt((np.array(ev_utm_x_km)[i+1] - np.array(ev_utm_x_km)[i]) ** 2 + (np.array(ev_utm_y_km)[i + 1] - np.array(ev_utm_y_km)[i]) ** 2) + dist_hold
+                dist_hold = interpolated_dist_p[i] 
+
+            distance_grid, elevation_grid = np.meshgrid(
+            interpolated_dist_p,
+            np.linspace(np.min(ev), np.max(alt_t) + 100, len(interpolated_dist_p))
+            )
+            # Fill the mesh grid with elevation values for color mapping
+            color_fill = np.full_like(distance_grid, 0)  # Initialize with NaN
+            for row in range(len(elevation_grid)):
+                for col in range(len(elevation_grid[row])):
+                    if elevation_grid[row, col] <= float(ev[col]):
+                        color_fill[row, col] = elevation_grid[row, col]
+                    else:
+                        color_fill[row, col] = np.nan  
+
+            # Turn grids into 1D arrays
+            distance_grid = distance_grid.flatten()
+            elevation_grid = elevation_grid.flatten()
+            color_fill = color_fill.flatten()
+
+            num_cells = 620  # between 600 and 650
+            space_x = (np.max(distance_grid) - np.min(distance_grid)) / num_cells
+            space_y = (np.max(elevation_grid) - np.min(elevation_grid)) / num_cells
+            grid_y_min, grid_y_max = np.min(elevation_grid), np.max(elevation_grid)
+            outline_y_min, outline_y_max = np.min(ev), np.max(ev)
+
+            # Choose the larger range to ensure both the grid and outline fit
+            y_min = min(grid_y_min, outline_y_min)
+            y_max = max(grid_y_max, outline_y_max)
+
+            # Ensure the region covers both grid and outline
+            prof_region = [0, np.max(distance_grid), y_min, y_max]
+            fig.basemap(
+                region=prof_region,  # x_min, x_max, y_min, y_max
+                projection=proj,
+                frame=["WSrt", "xa20+lDistance / km", "ya1000+lElevation / m"], 
+            )
 
             fig.plot(
                 x=[0, np.max(dist_p), np.max(dist_p), 0],
-                y=[0, 0, np.max(alt_t)+100, np.max(alt_t)+100],
+                y=[np.min(ev), np.min(ev), np.max(alt_t)+100, np.max(alt_t)+100],
                 fill="lightblue",
                 projection=proj,
                 close=True
             )
 
-            # Interpolate 10 evenly spaced points between each pair of dist_p and ev
-            interpolated_dist_p = []
-            for i in range(len(dist_p[:-2]) - 1):
-                dist_segment = np.linspace(dist_p[i], dist_p[i + 1], 10)  # 10 intermediate points + start and end
-                interpolated_dist_p.extend(dist_segment)
-
-            #dist_x, elv_y = np.meshgrid(np.arange(len(interpolated_dist_p)), np.arange(len(ev)))
-            distance_grid, elevation_grid = np.meshgrid(
-            np.linspace(0, np.max(dist_p), len(interpolated_dist_p)),
-            np.linspace(0, np.max(ev) + 100, len(interpolated_dist_p))
+            c_fill = pygmt.xyz2grd(
+                x=distance_grid, 
+                y=elevation_grid, 
+                z=color_fill, 
+                projection=proj, 
+                region=prof_region, 
+                spacing=(space_x, space_y)
             )
-            cmap_limits = [float(np.min(grid)), float(np.max(grid))]  # Get min and max elevation values
+            cmap_limits = [float(np.min(grid)), float(np.max(grid))]  # Include light blue value in the range
             pygmt.makecpt(cmap="geo", series=cmap_limits, continuous=True)
-            # Fill the mesh grid with elevation values for color mapping
-            color_fill = np.full_like(distance_grid, 0)  # Initialize with NaN
 
-            for j,value_2 in enumerate(elevation_grid):
-                for i,value_1 in enumerate(distance_grid):
-                    if value_2[i] <= float(ev[i]):
-                        color_fill[i,j] = value_2[i]
-                    else:
-                        color_fill[i, j] = -1000  # Leave as NaN for areas outside interpolated points
-            print(color_fill)
-            #trurn grids into 1D arrays
-            distance_grid = distance_grid.flatten()
-            elevation_grid = elevation_grid.flatten()
-            color_fill = color_fill.flatten()
+            # Apply the color palette table to the grid
+            fig.grdimage(grid=c_fill, projection=proj, region=prof_region, cmap=True, nan_transparent=True)
 
-            c_fill = pygmt.xyz2grd(x=distance_grid, y=elevation_grid, z = color_fill, projection=proj, region=[0, np.max(dist_p), 0,np.max(alt_t)+100],spacing = (np.max(dist_p)/len(interpolated_dist_p),(np.max(alt_t)+100)/len(ev)))
-            print(c_fill)
-            cmap_limits = [float(np.min(grid)), float(np.max(grid))]  # Get min and max elevation values
-            pygmt.makecpt(cmap="geo", series=cmap_limits, continuous=True)
-            fig.grdimage(grid=c_fill, projection=proj, cmap=True)
-
-            fig.plot(x=np.array(dist_p[:-2]), y=np.array(alt_t[:-2]), pen="1p,black", projection=proj)
+            fig.plot(x=np.array(dist_p[:-2]), y=np.array(alt_t[:-2]), pen="2p,black", region=prof_region, projection=proj)
 
             fig.plot(
                 x=np.array(interpolated_dist_p),
                 y=np.array(ev),
-                pen="1p,black",
+                pen="2p,black",
                 projection=proj,
+                region=prof_region,
             )
-
-            fig.plot(
-                x=np.array(distance_grid),
-                y=np.array(elevation_grid),
-                fill = color_fill,
-                projection=proj,
-                cmap=True,
-            )
-
 
     fig.savefig("output.png")
     fig.show(verbose="i") 
