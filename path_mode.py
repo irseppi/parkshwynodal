@@ -251,7 +251,12 @@ for flight_num in flights:
                     else:
                         color_fill[i, j] = -1000  # Leave as NaN for areas outside interpolated points
             print(color_fill)
-            c_fill = pygmt.xyz2grd(data=color_fill,projection=proj, region=[0, np.max(dist_p), 0,np.max(alt_t)+100],spacing = (np.max(dist_p)/len(interpolated_dist_p),(np.max(alt_t)+100)/len(ev)))
+            #trurn grids into 1D arrays
+            distance_grid = distance_grid.flatten()
+            elevation_grid = elevation_grid.flatten()
+            color_fill = color_fill.flatten()
+
+            c_fill = pygmt.xyz2grd(x=distance_grid, y=elevation_grid, z = color_fill, projection=proj, region=[0, np.max(dist_p), 0,np.max(alt_t)+100],spacing = (np.max(dist_p)/len(interpolated_dist_p),(np.max(alt_t)+100)/len(ev)))
             print(c_fill)
             cmap_limits = [float(np.min(grid)), float(np.max(grid))]  # Get min and max elevation values
             pygmt.makecpt(cmap="geo", series=cmap_limits, continuous=True)
@@ -265,6 +270,15 @@ for flight_num in flights:
                 pen="1p,black",
                 projection=proj,
             )
+
+            fig.plot(
+                x=np.array(distance_grid),
+                y=np.array(elevation_grid),
+                fill = color_fill,
+                projection=proj,
+                cmap=True,
+            )
+
 
     fig.savefig("output.png")
     fig.show(verbose="i") 
