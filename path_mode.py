@@ -141,12 +141,8 @@ for flight_num in flights:
     med = np.array(all_med[flight_num])
     fxx = np.array(UTM_km_x[flight_num])
     fyy = np.array(UTM_km_y[flight_num])
-    print(len(fxx))
-    print(len(alt_t))
     #Create array of distance along path 
     dist_p = np.zeros(len(fxx))
-    print(len(dist_p))
-    
     dist_hold = 0
     for i in range(len(fxx)-2):
         dist_p[i] = np.sqrt((np.array(fxx)[i+1] - np.array(fxx)[i]) ** 2 + (np.array(fyy)[i + 1] - np.array(fyy)[i]) ** 2) + dist_hold
@@ -211,18 +207,19 @@ for flight_num in flights:
                 frame=["WSrt", "xa20+lDistance / m", "ya1000+lElevation / m"], 
             )
 
-
             points = pd.DataFrame({'longitude': [], 'latitude': []})
             for i in range(len(f_lon[:-2]) - 1):
-                lon_segment = np.linspace(f_lon[i], f_lon[i + 1], 100)  # 10 intermediate points + start and end
-                lat_segment = np.linspace(f_lat[i], f_lat[i + 1], 100)
+                lon_segment = np.linspace(f_lon[i], f_lon[i + 1], 10)  # 10 intermediate points + start and end
+                lat_segment = np.linspace(f_lat[i], f_lat[i + 1], 10)
                 points = pd.concat([points, pd.DataFrame({'longitude': lon_segment, 'latitude': lat_segment})], ignore_index=True)
+            
             elevation_data = pygmt.grdtrack(
                 grid=grid,
                 points=points,
                 newcolname="elevation",
             )      
             ev = elevation_data['elevation'].values   
+
             fig.plot(
                 x=[0, np.max(dist_p), np.max(dist_p), 0],
                 y=[0, 0, np.max(alt_t)+100, np.max(alt_t)+100],
@@ -230,42 +227,45 @@ for flight_num in flights:
                 projection=proj,
                 close=True
             )
-            print(dist_p)
-            print(alt_t)
-            fig.plot(x=np.array(dist_p[:-2]), y=np.array(alt_t[:-2]), pen="1p,black",projection=proj) #, projection="X24.5c/4c",pen="1p,black")
 
             # Interpolate 10 evenly spaced points between each pair of dist_p and ev
             interpolated_dist_p = []
             for i in range(len(dist_p[:-2]) - 1):
-                dist_segment = np.linspace(dist_p[i], dist_p[i + 1], 100)  # 10 intermediate points + start and end
+                dist_segment = np.linspace(dist_p[i], dist_p[i + 1], 10)  # 10 intermediate points + start and end
                 interpolated_dist_p.extend(dist_segment)
-   
+
+            #dist_x, elv_y = np.meshgrid(np.arange(len(interpolated_dist_p)), np.arange(len(ev)))
+            distance_grid, elevation_grid = np.meshgrid(
+            np.linspace(0, np.max(dist_p), len(interpolated_dist_p)),
+            np.linspace(0, np.max(ev) + 100, len(interpolated_dist_p))
+            )
             cmap_limits = [float(np.min(grid)), float(np.max(grid))]  # Get min and max elevation values
             pygmt.makecpt(cmap="geo", series=cmap_limits, continuous=True)
+            # Fill the mesh grid with elevation values for color mapping
+            color_fill = np.full_like(distance_grid, 0)  # Initialize with NaN
+
+            for j,value_2 in enumerate(elevation_grid):
+                for i,value_1 in enumerate(distance_grid):
+                    if value_2[i] <= float(ev[i]):
+                        color_fill[i,j] = value_2[i]
+                    else:
+                        color_fill[i, j] = -1000  # Leave as NaN for areas outside interpolated points
+            print(color_fill)
+            c_fill = pygmt.xyz2grd(data=color_fill,projection=proj, region=[0, np.max(dist_p), 0,np.max(alt_t)+100],spacing = (np.max(dist_p)/len(interpolated_dist_p),(np.max(alt_t)+100)/len(ev)))
+            print(c_fill)
+            cmap_limits = [float(np.min(grid)), float(np.max(grid))]  # Get min and max elevation values
+            pygmt.makecpt(cmap="geo", series=cmap_limits, continuous=True)
+            fig.grdimage(grid=c_fill, projection=proj, cmap=True)
+
+            fig.plot(x=np.array(dist_p[:-2]), y=np.array(alt_t[:-2]), pen="1p,black", projection=proj)
+
             fig.plot(
                 x=np.array(interpolated_dist_p),
                 y=np.array(ev),
                 pen="1p,black",
-                fill=ev,  # Fill based on elevation values
                 projection=proj,
-                cmap=True
             )
-            # Create a mesh grid for distance and elevation
-            distance_grid, elevation_grid = np.meshgrid(
-                np.linspace(0, np.max(dist_p), len(interpolated_dist_p)),
-                np.linspace(0, np.max(ev) + 100, 100)
-            )
-            
-            # Fill the mesh grid with elevation values for color mapping
-            color_fill = np.full_like(distance_grid, 0)  # Initialize with NaN
-            for i,value_1 in enumerate(distance_grid):
-                for j,value_2 in enumerate(elevation_grid):
-                    if value_2 < ev[j]:
-                        ev[i,j] = value_2
-                        color_fill[i, j] = elevation_grid[j]  # Fill with elevation values
-                    else:
-                        color_fill[i, j] = -4  # Leave as NaN for areas outside interpolated points
-            print(color_fill)
+
     fig.savefig("output.png")
     fig.show(verbose="i") 
         
