@@ -351,7 +351,7 @@ for flight_num in flights:
                 projection=proj,
                 region=prof_region,
             )
-    fig.savefig("output.png")
+    fig.savefig("output.png", dpi=300)
     fig.show(verbose="i") 
         
     break
