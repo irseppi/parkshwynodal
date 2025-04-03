@@ -142,13 +142,51 @@ for flight_num in flights:
     med = np.array(all_med[flight_num])
     fxx = np.array(UTM_km_x[flight_num])
     fyy = np.array(UTM_km_y[flight_num])
+    
+    P_lat = np.array(points_lat[flight_num])
+    P_lon = np.array(points_lon[flight_num])
+
+    P_utm = [utm_proj(lon, lat) for lat, lon in zip(P_lat, P_lon)]
+    P_utm_x, P_utm_y = zip(*P_utm)
+
+
+    P_utm_x_km = [x / 1000 for x in P_utm_x]
+    P_utm_y_km = [y / 1000 for y in P_utm_y]
+    dist_point = []
+    elev_point = []
+
     #Create array of distance along path 
     dist_p = np.zeros(len(fxx))
     dist_hold = 0
-    for i in range(len(fxx)-2):
+    for i in range(len(fxx)-2): 
         dist_p[i] = np.sqrt((np.array(fxx)[i+1] - np.array(fxx)[i]) ** 2 + (np.array(fyy)[i + 1] - np.array(fyy)[i]) ** 2) + dist_hold
         dist_hold = dist_p[i]
-    
+    for j in range(len(P_utm_x_km)):
+        for i in range(len(fxx)):
+            # Check if the point (P_utm_x_km[j], P_utm_y_km[j]) lies between the two points (fxx[i], fyy[i]) and (fxx[i+1], fyy[i+1])
+            if min(np.array(fxx)[i], np.array(fxx)[i+1]) <= P_utm_x_km[j] <= max(np.array(fxx)[i], np.array(fxx)[i+1]) and \
+            min(np.array(fyy)[i], np.array(fyy)[i+1]) <= P_utm_y_km[j] <= max(np.array(fyy)[i], np.array(fyy)[i+1]):
+                # Calculate the distance along the path to the point (P_utm_x_km[j], P_utm_y_km[j])
+                segment_length = np.sqrt((np.array(fxx)[i+1] - np.array(fxx)[i]) ** 2 + (np.array(fyy)[i+1] - np.array(fyy)[i]) ** 2)
+                projection_factor = np.sqrt((P_utm_x_km[j] - np.array(fxx)[i]) ** 2 + (P_utm_y_km[j] - np.array(fyy)[i]) ** 2) / segment_length
+                projected_dist = dist_p[i] + projection_factor * segment_length
+                dist_point.append(projected_dist)
+                    
+                # Interpolate the altitude at the point (P_utm_x_km[j], P_utm_y_km[j])
+                interpolated_alt = alt_t[i] + projection_factor * (alt_t[i+1] - alt_t[i])
+                elev_point.append(interpolated_alt)
+                break
+
+                # Avoid adding duplicate points
+                if len(dist_point) == 0 or not np.isclose(P_utm_x_km[j], P_utm_x_km[-1]):
+                    dist_point.append(projected_dist)
+                    
+                    # Interpolate the altitude at the point (P_utm_x_km[j], P_utm_y_km[j])
+                    interpolated_alt = alt_t[i] + projection_factor * (alt_t[i+1] - alt_t[i])
+                    elev_point.append(interpolated_alt)
+            else:
+                continue
+    print(dist_point, elev_point)
     fig = pygmt.Figure()
     with pygmt.config(MAP_DEGREE_SYMBOL= "none"):
         with fig.subplot(
@@ -195,10 +233,10 @@ for flight_num in flights:
                     fig.grdimage(grid=grid_inset, region=zoom_region, projection=proj,frame="a", cmap=True)
                     fig.plot(x=np.array(f_lon), y=np.array(f_lat), projection=proj, pen="1p,black") 
 
-                    fig.plot(x=seismo_longitudes, y=seismo_latitudes, projection=proj, style="x0.2c", pen="01p,black")
+                    fig.plot(x=seismo_longitudes, y=seismo_latitudes, projection=proj, style="x0.4c", pen="01p,black")
 
                     pygmt.makecpt(cmap="gmt/seis", series=[np.min(med)-0.01, np.max(med)+0.01]) 
-                    yy = fig.plot(x=lon, y=lat, style="c0.3c", fill=med, projection=proj, pen="black", cmap=True) 
+                    yy = fig.plot(x=lon, y=lat, style="c0.4c", fill=med, projection=proj, pen="black", cmap=True) 
 
         fig.shift_origin(yshift="-8c")
         proj = "X24.5c/6c"
@@ -292,7 +330,7 @@ for flight_num in flights:
             # Apply the color palette table to the grid
             fig.grdimage(grid=c_fill, projection=proj, region=prof_region, cmap=True, nan_transparent=True)
 
-            fig.plot(x=np.array(dist_p[:-2]), y=np.array(alt_t[:-2]), pen="2p,black", region=prof_region, projection=proj)
+            fig.plot(x=np.array(dist_p[:-2]), y=np.array(alt_t[:-2]), pen="1p,black", region=prof_region, projection=proj)
 
             fig.plot(
                 x=np.array(interpolated_dist_p),
@@ -301,7 +339,18 @@ for flight_num in flights:
                 projection=proj,
                 region=prof_region,
             )
-
+            pygmt.makecpt(cmap="gmt/seis", series=[np.min(med)-0.01, np.max(med)+0.01])
+            print(len(med),len(dist_point), len(elev_point))
+            fig.plot(
+                x=np.array(dist_point),
+                y=np.array(elev_point),
+                style="c0.3c", 
+                fill=med, 
+                pen="black", 
+                cmap=True,
+                projection=proj,
+                region=prof_region,
+            )
     fig.savefig("output.png")
     fig.show(verbose="i") 
         
