@@ -385,7 +385,7 @@ for flight_num in flights:
             perspective=[199,90]
             )
             
-    fig.savefig("output.png", dpi=300)
+    fig.savefig("flight_path_10512184.png", dpi=300)
     fig.show(verbose="i") 
         
     break #1st plot, 3rd plot or ...
