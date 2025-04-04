@@ -363,7 +363,9 @@ for flight_num in flights:
                 projection=proj,
                 region=prof_region,
             )
-            pygmt.makecpt(cmap="gmt/seis", series=[np.min(med)-0.01, np.max(med)+0.01])
+
+            pygmt.makecpt(cmap="gmt/seis", series=[np.min(med)-0.01, np.max(med)+0.01]) 
+
             fig.plot(
                 x=np.array(dist_point),
                 y=np.array(elev_point),
@@ -374,6 +376,15 @@ for flight_num in flights:
                 projection=proj,
                 region=prof_region,
             )
+
+            fig.image(imagefile="N125KT.png",
+            position="g65/1215+w2.7c+jCM",
+            box=False,
+            region=prof_region,
+            projection=proj,
+            perspective=[195,90]
+            )
+            
     fig.savefig("output.png", dpi=300)
     fig.show(verbose="i") 
         
