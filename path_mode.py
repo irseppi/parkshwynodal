@@ -378,11 +378,11 @@ for flight_num in flights:
             )
 
             fig.image(imagefile="N125KT.png",
-            position="g65/1215+w2.7c+jCM",
+            position="g65/1217+w2.7c+jCM",
             box=False,
             region=prof_region,
             projection=proj,
-            perspective=[195,90]
+            perspective=[199,90]
             )
             
     fig.savefig("output.png", dpi=300)
