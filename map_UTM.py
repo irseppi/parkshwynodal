@@ -213,7 +213,7 @@ for i, flight_file in enumerate(flight_files):
                 axs[0].tick_params(axis='both', which='major', labelsize=9)
 
                 head_avg = (head[index]+head[index+1])/2
-                heading = np.deg2rad(head_avg)
+                heading = np.deg2rad(head_avg+90)  # or could be minus 90
                 # Define the UTM and latitude/longitude coordinate systems
 
                 rect = Rectangle((min_x, min_y), (max_x-min_x), (max_y-min_y), ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
