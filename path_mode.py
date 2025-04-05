@@ -188,7 +188,7 @@ for flight_num in flights:
 
             else:
                 continue
-    print(dist_point, elev_point)
+
     fig = pygmt.Figure()
     with pygmt.config(MAP_DEGREE_SYMBOL= "none"):
         with fig.subplot(
