@@ -53,15 +53,6 @@ day = str(21)
 month = '02'
 
 file_in = open('/home/irseppi/REPOSITORIES/parkshwynodal/529754214_list.txt','r')
-airplane = 'input/20231010_Aircraft_UA_Fairbanks.csv'
-
-plane_data = pd.read_csv(airplane, sep=",")
-man = plane_data['MANUFACTURER']
-model = plane_data['Model']
-des = plane_data['Type Designator']
-descrip = plane_data['Description']
-engine = plane_data['Engine Type']
-coun = plane_data['Engine Count']
 
 flight_id = '529754214'	
 aircraft_id	 = '1051218'	
@@ -91,6 +82,7 @@ time_list = []
 dist_list = []
 vel_list = []
 head_list = []
+
 for line in file_in.readlines():
 	#date,flight_num,closest_x_m,closest_y_m,dist_m,closest_time,alt_avg_m,speed_avg_mps,head_avg,station
 	text = line.split(',')
@@ -109,6 +101,7 @@ for line in file_in.readlines():
 	lat_list.append(lat)
 	lon_list.append(lon)
 file_in.close()
+
 # Convert the lists to numpy arrays
 lat_list = np.array(lat_list)
 lon_list = np.array(lon_list)
@@ -187,7 +180,6 @@ for station in os.listdir(spec_dir):
 		if abs(float(time) - float(times[t])) < diff:
 			diff = abs(float(time) - float(times[t]))
 			direction = np.arctan2(flight_utm_y_km[t+1] - flight_utm_y_km[t], flight_utm_x_km[t+1] - flight_utm_x_km[t])
-
 		else:
 			continue
 
@@ -260,7 +252,7 @@ for station in os.listdir(spec_dir):
 
 	BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/fig_paper/'
 	make_base_dir(BASE_DIR)
-	name= BASE_DIR + '20190221_'+(flight_id)+'_'+time+'_'+str(station)+'_'+str(equip)+'_'+str(id)+'_.png'#+str(descrip[h])+'_'+str(engine[h])+str(coun[h])+'.png'
+	name= BASE_DIR + '20190221_'+(flight_id)+'_'+time+'_'+str(station)+'_'+str(equip)+'.png'
 
 	# Save combined image
 	canvas.save(name)
