@@ -228,9 +228,8 @@ for i, flight_file in enumerate(flight_files):
                 head_avg = (head[index]+head[index+1])/2
                 converted_angle = (90 - head_avg) % 360
                 heading = np.deg2rad(converted_angle)
-                #heading = np.deg2rad(450 - head_avg) % (2 * np.pi)
-                # Define the UTM and latitude/longitude coordinate systems
 
+                # Define the UTM and latitude/longitude coordinate systems
                 rect = Rectangle((min_x, min_y), (max_x-min_x), (max_y-min_y), ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
                 axs[0].add_patch(rect)
 
@@ -263,6 +262,7 @@ for i, flight_file in enumerate(flight_files):
                 fig.add_artist(con)
                 con = mpatch.ConnectionPatch(xyA=(max_x, max_y), xyB=(min_x, max_y), coordsA="data", coordsB="data", axesA=axs[0], axesB=axs[1], color="black", linestyle="--")
                 fig.add_artist(con)
+                plt.tight_layout(pad=0.2)
 
                 BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all_UTM/' + date + '/'+flight_num + '/' + station + '/'
                 make_base_dir(BASE_DIR)
