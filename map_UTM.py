@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatch
 import pyproj
-
 from matplotlib.patches import Rectangle
 from prelude import load_flights, dist_less, make_base_dir
 
@@ -11,7 +10,7 @@ from prelude import load_flights, dist_less, make_base_dir
 flight_files,filenames = load_flights(2, 4, 11, 27)
 
 # Open output file for writing
-output = open('all_station_crossing_db_updated.txt','w')
+#output = open('all_station_crossing_db_updated.txt','w')
 
 utm_proj = pyproj.Proj(proj='utm', zone='6', ellps='WGS84')
 
@@ -37,9 +36,22 @@ seismo_utm_x_km = [x / 1000 for x in seismo_utm_x]
 seismo_utm_y_km = [y / 1000 for y in seismo_utm_y]
 seismo_utm_km = [(x, y) for x, y in zip(seismo_utm_x_km, seismo_utm_y_km)]
 
+def dist_less(flight_utm_x_km, flight_utm_y_km, seismo_utm_x_km, seismo_utm_y_km):
+
+    f = False
+    for s in range(len(flight_utm_x_km)):
+        for l in range(len(seismo_utm_x_km)):
+            dist_km = np.sqrt((seismo_utm_y_km[l]-flight_utm_y_km[s])**2 +(seismo_utm_x_km[l]-flight_utm_x_km[s])**2)
+            if dist_km <= 2:
+                f = True
+                break
+            else:
+                continue
+    return f
+
 def closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight_utm_y2, seismo_utm_x, seismo_utm_y):
     closest_point = None
-    dist_lim = np.Infinity
+    dist_lim = np.inf
 
     x = [flight_utm_x1, flight_utm_x2]
     y = [flight_utm_y1, flight_utm_y2]
@@ -84,7 +96,7 @@ def closest_point_on_segment(flight_utm_x1, flight_utm_y1, flight_utm_x2, flight
 
 
 def find_closest_point(flight_utm, seismo_utm):
-    min_distance = np.Infinity
+    min_distance = np.inf
     closest_point = None
 
     for i in range(len(flight_utm) - 1):
@@ -119,19 +131,20 @@ for i, flight_file in enumerate(flight_files):
     fname = filenames[i]	
     flight_num = fname[9:18]
     date = fname[0:8]
-    if dist_less(flight_latitudes, flight_longitudes, seismo_latitudes, seismo_longitudes) == False:
+
+    # Convert flight latitude and longitude to UTM coordinates
+    flight_utm = [utm_proj(lon, lat) for lat, lon in zip(flight_latitudes, flight_longitudes)]
+    flight_utm_x, flight_utm_y = zip(*flight_utm)
+
+    # Convert UTM coordinates to kilometers
+    flight_utm_x_km = [x / 1000 for x in flight_utm_x]
+    flight_utm_y_km = [y / 1000 for y in flight_utm_y]
+    flight_path = [(x,y) for x, y in zip(flight_utm_x_km, flight_utm_y_km)]
+        
+    if dist_less(flight_utm_x_km, flight_utm_y_km, seismo_utm_x_km, seismo_utm_y_km) == False:
         continue
 
     else:
-        # Convert flight latitude and longitude to UTM coordinates
-        flight_utm = [utm_proj(lon, lat) for lat, lon in zip(flight_latitudes, flight_longitudes)]
-        flight_utm_x, flight_utm_y = zip(*flight_utm)
-
-        # Convert UTM coordinates to kilometers
-        flight_utm_x_km = [x / 1000 for x in flight_utm_x]
-        flight_utm_y_km = [y / 1000 for y in flight_utm_y]
-        flight_path = [(x,y) for x, y in zip(flight_utm_x_km, flight_utm_y_km)]
-        
         # Iterate over seismometer data
         for s in range(len(seismo_data)):
             seismometer = (seismo_utm_x_km[s], seismo_utm_y_km[s])  
@@ -213,7 +226,9 @@ for i, flight_file in enumerate(flight_files):
                 axs[0].tick_params(axis='both', which='major', labelsize=9)
 
                 head_avg = (head[index]+head[index+1])/2
-                heading = np.deg2rad(head_avg+90)  # or could be minus 90
+                converted_angle = (90 - head_avg) % 360
+                heading = np.deg2rad(converted_angle)
+                #heading = np.deg2rad(450 - head_avg) % (2 * np.pi)
                 # Define the UTM and latitude/longitude coordinate systems
 
                 rect = Rectangle((min_x, min_y), (max_x-min_x), (max_y-min_y), ls="-", lw = 1, ec = 'k', fc="none", zorder=2.5)
@@ -248,23 +263,23 @@ for i, flight_file in enumerate(flight_files):
                 fig.add_artist(con)
                 con = mpatch.ConnectionPatch(xyA=(max_x, max_y), xyB=(min_x, max_y), coordsA="data", coordsB="data", axesA=axs[0], axesB=axs[1], color="black", linestyle="--")
                 fig.add_artist(con)
-                
+
                 BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all_UTM/' + date + '/'+flight_num + '/' + station + '/'
                 make_base_dir(BASE_DIR)
                 plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all_UTM/' + date + '/' + flight_num + '/' + station + '/map_' + flight_num + '_' + str(closest_time) + '.png')
                 plt.close()
 
-                alt_avg = (alt[index]+alt[index+1])/2
-                alt_avg_m = alt_avg * 0.3048 #convert from feet to meters
+                #alt_avg = (alt[index]+alt[index+1])/2
+                #alt_avg_m = alt_avg * 0.3048 #convert from feet to meters
 
-                speed_avg = (speed[index]+speed[index+1])/2
-                speed_avg_mps = speed_avg * 0.514444 #convert from knots to meters/sec
-                dist_m = d * 1000
-                closest_x_m = closest_x * 1000
-                closest_y_m = closest_y * 1000
+                #speed_avg = (speed[index]+speed[index+1])/2
+                #speed_avg_mps = speed_avg * 0.514444 #convert from knots to meters/sec
+                #dist_m = d * 1000
+                #closest_x_m = closest_x * 1000
+                #closest_y_m = closest_y * 1000
                 # Write data to the output file
-                output.write(str(date)+ ',' + str(flight_num) + ',' + str(closest_x_m) + ',' + str(closest_y_m) + ',' + str(dist_m) + ',' +str(closest_time) + ',' + str(alt_avg_m) + ',' + str(speed_avg_mps) + ',' + str(head_avg) + ',' + str(station) + ',\n')
+                #output.write(str(date)+ ',' + str(flight_num) + ',' + str(closest_x_m) + ',' + str(closest_y_m) + ',' + str(dist_m) + ',' +str(closest_time) + ',' + str(alt_avg_m) + ',' + str(speed_avg_mps) + ',' + str(head_avg) + ',' + str(station) + ',\n')
 
             else:
                 continue
-output.close()
+#output.close()
