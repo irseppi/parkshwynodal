@@ -192,7 +192,7 @@ for station in os.listdir(spec_dir):
 	font2 = ImageFont.truetype('input/Arial.ttf', 25)
 	diff = np.inf
 			
-	text1 = 'Altitude: '+str(round(alt,2))+' m ('+str(round(alt*3.28084,2)) +' ft)\nDistance: '+str(round(dist,2))+' m\nVelocity: '+str(round(speed,2))+' m/s ('+str(round(speed*2.23694,2))+' mph)\n               at '+str(round(deg,2))+ '\N{DEGREE SIGN}' + '\nHeading: '+str(round(head,2))+ '\N{DEGREE SIGN}'
+	text1 = 'Altitude: '+str(round(alt,2))+' m\nDistance: '+str(round(dist,2))+' m\nVelocity: '+str(round(speed,2))+' m/s\n               at '+str(round(deg,2))+ '\N{DEGREE SIGN}' + '\nHeading: '+str(round(head,2))+ '\N{DEGREE SIGN}'
 	text2 = 'Temperature: '+str(round(temp,2))+'\N{DEGREE SIGN}'+'C\nWind: '+str(round(wind,2))+' m/s \nat '+str(round(az,2))+ '\N{DEGREE SIGN}\nSound Speed:\n'+str(round(sound,2))+' m/s'
 	text3 = 'Callsign: ' +  str(callsign) + ' (' + str(equip) + ')'
 
