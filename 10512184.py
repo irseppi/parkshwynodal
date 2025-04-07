@@ -243,7 +243,7 @@ for station in os.listdir(spec_dir):
 	draw.text((google_slide_width - int(plane.width*1.15), int(plane.height) + int(plane.height*0.05)), '(d)', fill='black', font=font2)
 	draw.text((google_slide_width - spec.width + int(spec.width/12) - 15, google_slide_height - spec.height + 20), '(e)', fill='black', font=font2)
 
-	draw.text((google_slide_width - 370, 405), text1, fill='black', font=font)			
+	draw.text((google_slide_width - 305, 405), text1, fill='black', font=font)			
 	draw.text((google_slide_width - 155, 405), text2,fill='black', font=font)
 	bbox = draw.textbbox((google_slide_width - plane.width, 0), text3, font=font)
 	draw.rectangle(bbox, fill="white")
