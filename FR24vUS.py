@@ -79,7 +79,7 @@ for line in file_in.readlines():
 file_in.close()
 
 file_list = ['C185data_atm_1o.txt','C185data_atm_full.txt','C185data_1o.txt','C185data_full.txt']
-title = ['OH/FT','OH/VT','FH/FT','FH/VT']
+title = ['OH/VT','FH/VT','OH/FT','FH/FT']
 
 fig, axs = plt.subplots(4, 3, figsize=(18, 24), sharey=False)
 
