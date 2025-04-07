@@ -194,7 +194,7 @@ for i, flight_file in enumerate(flight_files):
                     max_y = (yy + 0.1)
                 # Create a figure with two subplots side by side
                 fig, axs = plt.subplots(1, 2, gridspec_kw={'width_ratios': [1, 2]}) 
-                fig.subplots_adjust(wspace=0.5)  # Adjust the spacing between subplots
+                fig.subplots_adjust(wspace=1)  # Adjust the spacing between subplots
 
 
                 axs[0].set_xticks(np.arange(int(lxmin/1000)-7, int(lxmax/1000), 50))
@@ -262,11 +262,11 @@ for i, flight_file in enumerate(flight_files):
                 fig.add_artist(con)
                 con = mpatch.ConnectionPatch(xyA=(max_x, max_y), xyB=(min_x, max_y), coordsA="data", coordsB="data", axesA=axs[0], axesB=axs[1], color="black", linestyle="--")
                 fig.add_artist(con)
-                plt.tight_layout(pad=0.2)
+                plt.tight_layout(pad=0.2, rect=[0, 0, 1, 1])
 
                 BASE_DIR = '/scratch/irseppi/nodal_data/plane_info/map_all_UTM/' + date + '/'+flight_num + '/' + station + '/'
                 make_base_dir(BASE_DIR)
-                plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all_UTM/' + date + '/' + flight_num + '/' + station + '/map_' + flight_num + '_' + str(closest_time) + '.png')
+                plt.savefig('/scratch/irseppi/nodal_data/plane_info/map_all_UTM/' + date + '/' + flight_num + '/' + station + '/map_' + flight_num + '_' + str(closest_time) + '.png', bbox_inches='tight')
                 plt.close()
 
                 #alt_avg = (alt[index]+alt[index+1])/2
