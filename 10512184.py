@@ -8,7 +8,46 @@ import json
 from datetime import datetime, timezone
 from pyproj import Proj
 from prelude import speed_of_sound
+import math
 utm_proj = Proj(proj='utm', zone='6', ellps='WGS84')
+
+def add_vectors(v1_magnitude, v1_angle, v2_magnitude, v2_angle):
+	"""
+	Adds two vectors given their magnitudes and directions (angles in degrees, clockwise from the positive y-axis).
+
+	Args:
+		v1_magnitude (float): Magnitude of the first vector.
+		v1_angle (float): Direction angle (in degrees, clockwise from the positive y-axis) of the first vector.
+		v2_magnitude (float): Magnitude of the second vector.
+		v2_angle (float): Direction angle (in degrees, clockwise from the positive y-axis) of the second vector.
+
+	Returns:
+		tuple: A tuple containing the magnitude and direction (angle in degrees, clockwise from the positive y-axis) 
+			   of the resultant vector.
+	"""
+
+	# Convert angles to radians for trigonometric functions
+	v1_angle_rad = math.radians(90 - v1_angle)
+	v2_angle_rad = math.radians(90 - v2_angle)
+
+	# Calculate components of the vectors
+	v1_x = v1_magnitude * math.cos(v1_angle_rad)
+	v1_y = v1_magnitude * math.sin(v1_angle_rad)
+	v2_x = v2_magnitude * math.cos(v2_angle_rad)
+	v2_y = v2_magnitude * math.sin(v2_angle_rad)
+
+	# Add the components
+	resultant_x = v1_x + v2_x
+	resultant_y = v1_y + v2_y
+
+	# Calculate magnitude of the resultant vector
+	resultant_magnitude = math.sqrt(resultant_x**2 + resultant_y**2)
+
+	# Calculate direction (angle) of the resultant vector
+	resultant_angle_rad = math.atan2(resultant_y, resultant_x)
+	resultant_angle_deg = (90 - math.degrees(resultant_angle_rad)) % 360
+
+	return resultant_magnitude, resultant_angle_deg
 
 day = str(21)
 month = '02'
@@ -32,21 +71,36 @@ callsign = 'N125KT'
 spec_dir = '/scratch/irseppi/nodal_data/plane_info/C185_spec_c/2019-02-21/529754214'
 flight_file = '/scratch/irseppi/nodal_data/flightradar24/20190221_positions/20190221_' + flight_id + '.csv'
 flight_data = pd.read_csv(flight_file, sep=",")
+flight_latitudes = flight_data['latitude']
+flight_longitudes = flight_data['longitude']
+
+# Convert flight latitude and longitude to UTM coordinates
+flight_utm = [utm_proj(lon, lat) for lat, lon in zip(flight_latitudes, flight_longitudes)]
+flight_utm_x, flight_utm_y = zip(*flight_utm)
+
+# Convert UTM coordinates to kilometers
+flight_utm_x_km = [x / 1000 for x in flight_utm_x]
+flight_utm_y_km = [y / 1000 for y in flight_utm_y]
 times = flight_data['snapshot_id']
-speed = flight_data['speed']
-alti = flight_data['altitude']
-head = flight_data['heading']
 
 alt_list = []
 lon_list = []
 lat_list = []
 sta_list = []
 time_list = []
+dist_list = []
+vel_list = []
+head_list = []
 for line in file_in.readlines():
+	#date,flight_num,closest_x_m,closest_y_m,dist_m,closest_time,alt_avg_m,speed_avg_mps,head_avg,station
 	text = line.split(',')
 	time_list.append(float(text[5]))
 	sta_list.append(str(text[9]))
-	alt_list.append(float(text[4])*0.0003048) #convert between feet and km
+	dist_list.append(float(text[4]))
+	vel_list.append(float(text[7]))
+	head_list.append(float(text[8]))
+	alt_list.append(float(text[6])) #convert between feet and km
+
 	x =  float(text[2])  # Replace with your UTM x-coordinate
 	y = float(text[3])  # Replace with your UTM y-coordinate
 
@@ -61,6 +115,9 @@ lon_list = np.array(lon_list)
 alt_list = np.array(alt_list)
 sta_list = np.array(sta_list)
 time_list = np.array(time_list)
+head_list = np.array(head_list)
+alt_list = np.array(alt_list)
+vel_list = np.array(vel_list)
 
 for station in os.listdir(spec_dir):
 	sta = os.path.join(spec_dir, station)
@@ -74,13 +131,14 @@ for station in os.listdir(spec_dir):
 				lon = lon_list[ggy]
 				alt = alt_list[ggy]
 				t_db = time_list[ggy]
+				speed = vel_list[ggy]
+				head = head_list[ggy]
+				dist_g = dist_list[ggy]
 				id = ggy
 				break
-	print(id)
+
 	input_files = '/scratch/irseppi/nodal_data/plane_info/atmosphere_data/' + str(t_db) + '_' + str(lat) + '_' + str(lon) + '.dat'
-
-	file =  open(input_files, 'r') #as file:
-
+	file =  open(input_files, 'r') 
 	data = json.load(file)
 
 	# Extract metadata
@@ -103,8 +161,8 @@ for station in os.listdir(spec_dir):
 	for item in data_list:
 		if item['parameter'] == 'Z':
 			for okay in range(len(item['values'])):
-				if abs(float(item['values'][okay]) - float(alt)) < hold:
-					hold = abs(float(item['values'][okay]) - float(alt))
+				if abs(float(item['values'][okay]) - float(alt/1000)) < hold:
+					hold = abs(float(item['values'][okay]) - float(alt/1000))
 					z_index = okay
 	for item in data_list:
 		if item['parameter'] == 'T':
@@ -113,26 +171,37 @@ for station in os.listdir(spec_dir):
 			zonal_wind = float(item['values'][z_index])
 		if item['parameter'] == 'V':
 			meridional_wind = float(item['values'][z_index])
-	wind_speed = np.sqrt(zonal_wind^2 + meridional_wind^2). 
-	azimuth_direction = arctan2(meridional_wind, zonal_wind)
+
+	if zonal_wind > 0:
+		v1_angle = 90
+	else:
+		v1_angle = 270
+	if meridional_wind > 0:
+		v2_angle = 0
+	else:
+		v2_angle = 180
+	wind, az = add_vectors(zonal_wind, v1_angle, meridional_wind, v2_angle)
 	c = speed_of_sound(Tc)
-		
-	dist = 0
-	deg = 0
-	temp = Tc
-	wind = 0 
-	sound = c
-	az = 0
-	mnum = "FH/VT"
-	font2 = ImageFont.truetype('input/Arial.ttf', 25)
 	diff = np.inf
 	for t in range(len(times)):
 		if abs(float(time) - float(times[t])) < diff:
 			diff = abs(float(time) - float(times[t]))
-			text1 = 'Altitude: '+str(round(alti[t]*0.3048,2))+' m ('+str(round(alti[t],2)) +' ft)\nDistance: '+str(round(dist,2))+' m\nVelocity: '+str(round(speed[t]*0.514444,2))+' m/s ('+str(round(speed[t]*1.15078,2))+' mph)\n               at '+str(round(deg,2))+ '\N{DEGREE SIGN}' + '\nHeading: '+str(round(head[t],2))+ '\N{DEGREE SIGN}'
-			text2 = 'Temperature: '+str(round(temp,2))+'\N{DEGREE SIGN}'+'C\nWind: '+str(round(wind,2))+' m/s \nat '+str(round(az,2))+ '\N{DEGREE SIGN}\nSound Speed: '+str(round(sound,2))+' m/s'
+			direction = np.arctan2(flight_utm_y_km[t+1] - flight_utm_y_km[t], flight_utm_x_km[t+1] - flight_utm_x_km[t])
+
 		else:
 			continue
+
+	deg = (90 -  np.degrees(direction)) % 360
+	dist = np.sqrt(dist_g**2 + alt**2)
+	temp = Tc
+	sound = c
+	
+	mnum = "FH/VT"
+	font2 = ImageFont.truetype('input/Arial.ttf', 25)
+	diff = np.inf
+			
+	text1 = 'Altitude: '+str(round(alt,2))+' m ('+str(round(alt*3.28084,2)) +' ft)\nDistance: '+str(round(dist,2))+' m\nVelocity: '+str(round(speed,2))+' m/s ('+str(round(speed*2.23694,2))+' mph)\n               at '+str(round(deg,2))+ '\N{DEGREE SIGN}' + '\nHeading: '+str(round(head,2))+ '\N{DEGREE SIGN}'
+	text2 = 'Temperature: '+str(round(temp,2))+'\N{DEGREE SIGN}'+'C\nWind: '+str(round(wind,2))+' m/s \nat '+str(round(az,2))+ '\N{DEGREE SIGN}\nSound Speed:\n'+str(round(sound,2))+' m/s'
 	text3 = 'Callsign: ' +  str(callsign) + ' (' + str(equip) + ')'
 
 	font2 = ImageFont.truetype('input/Arial.ttf', 25)
@@ -140,7 +209,6 @@ for station in os.listdir(spec_dir):
 	spectrogram = Image.open(im)
 
 	# Get the path of the image file using a wildcard
-	#print('/scratch/irseppi/nodal_data/plane_info/map_all/2019'+month[i]+day[i]+'/'+flight+'/'+station+'/map_'+flight+'_*')
 	image_path = glob.glob('/scratch/irseppi/nodal_data/plane_info/map_all_UTM/20190221/'+flight_id+'/'+station+'/map_'+flight_id+'_*')[0]
 
 	map_img = Image.open(image_path)
