@@ -31,7 +31,7 @@ for day in range(1, 26):
 		m.append(month)
 day = d
 month = m
-
+aws = []
 file_in = open('/home/irseppi/REPOSITORIES/parkshwynodal/input/all_station_crossing_db_UTM.txt','r')
 for li in file_in.readlines():
 	text = li.split(',')
@@ -53,9 +53,11 @@ for li in file_in.readlines():
 	lon, lat = utm_proj(x, y, inverse=True)
 
 	input_files = '/scratch/irseppi/nodal_data/plane_info/atmosphere_data/' + str(time) + '_' + str(lat) + '_' + str(lon) + '.dat'
+	try:
 
-	file =  open(input_files, 'r') #as file:
-
+		file =  open(input_files, 'r') #as file:
+	except FileNotFoundError:
+		continue
 	data = json.load(file)
 
 	# Extract metadata
@@ -88,8 +90,8 @@ for li in file_in.readlines():
 			Tc = - 273.15 + float(item['values'][z_index])
 
 	c = speed_of_sound(Tc)
-
-
+	aws.append(c)
+print(c)
 airplane = 'input/20231010_Aircraft_UA_Fairbanks.csv'
 
 plane_data = pd.read_csv(airplane, sep=",")
@@ -192,8 +194,7 @@ for i in range(len(day)):
 					scale = 70/1280
 					plane = plane_img.resize((int(google_slide_width * 0.26), int(google_slide_height * 0.26)))
 					spec = spec_img.resize((int(google_slide_width * 0.31), int(google_slide_height * 0.35)))  
-					#maps = map_img.resize((int(google_slide_width *  0.31), int(google_slide_height * 0.27)))
-					maps = map_img.resize((int(google_slide_width *  0.25), int(google_slide_width * 0.25 * map_img.height / map_img.width)))
+					maps = map_img.resize((int(google_slide_width *  0.28), int(google_slide_width *0.28* map_img.height / map_img.width)))
 					spectrogram = spectrogram.resize((int(google_slide_width * 0.75), int(google_slide_height)))
 
 					# Create blank canvas
@@ -201,8 +202,7 @@ for i in range(len(day)):
 
 					# Paste images onto canvas
 					canvas.paste(spec, (google_slide_width - spec.width+ int(spec.width/12), google_slide_height - spec.height))
-					
-					canvas.paste(maps, (google_slide_width - int(maps.width*1.05), int(plane.height)-int(plane.height*0.1)))
+					canvas.paste(maps, (google_slide_width - int(maps.width*1.05), int(plane.height)))
 					canvas.paste(plane, (google_slide_width - plane.width, 0))
 					canvas.paste(spectrogram, (-40, 0))
 					# Draw text from files
