@@ -243,7 +243,7 @@ def rename_file(flight_name):
 def extract_flight(equipment):
 	"""
 	Extracts all rows from the 'all_station_crossing_db.txt' file whith the designated equipment type 
-	and prints them into an infividual file labeled with the equipment type.
+	and prints them into an individual file labeled with the equipment type.
 	
 	Args:
 		equipment (str): The equipment type to extract from the file.
